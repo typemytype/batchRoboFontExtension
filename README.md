@@ -19,7 +19,7 @@ Binary fonts are also supported (otf, ttf), they will be imported and generated.
 
 * ttf
 * woff
-* eat
+* eot
 * svg
 
 there are options to preserve hints, only optionall when a TTF is provided. It has full support for ttfautohint and all of the different settings.  Batch will also generate a HTML preview that with some simple presents.
