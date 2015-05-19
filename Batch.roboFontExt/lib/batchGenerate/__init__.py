@@ -8,7 +8,8 @@ from lib.settings import doodleSupportedExportFileTypes
 from mojo.extensions import getExtensionDefault, setExtensionDefault
 from mojo.roboFont import OpenFont
 
-from tools import settingsIdentifier, Report, buildTree
+from batchTools import settingsIdentifier, Report, buildTree
+
 
 class BatchGenerate(Group):
 
@@ -19,27 +20,27 @@ class BatchGenerate(Group):
         self.controller = controller
 
         y = 10
-        
+
         for setting in self.generateSettings:
             key = setting.replace(" ", "_").lower()
-            checkbox = CheckBox((10, y, -10, 22), setting, 
+            checkbox = CheckBox((10, y, -10, 22), setting,
                                 value=getExtensionDefault("%s.%s" % (settingsIdentifier, key), True),
                                 sizeStyle="small",
                                 callback=self.saveDefaults)
             setattr(self, key, checkbox)
             y += 25
-        
+
         y += 10
         for format in doodleSupportedExportFileTypes:
-            checkbox = CheckBox((10, y, -10, 22), format.upper(), 
+            checkbox = CheckBox((10, y, -10, 22), format.upper(),
                                 value=getExtensionDefault("%s.%s" % (settingsIdentifier, format), format != "pfa"),
                                 callback=self.saveDefaults)
             setattr(self, format, checkbox)
             y += 30
-        
+
         middle = 45
         self.suffixText = TextBox((10, y+2, middle, 22), "Suffix:", alignment="right")
-        self.generateSuffix = EditText((middle+10, y, 100, 22), 
+        self.generateSuffix = EditText((middle+10, y, 100, 22),
             getExtensionDefault("%s.generateSuffix" % settingsIdentifier, ""),
             callback=self.saveDefaults)
 
@@ -63,20 +64,20 @@ class BatchGenerate(Group):
         suffix = self.generateSuffix.get()
 
         formats = [i for i in doodleSupportedExportFileTypes if getattr(self, i).get()]
-        
+
         if report is None:
             report = Report()
         report.writeTitle("Batch Generate Files:")
 
         progress.update("Collecting Data...")
-        
+
         paths = self.controller.get()
 
         fonts = []
         for path in paths:
             font = OpenFont(path, showUI=False)
             fonts.append(font)
-        
+
         if decompose:
             report.writeTitle("Decompose:")
             progress.update("Decompose...")
@@ -87,7 +88,7 @@ class BatchGenerate(Group):
                 font.decompose()
             progress.setTickCount(None)
             report.newLine()
-        
+
         if removeOverlap:
             report.writeTitle("Remove Overlap:")
             progress.update("Remove Overlap...")
@@ -98,7 +99,7 @@ class BatchGenerate(Group):
                 font.removeOverlap()
             progress.setTickCount(None)
             report.newLine()
-        
+
         report.writeTitle("Generate:")
         exportPaths = []
         for font in fonts:
@@ -108,16 +109,16 @@ class BatchGenerate(Group):
                 fileName = "%s-%s%s.%s" % (familyName, styleName, suffix, format)
                 progress.update("Generating ... %s" % fileName)
                 if self.controller.exportInFolders():
-                    fontDir = os.path.join(destDir, format) 
+                    fontDir = os.path.join(destDir, format)
                 else:
                     fontDir = destDir
                 buildTree(fontDir)
                 path = os.path.join(fontDir, fileName)
                 report.write("%s %s to %s" % (font.info.familyName, font.info.styleName, path))
-                result = font.generate(path, format, 
-                              decompose=False, 
-                              checkOutlines=False, 
-                              autohint=autohint, 
+                result = font.generate(path, format,
+                              decompose=False,
+                              checkOutlines=False,
+                              autohint=autohint,
                               releaseMode=releaseMode,
                               progressBar=progress,
                               glyphOrder=font.glyphOrder)
@@ -135,4 +136,4 @@ class BatchGenerate(Group):
         self.controller.runTask(self.run, destDir=destDir)
 
     def generateCallback(self, sender):
-    	self.controller.showGetFolder(self._generate)
+        self.controller.showGetFolder(self._generate)

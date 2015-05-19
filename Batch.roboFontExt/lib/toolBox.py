@@ -14,18 +14,17 @@ from mojo.UI import AccordionView
 from mojo.extensions import getExtensionDefault, setExtensionDefault
 from mojo.roboFont import AllFonts
 
-import webFormats
-
 from webFormats import WebFormats
 from batchGenerate import BatchGenerate
 from binaryMerger import BinaryMerger
 
-from tools import settingsIdentifier, updateWithDefaultValues, TaskRunner
+from batchTools import settingsIdentifier, updateWithDefaultValues, TaskRunner
 
 defaultOptions = {
-            "threaded" : False,
-            "exportInFolders" : False,
+            "threaded": False,
+            "exportInFolders": False,
         }
+
 
 class Settings(BaseWindowController):
 
@@ -68,8 +67,8 @@ class Settings(BaseWindowController):
 
     def saveCallback(self, sender):
         data = {
-            "threaded" : self.w.threaded.get(),
-            "exportInFolders" : self.w.exportInFolders.get()
+            "threaded": self.w.threaded.get(),
+            "exportInFolders": self.w.exportInFolders.get()
         }
         setExtensionDefault(self.identifier, data)
         self.closeCallback(sender)
@@ -78,6 +77,7 @@ class Settings(BaseWindowController):
         self.w.close()
 
 genericListPboardType = "genericListPboardType"
+
 
 class ToolBox(BaseWindowController):
 
@@ -109,7 +109,6 @@ class ToolBox(BaseWindowController):
         self.w.addToolbar(toolbarIdentifier="ToolBoxToolbar", toolbarItems=toolbarItems, addStandardItems=False)
 
         y = 10
-        lh = 200
 
         columnDescriptions = [
                               dict(title="path", key="path", formatter=PathFormatter.alloc().init()),
@@ -220,7 +219,6 @@ class ToolBox(BaseWindowController):
         if not isProposal:
             indexes = [int(i) for i in sorted(dropInfo["data"])]
             indexes.sort()
-            source = dropInfo["source"]
             rowIndex = dropInfo["rowIndex"]
 
             items = sender.get()

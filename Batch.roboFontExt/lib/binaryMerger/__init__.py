@@ -10,12 +10,12 @@ from fontTools.ttLib import TTFont
 from mojo.extensions import getExtensionDefault, setExtensionDefault
 from mojo.roboFont import OpenFont
 
-from tools import settingsIdentifier, Report
+from batchTools import settingsIdentifier, Report
 
 
 class BinaryMerger(Group):
-    
-    defaultTableNames = [dict(add=False, tableName=t) for t in 
+
+    defaultTableNames = [dict(add=False, tableName=t) for t in
                     ["head", "hhea", "maxp", "OS/2", "hmtx", "LTSH", "VDMX",
                     "hdmx", "cmap", "fpgm", "prep", "cvt ", "loca", "CFF ", "glyf",
                     "kern", "name", "post", "gasp", "PCLT"]]
@@ -23,7 +23,7 @@ class BinaryMerger(Group):
     binaryMergerIdentifierKey = "%s.%s" % (settingsIdentifier, "binaryMergerTables")
 
     def __init__(self, posSize, controller, generateCallback):
-        
+
         super(BinaryMerger, self).__init__(posSize)
 
         self.controller = controller
@@ -32,20 +32,20 @@ class BinaryMerger(Group):
         tableNames = getExtensionDefault(self.binaryMergerIdentifierKey, self.defaultTableNames)
 
         columnDescriptions = [
-            dict(title="", key="add", width=20, cell=CheckBoxListCell()), 
+            dict(title="", key="add", width=20, cell=CheckBoxListCell()),
             dict(title="Table Name", key="tableName", editable=True)
             ]
-        self.tableList = List((0, 0, -0, -40), tableNames, 
+        self.tableList = List((0, 0, -0, -40), tableNames,
                     columnDescriptions=columnDescriptions,
                     editCallback=self.tableListEditCallback,
                     )
-        
-        segmentDescriptions = [dict(title="+"), dict(title="-")]    
+
+        segmentDescriptions = [dict(title="+"), dict(title="-")]
         self.addDel = SegmentedButton((12, -28, 60, 20), segmentDescriptions, selectionStyle="momentary", callback=self.addDelCallback)
         self.addDel.getNSSegmentedButton().setSegmentStyle_(NSSegmentStyleSmallSquare)
 
-        self.generate = Button((-100, -30, -10, 22), "Generate", callback=self.generateCallback)         
-    
+        self.generate = Button((-100, -30, -10, 22), "Generate", callback=self.generateCallback)
+
     def updateDefaults(self):
         tables = list(self.tableList)
         setExtensionDefault(self.binaryMergerIdentifierKey, tables)
@@ -68,7 +68,7 @@ class BinaryMerger(Group):
         else:
             self.delCallback()
         self.updateDefaults()
-    
+
     def run(self, destDir, progress):
         report = Report()
         tempDir = tempfile.mkdtemp()

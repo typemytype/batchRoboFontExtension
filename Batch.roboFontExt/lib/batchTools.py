@@ -4,6 +4,7 @@ import os
 
 settingsIdentifier = "com.typemytype.toolbox"
 
+
 class Report(object):
 
     def __init__(self):
@@ -40,11 +41,13 @@ class Report(object):
         f.write("\n".join(self._data))
         f.close()
 
+
 def updateWithDefaultValues(data, defaults):
     for key, value in defaults.items():
         if key in data:
             continue
         data[key] = value
+
 
 def buildTree(path):
     if not os.path.exists(path):
