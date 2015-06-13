@@ -53,7 +53,7 @@ def fixMetrics(font):
     font["hhea"].ascent = maxy
 
 
-def convertToTTF(otfPath, dest):
+def convertToTTF(otfPath, dest, report):
     temp = tempfile.mkstemp(suffix=".ttf")[1]
     tempDest = tempfile.mkstemp(suffix=".ttf")[1]
 
@@ -66,8 +66,9 @@ def convertToTTF(otfPath, dest):
         if attr not in defaultFontInfoAttributes:
             setattr(font.info, attr, None)
 
-    font.generate(temp, "ttf", decompose=False, checkOutlines=False, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
+    result = font.generate(temp, "ttf", decompose=False, checkOutlines=False, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
     font.close()
+    report.write(result)
 
     sourceFont = TTFont(temp)
     sourceFontWithTables = TTFont(otfPath)
@@ -90,14 +91,15 @@ def convertToTTF(otfPath, dest):
     os.remove(tempDest)
 
 
-def generateTTF(ufoPath, dest):
+def generateTTF(ufoPath, dest, report):
     tempDest = tempfile.mkstemp(suffix=".ttf")[1]
 
     font = OpenFont(ufoPath, showUI=False)
     font.lib[shouldAddPointsInSplineConversionLibKey] = 1
 
-    font.generate(tempDest, "ttf", decompose=False, checkOutlines=True, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
+    result = font.generate(tempDest, "ttf", decompose=False, checkOutlines=True, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
     font.close()
+    report.write(result)
 
     autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
     TTFAutohint(tempDest, dest, autohintOptions)
@@ -225,17 +227,21 @@ class WebFormats(Group):
         tempTTF = tempfile.mkstemp(suffix=".ttf")[1]
 
         if ext == ".otf":
-            convertToTTF(path, tempTTF)
+            report.write("Source is binary OTF file. Convert to TTF.")
+            convertToTTF(path, tempTTF, report)
         elif ext == ".ttf":
+            report.write("Source is binary TTF file.")
             shutil.copyfile(path, tempTTF)
             if not preserveTTFhints:
+                report.write("Auto hint the existing TTF file.")
                 tempDest = tempfile.mkstemp(suffix=".ttf")[1]
                 autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
                 TTFAutohint(tempTTF, tempDest, autohintOptions)
                 os.remove(tempTTF)
                 tempTTF = tempDest
         elif ext == ".ufo":
-            generateTTF(path, tempTTF)
+            report.write("Source is UFO file. Generate TTF.")
+            generateTTF(path, tempTTF, report)
 
         font = CompositorFont(tempTTF)
         familyName = font.info.familyName
@@ -253,21 +259,25 @@ class WebFormats(Group):
 
         # convert to eot
         if saveEOT:
+            report.write("Build EOT.")
             buildTree(fontDir)
             convertToEot(tempTTF, eotPath)
 
         # convert to woff
         if saveWOFF:
+            report.write("Build WOFF.")
             buildTree(fontDir)
             convertToWoff(tempTTF, woffPath)
 
         # save ttf
         if saveTTF:
+            report.write("Build TTF.")
             buildTree(fontDir)
             shutil.copyfile(tempTTF, ttfPath)
 
         # convert to svg
         if saveSVG:
+            report.write("Build SVG.")
             buildTree(fontDir)
             convertToSVG(tempTTF, svgPath)
 
@@ -335,8 +345,16 @@ class WebFormats(Group):
         for path in paths:
             txt = os.path.basename(path)
             progress.update(txt)
-            report.write(path)
-            self._convertPath(path, destDir=destDir, saveTTF=saveTTF, saveWOFF=saveWOFF, saveEOT=saveEOT, saveSVG=saveSVG, suffix=suffix, report=report, preserveTTFhints=preserveTTFhints)
+            report.writeTitle(os.path.basename(path), "*")
+            report.write("source: %s" % path)
+            try:
+                self._convertPath(path, destDir=destDir, saveTTF=saveTTF, saveWOFF=saveWOFF, saveEOT=saveEOT, saveSVG=saveSVG, suffix=suffix, report=report, preserveTTFhints=preserveTTFhints)
+            except:
+                import traceback
+                message = traceback.format_exc(5)
+                report.write("Failed")
+                report.write(message)
+            report.newLine()
 
         report.newLine()
         report.writeTitle("TTFAutohint options:")
