@@ -222,15 +222,17 @@ class WebFormats(Group):
     def _convertPath(self, path, destDir, saveTTF=True, saveWOFF=True, saveEOT=True, saveSVG=False, suffix="", report=None, preserveTTFhints=False):
         fileName = os.path.basename(path)
         fileName, ext = os.path.splitext(fileName)
+        ext = ext.lower()
         fileName += suffix
+        fileName = fileName.replace(" ", "_")
 
         tempTTF = tempfile.mkstemp(suffix=".ttf")[1]
 
         if ext == ".otf":
-            report.write("Source is binary OTF file. Convert to TTF.")
+            report.write("Source is binary a OTF file. Convert to TTF.")
             convertToTTF(path, tempTTF, report)
         elif ext == ".ttf":
-            report.write("Source is binary TTF file.")
+            report.write("Source is binary a TTF file.")
             shutil.copyfile(path, tempTTF)
             if not preserveTTFhints:
                 report.write("Auto hint the existing TTF file.")
@@ -240,7 +242,7 @@ class WebFormats(Group):
                 os.remove(tempTTF)
                 tempTTF = tempDest
         elif ext == ".ufo":
-            report.write("Source is UFO file. Generate TTF.")
+            report.write("Source is a UFO file. Generate TTF.")
             generateTTF(path, tempTTF, report)
 
         font = CompositorFont(tempTTF)
@@ -260,24 +262,28 @@ class WebFormats(Group):
         # convert to eot
         if saveEOT:
             report.write("Build EOT.")
+            report.write("\tpath: %s" % eotPath)
             buildTree(fontDir)
             convertToEot(tempTTF, eotPath)
 
         # convert to woff
         if saveWOFF:
             report.write("Build WOFF.")
+            report.write("\tpath: %s" % woffPath)
             buildTree(fontDir)
             convertToWoff(tempTTF, woffPath)
 
         # save ttf
         if saveTTF:
             report.write("Build TTF.")
+            report.write("\tpath: %s" % ttfPath)
             buildTree(fontDir)
             shutil.copyfile(tempTTF, ttfPath)
 
         # convert to svg
         if saveSVG:
             report.write("Build SVG.")
+            report.write("\tpath: %s" % svgPath)
             buildTree(fontDir)
             convertToSVG(tempTTF, svgPath)
 
