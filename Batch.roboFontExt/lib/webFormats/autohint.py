@@ -13,6 +13,8 @@ from lib.UI.stepper import SliderEditIntStepper
 from batchTools import updateWithDefaultValues
 
 ttfautohint = os.path.join(os.path.dirname(__file__), "ttfautohint")
+os.chmod(ttfautohint, 0777)
+
 
 defaultOptions = {
             "hintRangeMinimum": 8,

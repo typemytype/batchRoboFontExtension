@@ -6,6 +6,7 @@ from fontTools.ttLib import TTFont
 from mojo.compile import executeCommand
 
 ttf2eot = os.path.join(os.path.dirname(__file__), "ttf2eot")
+os.chmod(ttf2eot, 0777)
 
 
 def generateEOT(source, dest):

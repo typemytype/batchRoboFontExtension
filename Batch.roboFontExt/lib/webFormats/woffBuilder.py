@@ -10,6 +10,7 @@ from xmlWriter import XMLWriter
 from mojo.compile import executeCommand
 
 sfnt2woff = os.path.join(os.path.dirname(__file__), "sfnt2woff")
+os.chmod(sfnt2woff, 0777)
 
 
 class Info(object):
