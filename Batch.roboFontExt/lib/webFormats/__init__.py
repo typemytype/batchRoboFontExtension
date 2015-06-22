@@ -22,6 +22,7 @@ from mojo.roboFont import OpenFont
 from mojo.extensions import getExtensionDefault, setExtensionDefault
 
 from woffBuilder import WOFFBuilder
+from woff2Builder import WOFF2Builder
 from eotBuilder import EOTBuilder
 from svgBuilder import SVGBuilder
 from autohint import TTFAutohint, defaultOptions, TTFAutoHintGroup
@@ -85,7 +86,8 @@ def convertToTTF(otfPath, dest, report):
     del sourceFontWithTables
 
     autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
-    TTFAutohint(tempDest, dest, autohintOptions)
+    result = TTFAutohint(tempDest, dest, autohintOptions)
+    report.writeItems(result)
 
     os.remove(temp)
     os.remove(tempDest)
@@ -102,13 +104,18 @@ def generateTTF(ufoPath, dest, report):
     report.write(result)
 
     autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
-    TTFAutohint(tempDest, dest, autohintOptions)
+    result = TTFAutohint(tempDest, dest, autohintOptions)
+    report.writeItems(result)
 
     os.remove(tempDest)
 
 
 def convertToWoff(ttfPath, dest):
     WOFFBuilder(ttfPath, dest)
+
+
+def convertToWoff2(ttfPath, dest):
+    WOFF2Builder(ttfPath, dest)
 
 
 def convertToEot(ttfPath, dest):
@@ -178,7 +185,7 @@ _percentageRe = re.compile("%(?!\((familyName|styleName)\)s)")
 
 class WebFormats(Group):
 
-    webSettings = ["Save TTF", "Save Woff", "Save EOT", "Save SVG"]
+    webSettings = ["Save TTF", "Save Woff", "Save Woff2", "Save EOT", "Save SVG"]
 
     def __init__(self, posSize, controller):
         super(WebFormats, self).__init__(posSize)
@@ -219,7 +226,7 @@ class WebFormats(Group):
 
     # convert
 
-    def _convertPath(self, path, destDir, saveTTF=True, saveWOFF=True, saveEOT=True, saveSVG=False, suffix="", report=None, preserveTTFhints=False):
+    def _convertPath(self, path, destDir, saveTTF=True, saveWOFF=True, saveWOFF2=True, saveEOT=True, saveSVG=False, suffix="", report=None, preserveTTFhints=False):
         fileName = os.path.basename(path)
         fileName, ext = os.path.splitext(fileName)
         ext = ext.lower()
@@ -238,7 +245,8 @@ class WebFormats(Group):
                 report.write("Auto hint the existing TTF file.")
                 tempDest = tempfile.mkstemp(suffix=".ttf")[1]
                 autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
-                TTFAutohint(tempTTF, tempDest, autohintOptions)
+                result = TTFAutohint(tempTTF, tempDest, autohintOptions)
+                report.writeItems(result)
                 os.remove(tempTTF)
                 tempTTF = tempDest
         elif ext == ".ufo":
@@ -256,6 +264,7 @@ class WebFormats(Group):
 
         ttfPath = os.path.join(fontDir, fileName + ".ttf")
         woffPath = os.path.join(fontDir, fileName + ".woff")
+        woff2Path = os.path.join(fontDir, fileName + ".woff2")
         eotPath = os.path.join(fontDir, fileName + ".eot")
         svgPath = os.path.join(fontDir, fileName + ".svg")
 
@@ -272,6 +281,13 @@ class WebFormats(Group):
             report.write("\tpath: %s" % woffPath)
             buildTree(fontDir)
             convertToWoff(tempTTF, woffPath)
+
+        # convert to woff2
+        if saveWOFF2:
+            report.write("Build WOFF2.")
+            report.write("\tpath: %s" % woff2Path)
+            buildTree(fontDir)
+            convertToWoff2(tempTTF, woff2Path)
 
         # save ttf
         if saveTTF:
@@ -290,9 +306,9 @@ class WebFormats(Group):
         if os.path.exists(tempTTF):
             os.remove(tempTTF)
 
-        self._writeHTMLPreview(report.html, report.css, fileName, familyName, styleName, saveTTF, saveWOFF, saveEOT, saveSVG)
+        self._writeHTMLPreview(report.html, report.css, fileName, familyName, styleName, saveTTF, saveWOFF, saveWOFF2, saveEOT, saveSVG)
 
-    def _writeHTMLPreview(self, htmlWriter, cssWriter, fileName, familyName, styleName, saveTTF, saveWOFF, saveEOT, saveSVG):
+    def _writeHTMLPreview(self, htmlWriter, cssWriter, fileName, familyName, styleName, saveTTF, saveWOFF, saveWOFF2, saveEOT, saveSVG):
         # css
         if self.controller.exportInFolders():
             cssFileName = "%s/%s/%s" % (familyName.replace(" ", ""), styleName.replace(" ", ""), fileName)
@@ -308,6 +324,8 @@ class WebFormats(Group):
             cssSources.append("\turl('%s.eot?#iefix') format('embedded-opentype')" % cssFileName)
         if saveWOFF:
             cssSources.append("\turl('%s.woff') format('woff')" % cssFileName)
+        if saveWOFF2:
+            cssSources.append("\turl('%s.woff2') format('woff2')" % cssFileName)
         if saveTTF:
             cssSources.append("\turl('%s.ttf') format('truetype')" % cssFileName)
         if saveSVG:
@@ -338,6 +356,7 @@ class WebFormats(Group):
 
         saveTTF = self.save_ttf.get()
         saveWOFF = self.save_woff.get()
+        saveWOFF2 = self.save_woff2.get()
         saveEOT = self.save_eot.get()
         saveSVG = self.save_svg.get()
         suffix = self.webSuffix.get()
@@ -354,7 +373,7 @@ class WebFormats(Group):
             report.writeTitle(os.path.basename(path), "*")
             report.write("source: %s" % path)
             try:
-                self._convertPath(path, destDir=destDir, saveTTF=saveTTF, saveWOFF=saveWOFF, saveEOT=saveEOT, saveSVG=saveSVG, suffix=suffix, report=report, preserveTTFhints=preserveTTFhints)
+                self._convertPath(path, destDir=destDir, saveTTF=saveTTF, saveWOFF=saveWOFF, saveWOFF2=saveWOFF2, saveEOT=saveEOT, saveSVG=saveSVG, suffix=suffix, report=report, preserveTTFhints=preserveTTFhints)
             except:
                 import traceback
                 message = traceback.format_exc(5)

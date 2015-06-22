@@ -17,6 +17,11 @@ class Report(object):
         self.write(value)
         self.write(underline * len(value))
 
+    def writeItems(self, items):
+        for i in items:
+            if i:
+                self.write(i)
+
     def newLine(self):
         self._data.append("")
 
