@@ -74,7 +74,7 @@ def convertToTTF(otfPath, dest, report):
     sourceFont = TTFont(temp)
     sourceFontWithTables = TTFont(otfPath)
 
-    for table in ["loca", "OS/2", "cmap", "name", "GSUB", "GPOS"]:
+    for table in ["loca", "OS/2", "cmap", "name", "GSUB", "GPOS", "GDEF"]:
         if table in sourceFontWithTables:
             sourceFont[table] = sourceFontWithTables[table]
     fixMetrics(sourceFont)
