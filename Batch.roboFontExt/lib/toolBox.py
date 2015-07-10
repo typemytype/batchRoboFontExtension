@@ -134,7 +134,7 @@ class ToolBox(BaseWindowController):
 
         descriptions = [
                             dict(label="Fonts", view=self.paths, minSize=50, size=200, canResize=True, collapsed=False),
-                            dict(label="Web Fonts", view=self.webFormats, size=210, canResize=False, collapsed=False),
+                            dict(label="Web Fonts", view=self.webFormats, size=240, canResize=False, collapsed=False),
                             dict(label="Generate", view=self.batchGenerate, size=240, canResize=False, collapsed=False),
                             dict(label="Binary Merge", view=self.binaryMerger, size=240, canResize=False, collapsed=False),
                         ]

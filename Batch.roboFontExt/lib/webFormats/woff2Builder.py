@@ -17,7 +17,7 @@ def generateWOFF2(source, dest):
 
 def WOFF2Builder(sourcePath, destinationPath):
     fileName, ext = os.path.splitext(sourcePath)
-    if ext.lower() != ".ttf":
+    if ext.lower() not in [".ttf", ".otf"]:
         return
     result = generateWOFF2(sourcePath, destinationPath)
     return result
