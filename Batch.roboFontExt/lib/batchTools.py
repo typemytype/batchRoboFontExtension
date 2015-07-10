@@ -7,13 +7,29 @@ settingsIdentifier = "com.typemytype.toolbox"
 
 class Report(object):
 
+    INDENT = "    "
+
     def __init__(self):
         self._data = []
+        self._indent = 0
+
+    def indent(self, value=None):
+        if value is None:
+            self._indent += 1
+        else:
+            self._indent = value
+
+    def dedent(self):
+        self._indent -= 1
+        if self._indent < 0:
+            self._indent = 0
 
     def write(self, value):
-        self._data.append(value)
+        indent = self.INDENT * self._indent
+        value = value.replace("\n", "\n%s" % indent)
+        self._data.append("%s%s" % (indent, value))
 
-    def writeTitle(self, value, underline="-"):
+    def writeTitle(self, value, underline="*"):
         self.write(value)
         self.write(underline * len(value))
 
@@ -43,8 +59,11 @@ class Report(object):
 
     def save(self, path):
         f = file(path, "w")
-        f.write("\n".join(self._data))
+        f.write(self.get())
         f.close()
+
+    def get(self):
+        return "\n".join(self._data)
 
 
 def updateWithDefaultValues(data, defaults):
