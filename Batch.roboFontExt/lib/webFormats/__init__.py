@@ -535,8 +535,9 @@ class WebFormats(Group):
             except:
                 import traceback
                 message = traceback.format_exc(5)
-                report.write("Failed")
+                report.write("Failed:")
                 report.write(message)
+                report.indent(0)
             report.newLine()
 
         report.newLine()
