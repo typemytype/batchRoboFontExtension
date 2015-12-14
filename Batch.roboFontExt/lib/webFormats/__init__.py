@@ -63,6 +63,7 @@ def convertToTTF(otfPath, dest, report):
 
     font = OpenFont(otfPath, showUI=False)
     font.lib[shouldAddPointsInSplineConversionLibKey] = 1
+    font.kerning.clear()
 
     for attr in font.info.asDict().keys():
         if attr not in defaultFontInfoAttributes:
@@ -75,7 +76,7 @@ def convertToTTF(otfPath, dest, report):
     sourceFont = TTFont(temp)
     sourceFontWithTables = TTFont(otfPath)
 
-    for table in ["loca", "OS/2", "cmap", "name", "GSUB", "GPOS", "GDEF"]:
+    for table in ["loca", "OS/2", "cmap", "name", "GSUB", "GPOS", "GDEF", "kern"]:
         if table in sourceFontWithTables:
             sourceFont[table] = sourceFontWithTables[table]
     fixMetrics(sourceFont)
@@ -98,7 +99,7 @@ def convertToOTF(ttfPath, dest, report):
     temp = tempfile.mkstemp(suffix=".otf")[1]
 
     font = OpenFont(ttfPath, showUI=False)
-
+    font.kerning.clear()
     for attr in font.info.asDict().keys():
         if attr not in defaultFontInfoAttributes:
             setattr(font.info, attr, None)
@@ -109,7 +110,7 @@ def convertToOTF(ttfPath, dest, report):
 
     sourceFont = TTFont(temp)
     sourceFontWithTables = TTFont(ttfPath)
-    for table in ["loca", "OS/2", "cmap", "name", "GSUB", "GPOS", "GDEF"]:
+    for table in ["loca", "OS/2", "cmap", "name", "GSUB", "GPOS", "GDEF", "kern"]:
         if table in sourceFontWithTables:
             sourceFont[table] = sourceFontWithTables[table]
 
