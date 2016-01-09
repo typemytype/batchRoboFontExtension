@@ -103,7 +103,7 @@ class BinaryMerger(Group):
                     binarySource.close()
             font.close()
 
-        reportPath = os.path.join(destDir, "Binary Merg Report")
+        reportPath = os.path.join(destDir, "Binary Merge Report")
         report.save(reportPath)
 
         if os.path.exists(tempDir):
