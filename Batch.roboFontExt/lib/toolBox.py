@@ -135,7 +135,7 @@ class ToolBox(BaseWindowController):
         descriptions = [
                             dict(label="Fonts", view=self.paths, minSize=50, size=200, canResize=True, collapsed=False),
                             dict(label="Web Fonts", view=self.webFormats, size=240, canResize=False, collapsed=False),
-                            dict(label="Generate", view=self.batchGenerate, size=240, canResize=False, collapsed=False),
+                            dict(label="Batch Generate", view=self.batchGenerate, size=240, canResize=False, collapsed=False),
                             dict(label="Binary Merge", view=self.binaryMerger, size=240, canResize=False, collapsed=False),
                         ]
 
@@ -173,7 +173,7 @@ class ToolBox(BaseWindowController):
                 if f.info.familyName and f.info.styleName:
                     paths.append(path)
                 else:
-                    message = "%s has not family name or style name" % path
+                    message = "%s has no family name or style name" % path
                     print "*" * len(message)
                     print message
                     print "*" * len(message)
