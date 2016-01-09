@@ -13,13 +13,21 @@ Binary fonts are also supported (otf, ttf), they will be imported and generated.
 * PFA
 * VFB (only if ufo2vfb is installed)
 
+Output settings:
+
+* Decompose
+* Remove Overlap
+* Autohint
+* Release Mode
+
+
 ## Web Fonts
 
 #### Web font supports:
 
 * ttf
-* woff
-* woff2
+* woff (otf - ttf)
+* woff2 (otf - ttf)
 * eot
 * svg
 
@@ -38,4 +46,6 @@ The html preview can replace `%(familyName)s` and `%(styleName)s` by the values 
 ## Binary Merge 
 
 Will merge specific tables from a source. Only avaialbe when when a UFO is provided and when the UFO has the source path in the `font.lib`.
+
+Binary Merge is using the output settings as in Generate.
 
