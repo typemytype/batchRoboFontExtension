@@ -1,0 +1,64 @@
+<style>
+    body {
+        font: 12px 'Lucida Grande', Geneva, Arial, Verdana, sans-serif;
+        line-height: 14pt;
+    }
+</style>
+
+<h1>Batch</h1>
+
+<p>An extension to batch generate fonts.</p>
+
+<p>Drag and drop or open a one or multiple UFO's. If a folder is provided Batch will search in that folder for UFO's.
+Binary fonts are also supported (otf, ttf), they will be imported and generated.</p>
+
+<h4>Generate supports:</h4>
+
+<ul>
+<li>TTF</li>
+<li>OTF</li>
+<li>PFA</li>
+<li>VFB (only if ufo2vfb is installed)</li>
+</ul>
+
+
+<p>Output settings:</p>
+
+<ul>
+<li>Decompose</li>
+<li>Remove Overlap</li>
+<li>Autohint</li>
+<li>Release Mode</li>
+</ul>
+
+
+<h2>Web Fonts</h2>
+
+<h4>Web font supports:</h4>
+
+<ul>
+<li>ttf</li>
+<li>woff (otf - ttf)</li>
+<li>woff2 (otf - ttf)</li>
+<li>eot</li>
+<li>svg</li>
+</ul>
+
+
+<p>The woff option will create metadata based on the info in the font, if it is available. (openTypeNameManufacturer, openTypeNameManufacturerURL, openTypeNameDesigner, openType)NameDesignerURL, openTypeNameDescription, openTypeNameLicenseURL, openTypeNameLicense, copyright, trademark).</p>
+
+<p>The woff2 option will not create any metadata, the fonts will just be compressed.</p>
+
+<p>The option to preserve hints, only optional when a TTF is provided, will not autohint the binary TTF font.</p>
+
+<p>Full support for <code>ttfautohint</code> and all of the different settings.</p>
+
+<p>Batch will also generate a HTML preview that with some simple presents.</p>
+
+<p>The html preview can replace <code>%(familyName)s</code> and <code>%(styleName)s</code> by the values retrieved from the corresponding font.</p>
+
+<h2>Binary Merge</h2>
+
+<p>Will merge specific tables from a source. Only avaialbe when when a UFO is provided and when the UFO has the source path in the <code>font.lib</code>.</p>
+
+<p>Binary Merge is using the output settings as in Generate.</p>
