@@ -18,6 +18,7 @@ class BinaryMerger(Group):
     defaultTableNames = [dict(add=False, tableName=t) for t in
                     ["head", "hhea", "maxp", "OS/2", "hmtx", "LTSH", "VDMX",
                     "hdmx", "cmap", "fpgm", "prep", "cvt ", "loca", "CFF ", "glyf",
+                    "GPOS", "GSUB",
                     "kern", "name", "post", "gasp", "PCLT"]]
 
     binaryMergerIdentifierKey = "%s.%s" % (settingsIdentifier, "binaryMergerTables")
@@ -44,7 +45,7 @@ class BinaryMerger(Group):
         self.addDel = SegmentedButton((12, -28, 60, 20), segmentDescriptions, selectionStyle="momentary", callback=self.addDelCallback)
         self.addDel.getNSSegmentedButton().setSegmentStyle_(NSSegmentStyleSmallSquare)
 
-        self.generate = Button((-100, -30, -10, 22), "Generate", callback=self.generateCallback)
+        self.generate = Button((-150, -30, -10, 22), "Generate & Merge", callback=self.generateCallback)
 
     def updateDefaults(self):
         tables = list(self.tableList)
