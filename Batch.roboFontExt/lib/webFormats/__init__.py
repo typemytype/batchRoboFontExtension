@@ -270,7 +270,7 @@ class WebFormats(Group):
         self.preserveTTFhints = CheckBox((10, -25, -10, 18), "Preserve TTF hints",
             value=getExtensionDefault("%s.preserveTTFhints" % settingsIdentifier, False),
             sizeStyle="small")
-        self.convert = Button((-100, -30, -10, 22), "Convert", callback=self.convertCallback)
+        self.convert = Button((-100, -30, -10, 22), "Generate", callback=self.convertCallback)
         self.settings = ImageButton((-130, -28, 20, 20), bordered=False, imageNamed=NSImageNameSmartBadgeTemplate, callback=self.settingsCallback)
 
     def saveDefaults(self, sender):
@@ -510,6 +510,7 @@ class WebFormats(Group):
         report.writeTitle("Converted Files:")
         report.newLine()
 
+        saveOTF = self.save_otf.get()
         saveTTF = self.save_ttf.get()
         saveWOFF = self.save_woff.get()
         saveWOFFFormat = self.save_woff_format.get()
@@ -532,7 +533,7 @@ class WebFormats(Group):
             report.write("source: %s" % path)
             report.newLine()
             try:
-                self._convertPath(path, destDir=destDir, saveTTF=saveTTF, saveWOFF=saveWOFF, saveWOFFFormat=saveWOFFFormat, saveWOFF2=saveWOFF2, saveWOFF2Format=saveWOFF2Format, saveEOT=saveEOT, saveSVG=saveSVG, suffix=suffix, report=report, preserveTTFhints=preserveTTFhints)
+                self._convertPath(path, destDir=destDir, saveOTF=saveOTF, saveTTF=saveTTF, saveWOFF=saveWOFF, saveWOFFFormat=saveWOFFFormat, saveWOFF2=saveWOFF2, saveWOFF2Format=saveWOFF2Format, saveEOT=saveEOT, saveSVG=saveSVG, suffix=suffix, report=report, preserveTTFhints=preserveTTFhints)
             except:
                 import traceback
                 message = traceback.format_exc(5)
