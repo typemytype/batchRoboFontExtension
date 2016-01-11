@@ -6,6 +6,7 @@ from AppKit import *
 
 import string
 import re
+import time
 
 from vanilla import *
 from defconAppKit.windows.baseWindow import BaseWindowController
@@ -260,18 +261,23 @@ class WebFormats(Group):
             y += 30
 
         self.save_svg.enable(hasUfo2svg)
+        y += 5
+        self.preserveTTFhints = CheckBox((10, y, -10, 18), "Preserve TTF hints",
+            value=getExtensionDefault("%s.preserveTTFhints" % settingsIdentifier, False),
+            sizeStyle="small")
+        y += 30
 
         middle = 45
         self.suffixText = TextBox((10, y+2, middle, 22), "Suffix:", alignment="right")
         self.webSuffix = EditText((middle+10, y, 100, 22),
             getExtensionDefault("%s.webSuffix" % settingsIdentifier, "_web"),
             callback=self.saveDefaults)
+        y += 30
 
-        self.preserveTTFhints = CheckBox((10, -25, -10, 18), "Preserve TTF hints",
-            value=getExtensionDefault("%s.preserveTTFhints" % settingsIdentifier, False),
-            sizeStyle="small")
         self.convert = Button((-100, -30, -10, 22), "Generate", callback=self.convertCallback)
         self.settings = ImageButton((-130, -28, 20, 20), bordered=False, imageNamed=NSImageNameSmartBadgeTemplate, callback=self.settingsCallback)
+
+        self.height = y
 
     def saveDefaults(self, sender):
         for setting in self.webSettings:
@@ -311,8 +317,11 @@ class WebFormats(Group):
                     os.remove(self._tempTTFPath)
                     self._tempTTFPath = tempDest
                     report.dedent()
-            elif ext == ".ufo":
-                report.write("Source is a UFO file. Generate TTF.")
+            else:
+                if ext == ".ufo":
+                    report.write("Source is a UFO file. Generate TTF.")
+                else:
+                    report.write("Source is a %s file. Import the file. Generate TTF." % (ext[1:]))
                 report.indent()
                 generateTTF(path, self._tempTTFPath, report)
                 report.dedent()
@@ -337,8 +346,11 @@ class WebFormats(Group):
                 report.indent()
                 convertToOTF(path, self._tempOTFPath, report)
                 report.dedent()
-            elif ext == ".ufo":
-                report.write("Source is a UFO file. Generate OTF.")
+            else:
+                if ext == ".ufo":
+                    report.write("Source is a UFO file. Generate OTF.")
+                else:
+                    report.write("Source is a %s file. Import the file. Generate OTF." % (ext[1:]))
                 report.indent()
                 generateOTF(path, self._tempOTFPath, report)
                 report.dedent()
@@ -358,15 +370,19 @@ class WebFormats(Group):
         fileName = os.path.basename(path)
         fileName, ext = os.path.splitext(fileName)
         ext = ext.lower()
-        fileName += suffix
-        fileName = fileName.replace(" ", "_")
 
-        if ext == ".ufo":
-            font = OpenFont(path, showUI=False)
-        else:
+        if ext in [".ttf", ".otf"]:
             font = CompositorFont(path)
+        else:
+            font = OpenFont(path, showUI=False)
+
         familyName = font.info.familyName
         styleName = font.info.styleName
+
+        if not self.controller.keepFileNames():
+            fileName = "%s-%s" % (familyName, styleName)
+        fileName += suffix
+        fileName = fileName.replace(" ", "_")
 
         if self.controller.exportInFolders():
             fontDir = os.path.join(destDir, familyName.replace(" ", ""), styleName.replace(" ", ""))
@@ -503,11 +519,13 @@ class WebFormats(Group):
     def run(self, destDir, progress):
         progress.update("Converting...")
 
+        paths = self.controller.get()
+
         report = Report()
         report.css = CSSWriter()
         report.html = HTMLWriter(cssFileName="font.css", style=getExtensionDefault("%s.globalCSSPreview" % settingsIdentifier, ""))
 
-        report.writeTitle("Converted Files:")
+        report.writeTitle("Web Fonts:")
         report.newLine()
 
         saveOTF = self.save_otf.get()
@@ -519,10 +537,9 @@ class WebFormats(Group):
         saveEOT = self.save_eot.get()
         saveSVG = self.save_svg.get()
         suffix = self.webSuffix.get()
+        suffix = time.strftime(suffix)
 
         preserveTTFhints = self.preserveTTFhints.get()
-
-        paths = self.controller.get()
 
         progress.setTickCount(len(paths))
 
@@ -536,7 +553,7 @@ class WebFormats(Group):
                 self._convertPath(path, destDir=destDir, saveOTF=saveOTF, saveTTF=saveTTF, saveWOFF=saveWOFF, saveWOFFFormat=saveWOFFFormat, saveWOFF2=saveWOFF2, saveWOFF2Format=saveWOFF2Format, saveEOT=saveEOT, saveSVG=saveSVG, suffix=suffix, report=report, preserveTTFhints=preserveTTFhints)
             except:
                 import traceback
-                message = traceback.format_exc(5)
+                message = traceback.format_exc()
                 report.write("Failed:")
                 report.write(message)
                 report.indent(0)
@@ -563,6 +580,8 @@ class WebFormats(Group):
         self.controller.runTask(self.run, destDir=destDir)
 
     def convertCallback(self, sender):
+        if not self.controller.hasSourceFonts("No Fonts to Generate.", "Add Open, drop or add Open Fonts fonts to batch them."):
+            return
         self.controller.showGetFolder(self._convert)
 
     def settingsCallback(self, sender):

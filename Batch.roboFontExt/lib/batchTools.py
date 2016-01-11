@@ -101,7 +101,7 @@ class TaskRunner(NSObject):
             import traceback
             errorMessage = [
                     "*"*30,
-                    traceback.format_exc(5),
+                    traceback.format_exc(),
                     "*"*30
                     ]
             print "\n".join(errorMessage)

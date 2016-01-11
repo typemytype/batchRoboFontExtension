@@ -1,5 +1,6 @@
 from AppKit import *
 import os
+import time
 
 from vanilla import *
 
@@ -20,7 +21,6 @@ class BatchGenerate(Group):
         self.controller = controller
 
         y = 10
-
         for setting in self.generateSettings:
             key = setting.replace(" ", "_").lower()
             checkbox = CheckBox((10, y, -10, 22), setting,
@@ -43,8 +43,10 @@ class BatchGenerate(Group):
         self.generateSuffix = EditText((middle+10, y, 100, 22),
             getExtensionDefault("%s.generateSuffix" % settingsIdentifier, ""),
             callback=self.saveDefaults)
+        y += 30
 
         self.generate = Button((-100, -30, -10, 22), "Generate", callback=self.generateCallback)
+        self.height = y
 
     def saveDefaults(self, sender):
         for setting in self.generateSettings:
@@ -57,21 +59,23 @@ class BatchGenerate(Group):
             setExtensionDefault("%s.%s" % (settingsIdentifier, format), value)
 
     def run(self, destDir, progress, report=None):
+        paths = self.controller.get()
+
         decompose = self.decompose.get()
         removeOverlap = self.remove_overlap.get()
         autohint = self.autohint.get()
         releaseMode = self.release_mode.get()
         suffix = self.generateSuffix.get()
+        suffix = time.strftime(suffix)
 
         formats = [i for i in doodleSupportedExportFileTypes if getattr(self, i).get()]
 
         if report is None:
             report = Report()
-        report.writeTitle("Batch Generate Files:")
+        report.writeTitle("Batch Generated Fonts:")
+        report.newLine()
 
         progress.update("Collecting Data...")
-
-        paths = self.controller.get()
 
         fonts = []
         for path in paths:
@@ -80,6 +84,7 @@ class BatchGenerate(Group):
 
         if decompose:
             report.writeTitle("Decompose:")
+            report.indent()
             progress.update("Decompose...")
             progress.setTickCount(len(fonts))
             for font in fonts:
@@ -87,26 +92,40 @@ class BatchGenerate(Group):
                 progress.update()
                 font.decompose()
             progress.setTickCount(None)
+            report.dedent()
             report.newLine()
 
         if removeOverlap:
             report.writeTitle("Remove Overlap:")
             progress.update("Remove Overlap...")
+            report.indent()
             progress.setTickCount(len(fonts))
             for font in fonts:
                 report.write("%s %s" % (font.info.familyName, font.info.styleName))
                 progress.update()
                 font.removeOverlap()
             progress.setTickCount(None)
+            report.dedent()
             report.newLine()
 
         report.writeTitle("Generate:")
         exportPaths = []
-        for font in fonts:
+        for index, font in enumerate(fonts):
+            report.writeTitle((os.path.basename(paths[index])))
+            report.newLine()
+            report.write("source: %s" % paths[index])
+            report.newLine()
             for format in formats:
+                report.writeTitle("Generate %s" % format, "'")
+                report.indent()
                 familyName = font.info.familyName.replace(" ", "")
                 styleName = font.info.styleName.replace(" ", "")
-                fileName = "%s-%s%s.%s" % (familyName, styleName, suffix, format)
+                if not self.controller.keepFileNames():
+                    fileName = "%s-%s%s.%s" % (familyName, styleName, suffix, format)
+                else:
+                    fileName = os.path.basename(paths[index])
+                    fileName, _ = os.path.splitext(fileName)
+                    fileName = "%s%s.%s" % (fileName, suffix, format)
                 progress.update("Generating ... %s" % fileName)
                 if self.controller.exportInFolders():
                     fontDir = os.path.join(destDir, format)
@@ -114,7 +133,7 @@ class BatchGenerate(Group):
                     fontDir = destDir
                 buildTree(fontDir)
                 path = os.path.join(fontDir, fileName)
-                report.write("%s %s to %s" % (font.info.familyName, font.info.styleName, path))
+                report.write("path: %s" % path)
                 result = font.generate(path, format,
                               decompose=False,
                               checkOutlines=False,
@@ -122,10 +141,14 @@ class BatchGenerate(Group):
                               releaseMode=releaseMode,
                               progressBar=progress,
                               glyphOrder=font.glyphOrder)
+                report.indent()
                 report.write(result)
+                report.dedent()
                 exportPaths.append(path)
+                report.dedent()
+                report.newLine()
             font.close()
-        reportPath = os.path.join(destDir, "Generate Report")
+        reportPath = os.path.join(destDir, "Batch Generate Report")
         report.save(reportPath)
         return exportPaths
 
@@ -136,4 +159,6 @@ class BatchGenerate(Group):
         self.controller.runTask(self.run, destDir=destDir)
 
     def generateCallback(self, sender):
+        if not self.controller.hasSourceFonts("No Fonts to Generate.", "Add Open, drop or add Open Fonts fonts to batch them."):
+            return
         self.controller.showGetFolder(self._generate)

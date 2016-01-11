@@ -7,11 +7,12 @@ from defcon import Font as DefconFont
 
 from lib.formatters import PathFormatter
 from lib.tools.misc import walkDirectoryForFile
+from lib.settings import doodleSupportedExportFileTypes
 
 from lib.doodlePreferences import ExtensionPathWrapper
 
 from mojo.UI import AccordionView
-from mojo.extensions import getExtensionDefault, setExtensionDefault
+from mojo.extensions import getExtensionDefault, setExtensionDefault, ExtensionBundle
 from mojo.roboFont import AllFonts
 
 from webFormats import WebFormats
@@ -23,6 +24,7 @@ from batchTools import settingsIdentifier, updateWithDefaultValues, TaskRunner
 defaultOptions = {
             "threaded": False,
             "exportInFolders": False,
+            "keepFileNames": False,
         }
 
 
@@ -35,7 +37,7 @@ class Settings(BaseWindowController):
         data = getExtensionDefault(self.identifier, dict())
         updateWithDefaultValues(data, defaultOptions)
 
-        width = 300
+        width = 380
         height = 1000
 
         self.w = Sheet((width, height), parentWindow=parentWindow)
@@ -45,6 +47,9 @@ class Settings(BaseWindowController):
 
         y += 30
         self.w.exportInFolders = CheckBox((10, y, -10, 22), "Export in Sub Folders", value=data["exportInFolders"])
+
+        y += 30
+        self.w.keepFileNames = CheckBox((10, y, -10, 22), "Keep file names (otherwise use familyName-styleName)", value=data["keepFileNames"])
 
         y += 35
         self.w.saveButton = Button((-100, y, -10, 20), "Save settings", callback=self.saveCallback, sizeStyle="small")
@@ -68,7 +73,8 @@ class Settings(BaseWindowController):
     def saveCallback(self, sender):
         data = {
             "threaded": self.w.threaded.get(),
-            "exportInFolders": self.w.exportInFolders.get()
+            "exportInFolders": self.w.exportInFolders.get(),
+            "keepFileNames": self.w.keepFileNames.get()
         }
         setExtensionDefault(self.identifier, data)
         self.closeCallback(sender)
@@ -82,6 +88,8 @@ genericListPboardType = "genericListPboardType"
 class ToolBox(BaseWindowController):
 
     pathItemClass = ExtensionPathWrapper
+
+    supportedFontFileFormats = [".%s" % ext.lower() for ext in doodleSupportedExportFileTypes + ["woff", "pfb", "ttx"]]
 
     def __init__(self):
         h = 530
@@ -99,6 +107,12 @@ class ToolBox(BaseWindowController):
                             callback=self.toolbarAddOpenFonts,
                         ),
                         dict(itemIdentifier=NSToolbarFlexibleSpaceItemIdentifier),
+
+                        dict(itemIdentifier="Help",
+                            label="Help",
+                            imageNamed="toolbarDefaultPythonAppUnknow",
+                            callback=self.toolbarHelp,
+                        ),
                         dict(itemIdentifier="settings",
                             label="Settings",
                             imageNamed="prefToolbarMisc",
@@ -117,7 +131,7 @@ class ToolBox(BaseWindowController):
         self.paths = List((0, 0, -0, -0), [],
                             columnDescriptions=columnDescriptions,
                             showColumnTitles=False,
-                            allowsMultipleSelection=False,
+                            allowsMultipleSelection=True,
                             enableDelete=True,
                             dragSettings=dict(type=genericListPboardType, callback=self.dragCallback),
                             selfDropSettings=dict(type=genericListPboardType, operation=NSDragOperationMove, callback=self.selfDropCallback),
@@ -134,9 +148,9 @@ class ToolBox(BaseWindowController):
 
         descriptions = [
                             dict(label="Fonts", view=self.paths, minSize=50, size=200, canResize=True, collapsed=False),
-                            dict(label="Web Fonts", view=self.webFormats, size=240, canResize=False, collapsed=False),
-                            dict(label="Batch Generate", view=self.batchGenerate, size=240, canResize=False, collapsed=False),
-                            dict(label="Binary Merge", view=self.binaryMerger, size=240, canResize=False, collapsed=False),
+                            dict(label="Web Fonts", view=self.webFormats, size=self.webFormats.height, canResize=False, collapsed=False),
+                            dict(label="Batch Generate", view=self.batchGenerate, size=self.batchGenerate.height, canResize=False, collapsed=False),
+                            dict(label="Binary Merge", view=self.binaryMerger, size=240, canResize=self.binaryMerger.height, collapsed=False),
                         ]
 
         self.w.accordionView = AccordionView((0, 0, -0, -0), descriptions)
@@ -157,13 +171,22 @@ class ToolBox(BaseWindowController):
     def exportInFolders(self):
         return self._getDefaultValue("%s.general" % settingsIdentifier, "exportInFolders")
 
+    def keepFileNames(self):
+        return self._getDefaultValue("%s.general" % settingsIdentifier, "keepFileNames")
+
     def runTask(self, callback, **kwargs):
         progress = self.startProgress("Preparing...")
         self.task = TaskRunner(callback, self.isThreaded(), progress, kwargs)
 
+    def hasSourceFonts(self, messageText, informativeText, ext=None):
+        if not self.get(ext):
+            self.showMessage(messageText, informativeText)
+            return False
+        return True
+
     # list
 
-    def get(self):
+    def get(self, ext=None):
         items = self.paths.get()
         paths = []
         for item in items:
@@ -184,6 +207,9 @@ class ToolBox(BaseWindowController):
                 paths.extend(_paths)
             else:
                 paths.append(path)
+        if ext:
+            ext = [".%s" % e for e in ext]
+            paths = [path for path in paths if os.path.splitext(path)[1] in ext]
         return paths
 
     def _wrapItem(self, path):
@@ -200,7 +226,7 @@ class ToolBox(BaseWindowController):
         paths = dropInfo["data"]
         paths = [path for path in paths if path not in existingPaths]
         # only include UFOs
-        paths = [path for path in paths if os.path.splitext(path)[-1].lower() in [".ttf", ".otf", ".ufo"] or os.path.isdir(path)]
+        paths = [path for path in paths if os.path.splitext(path)[-1].lower() in self.supportedFontFileFormats or os.path.isdir(path)]
         # no paths, return False
         if not paths:
             return False
@@ -246,9 +272,6 @@ class ToolBox(BaseWindowController):
     def toolbarOpen(self, sender):
         self.showGetFile(["ttf", "otf", "ufo", ""], self._toolbarOpen)
 
-    def toolbarSettings(self, sender):
-        Settings(self.w)
-
     def toolbarAddOpenFonts(self, sender):
         fonts = AllFonts()
         existingPaths = [item.path() for item in self.paths.get()]
@@ -266,3 +289,9 @@ class ToolBox(BaseWindowController):
         items = self._wrapItems(paths)
         items = self.paths.get() + self._wrapItems(paths)
         self.paths.set(items)
+
+    def toolbarSettings(self, sender):
+        Settings(self.w)
+
+    def toolbarHelp(self, sender):
+        ExtensionBundle("Batch").openHelp()

@@ -36,6 +36,7 @@ class BinaryMerger(Group):
             dict(title="", key="add", width=20, cell=CheckBoxListCell()),
             dict(title="Table Name", key="tableName", editable=True)
             ]
+
         self.tableList = List((0, 0, -0, -40), tableNames,
                     columnDescriptions=columnDescriptions,
                     editCallback=self.tableListEditCallback,
@@ -46,6 +47,7 @@ class BinaryMerger(Group):
         self.addDel.getNSSegmentedButton().setSegmentStyle_(NSSegmentStyleSmallSquare)
 
         self.generate = Button((-150, -30, -10, 22), "Generate & Merge", callback=self.generateCallback)
+        self.height = 240
 
     def updateDefaults(self):
         tables = list(self.tableList)
@@ -71,14 +73,16 @@ class BinaryMerger(Group):
         self.updateDefaults()
 
     def run(self, destDir, progress):
+        paths = self.controller.get()
+
         report = Report()
         tempDir = tempfile.mkdtemp()
         tempExportPaths = self._generateCallback(tempDir, progress, report)
 
         progress.update("Merging Tables...")
-        report.writeTitle("Merging Tables:")
+        report.writeTitle("Merged Fonts:")
+        report.newLine()
 
-        paths = self.controller.get()
         tableNames = [item["tableName"] for item in self.tableList if item["add"]]
 
         for fontIndex, path in enumerate(paths):
@@ -92,12 +96,20 @@ class BinaryMerger(Group):
                     binarySource = TTFont(binarySourcepath)
                     tempFont = TTFont(tempExportPath)
                     fileName = os.path.basename(tempExportPath)
+                    if not self.controller.keepFileName():
+                        fileName = "%s-%s" % (font.info.familyName, font.info.styleName)
                     path = os.path.join(destDir, fileName)
-                    report.write(path)
+                    report.writeTitle(os.path.basename(path), "'")
+                    report.write("source: %s" % path)
+                    report.write("binary source: %s" % binarySource)
+                    report.newLine()
+                    report.indent()
                     for table in tableNames:
                         if table in binarySource:
-                            report.write("\tmerge %s table from %s" % (table, binarySourcepath))
+                            report.write("merge %s table" % table)
                             tempFont[table] = binarySource[table]
+                    report.dedent()
+                    report.newLine()
                     tempFont.save(path)
                     tempFont.close()
                     binarySource.close()
@@ -116,4 +128,6 @@ class BinaryMerger(Group):
         self.controller.runTask(self.run, destDir=destDir)
 
     def generateCallback(self, sender):
+        if not self.controller.hasSourceFonts("No Fonts to Merge.", "Add Open, drop or add Open Fonts fonts to batch them.", ext=["ufo"]):
+            return
         self.controller.showGetFolder(self._generate)
