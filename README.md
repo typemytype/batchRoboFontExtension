@@ -20,6 +20,7 @@ Output settings:
 * Autohint
 * Release Mode
 
+A suffix can be added to the file name. The suffix can contain [date time formatting](https://docs.python.org/2/library/time.html#time.strftime).
 
 ## Web Fonts
 
@@ -38,6 +39,8 @@ The woff2 option will not create any metadata, the fonts will just be compressed
 The option to preserve hints, only optional when a TTF is provided, will not autohint the binary TTF font.
 
 Full support for `ttfautohint` and all of the different settings. 
+
+A suffix can be added to the file name. The suffix can contain [date time formatting](https://docs.python.org/2/library/time.html#time.strftime).
 
 Batch will also generate a HTML preview that with some simple presents.
 
