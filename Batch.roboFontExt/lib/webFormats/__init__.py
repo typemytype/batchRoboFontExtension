@@ -564,7 +564,7 @@ class WebFormats(Group):
         autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
         report.writeDict(autohintOptions)
 
-        reportPath = os.path.join(destDir, "WebFonts Report")
+        reportPath = os.path.join(destDir, "WebFonts Report.txt")
         report.save(reportPath)
 
         cssPath = os.path.join(destDir, "font.css")

@@ -148,7 +148,7 @@ class BatchGenerate(Group):
                 report.dedent()
                 report.newLine()
             font.close()
-        reportPath = os.path.join(destDir, "Batch Generate Report")
+        reportPath = os.path.join(destDir, "Batch Generate Report.txt")
         report.save(reportPath)
         return exportPaths
 
