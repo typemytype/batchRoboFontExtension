@@ -28,6 +28,8 @@
 	<dict>
 		<key>repository</key>
 		<string>typemytype/batchRoboFontExtension</string>
+		<key>summary</key>
+		<string>Batch generate fonts to various formats.</string>
 	</dict>
 </dict>
 </plist>
