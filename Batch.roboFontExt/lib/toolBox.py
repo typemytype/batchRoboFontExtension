@@ -209,7 +209,7 @@ class ToolBox(BaseWindowController):
                 paths.append(path)
         if ext:
             ext = [".%s" % e for e in ext]
-            paths = [path for path in paths if os.path.splitext(path)[1] in ext]
+            paths = [p for p in paths if os.path.splitext(p)[1] in ext]
         return paths
 
     def _wrapItem(self, path):

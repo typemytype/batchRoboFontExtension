@@ -268,8 +268,8 @@ class WebFormats(Group):
         y += 30
 
         middle = 45
-        self.suffixText = TextBox((10, y+2, middle, 22), "Suffix:", alignment="right")
-        self.webSuffix = EditText((middle+10, y, 100, 22),
+        self.suffixText = TextBox((10, y + 2, middle, 22), "Suffix:", alignment="right")
+        self.webSuffix = EditText((middle + 10, y, 100, 22),
             getExtensionDefault("%s.webSuffix" % settingsIdentifier, "_web"),
             callback=self.saveDefaults)
         y += 30
