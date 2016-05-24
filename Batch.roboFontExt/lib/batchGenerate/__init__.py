@@ -39,8 +39,8 @@ class BatchGenerate(Group):
             y += 30
 
         middle = 45
-        self.suffixText = TextBox((10, y+2, middle, 22), "Suffix:", alignment="right")
-        self.generateSuffix = EditText((middle+10, y, 100, 22),
+        self.suffixText = TextBox((10, y + 2, middle, 22), "Suffix:", alignment="right")
+        self.generateSuffix = EditText((middle + 10, y, 100, 22),
             getExtensionDefault("%s.generateSuffix" % settingsIdentifier, ""),
             callback=self.saveDefaults)
         y += 30
@@ -94,19 +94,21 @@ class BatchGenerate(Group):
             progress.setTickCount(None)
             report.dedent()
             report.newLine()
+            decompose = False
 
-        if removeOverlap:
-            report.writeTitle("Remove Overlap:")
-            progress.update("Remove Overlap...")
-            report.indent()
-            progress.setTickCount(len(fonts))
-            for font in fonts:
-                report.write("%s %s" % (font.info.familyName, font.info.styleName))
-                progress.update()
-                font.removeOverlap()
-            progress.setTickCount(None)
-            report.dedent()
-            report.newLine()
+            if removeOverlap:
+                report.writeTitle("Remove Overlap:")
+                progress.update("Remove Overlap...")
+                report.indent()
+                progress.setTickCount(len(fonts))
+                for font in fonts:
+                    report.write("%s %s" % (font.info.familyName, font.info.styleName))
+                    progress.update()
+                    font.removeOverlap()
+                progress.setTickCount(None)
+                report.dedent()
+                report.newLine()
+                removeOverlap = False
 
         report.writeTitle("Generate:")
         exportPaths = []
@@ -135,8 +137,8 @@ class BatchGenerate(Group):
                 path = os.path.join(fontDir, fileName)
                 report.write("path: %s" % path)
                 result = font.generate(path, format,
-                              decompose=False,
-                              checkOutlines=False,
+                              decompose=decompose,
+                              checkOutlines=removeOverlap,
                               autohint=autohint,
                               releaseMode=releaseMode,
                               progressBar=progress,
