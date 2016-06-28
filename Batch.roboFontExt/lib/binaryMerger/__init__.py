@@ -96,7 +96,7 @@ class BinaryMerger(Group):
                     binarySource = TTFont(binarySourcepath)
                     tempFont = TTFont(tempExportPath)
                     fileName = os.path.basename(tempExportPath)
-                    if not self.controller.keepFileName():
+                    if not self.controller.keepFileNames():
                         fileName = "%s-%s" % (font.info.familyName, font.info.styleName)
                     path = os.path.join(destDir, fileName)
                     report.writeTitle(os.path.basename(path), "'")
