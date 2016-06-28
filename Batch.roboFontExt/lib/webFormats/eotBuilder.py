@@ -10,14 +10,8 @@ os.chmod(ttf2eot, 0777)
 
 
 def generateEOT(source, dest):
-    cmds = [ttf2eot]
-    cmds.append("<")
-    cmds.append(source)
-    cmds.append(">")
-    cmds.append(dest)
-
-    result = executeCommand(cmds)
-    return result
+    # ttf2eot has this weird 'ttf2eot < source.ttf > out.eot' commandline input..
+    os.system("%s < %s > %s" % (ttf2eot, source, dest))
 
 
 def _winStr(content):
@@ -74,6 +68,6 @@ def _optimizeForEOT(sourcePath, destPath):
 def EOTBuilder(sourcePath, destinationPath):
     tempTTF = tempfile.mkstemp(suffix=".ttf")[1]
     _optimizeForEOT(sourcePath, tempTTF)
-    generateEOT(tempTTF, destinationPath)
+    generateEOT(tempTTF, destinationPath)        
     if os.path.exists(tempTTF):
         os.remove(tempTTF)
