@@ -9,8 +9,6 @@ from lib.formatters import PathFormatter
 from lib.tools.misc import walkDirectoryForFile
 from lib.settings import doodleSupportedExportFileTypes
 
-from lib.doodlePreferences import ExtensionPathWrapper
-
 from mojo.UI import AccordionView
 from mojo.extensions import getExtensionDefault, setExtensionDefault, ExtensionBundle
 from mojo.roboFont import AllFonts
@@ -18,14 +16,16 @@ from mojo.roboFont import AllFonts
 from webFormats import WebFormats
 from batchGenerate import BatchGenerate
 from binaryMerger import BinaryMerger
+from variableFontGenerator import BatchVariableFontGenerate
 
-from batchTools import settingsIdentifier, updateWithDefaultValues, TaskRunner
+from batchTools import settingsIdentifier, ufoVersion, updateWithDefaultValues, TaskRunner, BathDesignSpaceDocumentReader
+
 
 defaultOptions = {
-            "threaded": False,
-            "exportInFolders": False,
-            "keepFileNames": False,
-        }
+    "threaded": False,
+    "exportInFolders": False,
+    "keepFileNames": False,
+}
 
 
 class Settings(BaseWindowController):
@@ -82,76 +82,96 @@ class Settings(BaseWindowController):
     def closeCallback(self, sender):
         self.w.close()
 
+
 genericListPboardType = "genericListPboardType"
+
+
+class BatchPathWrapper(NSObject):
+
+    def __new__(cls, *arg, **kwargs):
+        return cls.alloc().init()
+
+    def __init__(self, path):
+        self._path = path
+
+    def path(self):
+        return self._path
 
 
 class ToolBox(BaseWindowController):
 
-    pathItemClass = ExtensionPathWrapper
+    pathItemClass = BatchPathWrapper
 
-    supportedFontFileFormats = [".%s" % ext.lower() for ext in doodleSupportedExportFileTypes + ["woff", "pfb", "ttx"]]
+    supportedFontFileFormats = [".%s" % ext.lower() for ext in doodleSupportedExportFileTypes + ["woff", "pfb", "ttx", "designspace"]]
 
     def __init__(self):
         h = 530
         self.w = Window((300, h), "Batch", minSize=(300, 400))
 
         toolbarItems = [
-                        dict(itemIdentifier="open",
-                            label="Open",
-                            imageNamed="toolbarScriptOpen",
-                            callback=self.toolbarOpen,
-                        ),
-                        dict(itemIdentifier="addOpenFonts",
-                            label="Add Open Fonts",
-                            imageNamed="toolbarScriptNew",
-                            callback=self.toolbarAddOpenFonts,
-                        ),
-                        dict(itemIdentifier=NSToolbarFlexibleSpaceItemIdentifier),
+            dict(
+                itemIdentifier="open",
+                label="Open",
+                imageNamed="toolbarScriptOpen",
+                callback=self.toolbarOpen,
+            ),
+            dict(
+                itemIdentifier="addOpenFonts",
+                label="Add Open Fonts",
+                imageNamed="toolbarScriptNew",
+                callback=self.toolbarAddOpenFonts,
+            ),
+            dict(itemIdentifier=NSToolbarFlexibleSpaceItemIdentifier),
 
-                        dict(itemIdentifier="Help",
-                            label="Help",
-                            imageNamed="toolbarDefaultPythonAppUnknow",
-                            callback=self.toolbarHelp,
-                        ),
-                        dict(itemIdentifier="settings",
-                            label="Settings",
-                            imageNamed="prefToolbarMisc",
-                            callback=self.toolbarSettings,
-                        ),
-                        ]
+            dict(
+                itemIdentifier="Help",
+                label="Help",
+                imageNamed="toolbarDefaultPythonAppUnknow",
+                callback=self.toolbarHelp,
+            ),
+            dict(
+                itemIdentifier="settings",
+                label="Settings",
+                imageNamed="prefToolbarMisc",
+                callback=self.toolbarSettings,
+            ),
+        ]
 
         self.w.addToolbar(toolbarIdentifier="ToolBoxToolbar", toolbarItems=toolbarItems, addStandardItems=False)
 
         y = 10
 
         columnDescriptions = [
-                              dict(title="path", key="path", formatter=PathFormatter.alloc().init()),
-                              ]
+            dict(title="path", key="path", formatter=PathFormatter.alloc().init()),
+        ]
 
         self.paths = List((0, 0, -0, -0), [],
-                            columnDescriptions=columnDescriptions,
-                            showColumnTitles=False,
-                            allowsMultipleSelection=True,
-                            enableDelete=True,
-                            dragSettings=dict(type=genericListPboardType, callback=self.dragCallback),
-                            selfDropSettings=dict(type=genericListPboardType, operation=NSDragOperationMove, callback=self.selfDropCallback),
-                            otherApplicationDropSettings=dict(type=NSFilenamesPboardType,
-                                                              operation=NSDragOperationCopy,
-                                                              callback=self.dropPathCallback),
-                            )
+            columnDescriptions=columnDescriptions,
+            showColumnTitles=False,
+            allowsMultipleSelection=True,
+            enableDelete=True,
+            dragSettings=dict(type=genericListPboardType, callback=self.dragCallback),
+            selfDropSettings=dict(type=genericListPboardType, operation=NSDragOperationMove, callback=self.selfDropCallback),
+            otherApplicationDropSettings=dict(
+                type=NSFilenamesPboardType,
+                operation=NSDragOperationCopy,
+                callback=self.dropPathCallback),
+        )
 
         y += 200
 
         self.webFormats = WebFormats((0, 0, -0, -0), self)
         self.batchGenerate = BatchGenerate((0, 0, -0, -0), self)
         self.binaryMerger = BinaryMerger((0, 0, -0, -0), self, self.batchGenerate.run)
+        self.batchVariableFontGenerate = BatchVariableFontGenerate((0, 0, -0, -0), self)
 
         descriptions = [
-                            dict(label="Fonts", view=self.paths, minSize=50, size=200, canResize=True, collapsed=False),
-                            dict(label="Web Fonts", view=self.webFormats, size=self.webFormats.height, canResize=False, collapsed=False),
-                            dict(label="Batch Generate", view=self.batchGenerate, size=self.batchGenerate.height, canResize=False, collapsed=False),
-                            dict(label="Binary Merge", view=self.binaryMerger, size=240, canResize=self.binaryMerger.height, collapsed=False),
-                        ]
+            dict(label="Fonts", view=self.paths, minSize=50, size=200, canResize=True, collapsed=False),
+            dict(label="Web Fonts", view=self.webFormats, size=self.webFormats.height, canResize=False, collapsed=False),
+            dict(label="Batch Generate", view=self.batchGenerate, size=self.batchGenerate.height, canResize=False, collapsed=False),
+            dict(label="Variable Fonts", view=self.batchVariableFontGenerate, size=self.batchVariableFontGenerate.height, canResize=False, collapsed=False),
+            dict(label="Binary Merge", view=self.binaryMerger, size=240, canResize=self.binaryMerger.height, collapsed=False),
+        ]
 
         self.w.accordionView = AccordionView((0, 0, -0, -0), descriptions)
 
@@ -178,20 +198,21 @@ class ToolBox(BaseWindowController):
         progress = self.startProgress("Preparing...")
         self.task = TaskRunner(callback, self.isThreaded(), progress, kwargs)
 
-    def hasSourceFonts(self, messageText, informativeText, ext=None):
-        if not self.get(ext):
+    def hasSourceFonts(self, messageText, informativeText, supportedExtensions=None, flattenDesignSpace=True):
+        if not self.get(supportedExtensions=supportedExtensions, flattenDesignSpace=flattenDesignSpace):
             self.showMessage(messageText, informativeText)
             return False
         return True
 
     # list
 
-    def get(self, ext=None):
+    def get(self, supportedExtensions=None, flattenDesignSpace=True):
         items = self.paths.get()
         paths = []
         for item in items:
             path = item.path()
-            if os.path.splitext(path)[1] == ".ufo":
+            ext = os.path.splitext(path)[1].lower()
+            if ext == ".ufo":
                 f = DefconFont(path)
                 if f.info.familyName and f.info.styleName:
                     paths.append(path)
@@ -201,15 +222,19 @@ class ToolBox(BaseWindowController):
                     print message
                     print "*" * len(message)
             elif os.path.isdir(path):
-                _paths = walkDirectoryForFile(path, ext=".ttf")
-                _paths += walkDirectoryForFile(path, ext=".otf")
-                _paths += walkDirectoryForFile(path, ext=".ufo")
-                paths.extend(_paths)
+                for ext in self.supportedFontFileFormats:
+                    paths.extend(walkDirectoryForFile(path, ext=".%s" % ext))
+            elif flattenDesignSpace and ext == ".designspace":
+                if not hasattr(item, "designSpaceDocument"):
+                    item.designSpaceDocument = BathDesignSpaceDocumentReader(path, ufoVersion)
+                item.designSpaceDocument.process()
+                paths.extend([f.path for f in item.designSpaceDocument.getMasters()])
+                paths.extend([f.path for f in item.designSpaceDocument.getInstances()])
             else:
                 paths.append(path)
-        if ext:
-            ext = [".%s" % e for e in ext]
-            paths = [p for p in paths if os.path.splitext(p)[1] in ext]
+        if supportedExtensions is not None:
+            supportedExtensions = [".%s" % e for e in supportedExtensions]
+            paths = [p for p in paths if os.path.splitext(p)[1] in supportedExtensions]
         return paths
 
     def _wrapItem(self, path):
