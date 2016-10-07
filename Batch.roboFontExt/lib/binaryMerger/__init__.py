@@ -73,7 +73,7 @@ class BinaryMerger(Group):
         self.updateDefaults()
 
     def run(self, destDir, progress):
-        paths = self.controller.get()
+        paths = self.controller.get(["ufo"])
 
         report = Report()
         tempDir = tempfile.mkdtemp()
