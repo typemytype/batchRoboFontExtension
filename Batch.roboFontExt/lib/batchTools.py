@@ -494,7 +494,7 @@ class BathDesignSpaceDocumentReader(DesignSpaceDocumentReader):
         instances = []
         for instanceName, instance in self.instances.items():
             namedInstance = NamedInstance()
-            namedInstance.nameID = self.axisNameIDMap[instanceName]
+            namedInstance.subfamilyNameID = self.axisNameIDMap[instanceName]
 
             positions = dict()
             for axisName in self.getAxisNames():
