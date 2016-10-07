@@ -252,11 +252,11 @@ class WebFormats(Group):
             setattr(self, key, checkBox)
             if "Woff" in setting:
                 formatOption = BatchRadioGroup((120, y, 85, 22),
-                                            ["OTF", "TTF"],
-                                            value=getExtensionDefault("%s.format_%s" % (settingsIdentifier, key), True),
-                                            callback=self.saveDefaults,
-                                            isVertical=False,
-                                            sizeStyle="mini")
+                    ["OTF", "TTF"],
+                    value=getExtensionDefault("%s.format_%s" % (settingsIdentifier, key), True),
+                    callback=self.saveDefaults,
+                    isVertical=False,
+                    sizeStyle="mini")
                 setattr(self, "%s_format" % key, formatOption)
             y += 30
 
