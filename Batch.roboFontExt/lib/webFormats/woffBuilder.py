@@ -5,7 +5,7 @@ import shutil
 from compositor import Font as CompositorFont
 from extractor.formats.opentype import extractOpenTypeInfo
 
-from xmlWriter import XMLWriter
+from fontTools.misc.xmlWriter import XMLWriter
 
 from mojo.compile import executeCommand
 
