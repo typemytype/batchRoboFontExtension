@@ -501,13 +501,13 @@ class BathDesignSpaceDocumentReader(DesignSpaceDocumentReader):
                 axisTagName = tagBuilder(axisName)
                 _, value, _ = normelizePositionValues(
                     self.getMinValueForAxis(axisName),
-                    instance.locationObject[axisTagName],
+                    instance.locationObject[axisName],
                     self.getMaxValueForAxis(axisName))
 
                 if value < 0 or value > 1:
                     self.generateReport.write("Instance '%s' is an extrapolation for axis '%s'" % (instance.font.info.styleName, axisName))
 
-                positions[axisName] = value
+                positions[axisTagName] = value
             namedInstance.coordinates = positions
             instances.append(namedInstance)
         fvar.instances = instances
