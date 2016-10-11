@@ -320,7 +320,7 @@ class BathDesignSpaceDocumentReader(DesignSpaceDocumentReader):
         return self._getValueForAxis(axisName, min)
 
     def makeMasterGlyphsCompatible(self):
-        self.generateReport.writeTile("Making master compatible", "'")
+        self.generateReport.writeTitle("Making master compatible", "'")
         masters = self.getMasters()
         glyphNames = []
         for master in masters:
