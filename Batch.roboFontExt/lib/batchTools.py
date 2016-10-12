@@ -245,7 +245,7 @@ def tagBuilder(value, maxCount=4):
     return predefined[inputValue]
 
 
-class BathDesignSpaceDocumentReader(DesignSpaceDocumentReader):
+class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
 
     _fontClass = MathFont
     _glyphClass = compilerObjects.Glyph

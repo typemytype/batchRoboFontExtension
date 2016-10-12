@@ -4,7 +4,7 @@ from vanilla import *
 
 from mojo.extensions import getExtensionDefault, setExtensionDefault
 
-from batchTools import settingsIdentifier, ufoVersion, Report, BathDesignSpaceDocumentReader
+from batchTools import settingsIdentifier, ufoVersion, Report, BatchDesignSpaceDocumentReader
 
 
 class BatchVariableFontGenerate(Group):
@@ -55,7 +55,7 @@ class BatchVariableFontGenerate(Group):
 
             progress.update("Generating design space ... %s" % fileName)
 
-            desingSpace = BathDesignSpaceDocumentReader(path, ufoVersion)
+            desingSpace = BatchDesignSpaceDocumentReader(path, ufoVersion)
             desingSpace.generateVariationFont(outputPath, autohint=autohint, releaseMode=releaseMode, report=report)
             report.dedent()
 

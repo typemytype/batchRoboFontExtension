@@ -18,7 +18,7 @@ from batchGenerate import BatchGenerate
 from binaryMerger import BinaryMerger
 from variableFontGenerator import BatchVariableFontGenerate
 
-from batchTools import settingsIdentifier, ufoVersion, updateWithDefaultValues, TaskRunner, BathDesignSpaceDocumentReader
+from batchTools import settingsIdentifier, ufoVersion, updateWithDefaultValues, TaskRunner, BatchDesignSpaceDocumentReader
 
 
 defaultOptions = {
@@ -226,7 +226,7 @@ class ToolBox(BaseWindowController):
                     paths.extend(walkDirectoryForFile(path, ext=".%s" % ext))
             elif flattenDesignSpace and ext == ".designspace":
                 if not hasattr(item, "designSpaceDocument"):
-                    item.designSpaceDocument = BathDesignSpaceDocumentReader(path, ufoVersion)
+                    item.designSpaceDocument = BatchDesignSpaceDocumentReader(path, ufoVersion)
                 item.designSpaceDocument.process()
                 paths.extend([f.path for f in item.designSpaceDocument.getMasters()])
                 paths.extend([f.path for f in item.designSpaceDocument.getInstances()])
