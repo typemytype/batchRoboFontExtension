@@ -2,7 +2,7 @@ from AppKit import *
 
 from lib.baseObjects import CallbackWrapper
 
-from toolBox import ToolBox
+import toolBox
 
 
 class BatchMenu(object):
@@ -26,9 +26,10 @@ class BatchMenu(object):
         newItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(title, "action:", "")
         newItem.setTarget_(self.target)
 
-        fileMenu.insertItem_atIndex_(newItem, index+1)
+        fileMenu.insertItem_atIndex_(newItem, index + 1)
 
     def callback(self, sender):
-        OpenWindow(ToolBox)
+        OpenWindow(toolBox.ToolBox)
+
 
 BatchMenu()

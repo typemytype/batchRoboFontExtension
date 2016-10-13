@@ -266,6 +266,10 @@ class WebFormats(Group):
             value=getExtensionDefault("%s.preserveTTFhints" % settingsIdentifier, False),
             sizeStyle="small")
         y += 30
+        self.generateHTML = CheckBox((10, y, -10, 18), "Generate HTML",
+            value=getExtensionDefault("%s.generateHTML" % settingsIdentifier, True),
+            sizeStyle="small")
+        y += 30
 
         middle = 45
         self.suffixText = TextBox((10, y + 2, middle, 22), "Suffix:", alignment="right")
@@ -288,7 +292,7 @@ class WebFormats(Group):
                 value = getattr(self, "%s_format" % key).get()
                 setExtensionDefault("%s.format_%s" % (settingsIdentifier, key), value)
 
-        for key in ["webSuffix", "preserveTTFhints"]:
+        for key in ["webSuffix", "preserveTTFhints", "generateHTML"]:
             value = getattr(self, key).get()
             setExtensionDefault("%s.%s" % (settingsIdentifier, key), value)
 
@@ -567,11 +571,12 @@ class WebFormats(Group):
         reportPath = os.path.join(destDir, "WebFonts Report.txt")
         report.save(reportPath)
 
-        cssPath = os.path.join(destDir, "font.css")
-        report.css.save(cssPath)
+        if self.generateHTML():
+            cssPath = os.path.join(destDir, "font.css")
+            report.css.save(cssPath)
 
-        htmlPath = os.path.join(destDir, "preview.html")
-        report.html.save(htmlPath)
+            htmlPath = os.path.join(destDir, "preview.html")
+            report.html.save(htmlPath)
 
     def _convert(self, destDir):
         if not destDir:

@@ -20,7 +20,6 @@ from variableFontGenerator import BatchVariableFontGenerate
 
 from batchTools import settingsIdentifier, ufoVersion, updateWithDefaultValues, TaskRunner, BatchDesignSpaceDocumentReader
 
-
 defaultOptions = {
     "threaded": False,
     "exportInFolders": False,
