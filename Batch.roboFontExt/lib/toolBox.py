@@ -222,7 +222,7 @@ class ToolBox(BaseWindowController):
                     print "*" * len(message)
             elif os.path.isdir(path):
                 for ext in self.supportedFontFileFormats:
-                    paths.extend(walkDirectoryForFile(path, ext=".%s" % ext))
+                    paths.extend(walkDirectoryForFile(path, ext=ext))
             elif flattenDesignSpace and ext == ".designspace":
                 if not hasattr(item, "designSpaceDocument"):
                     item.designSpaceDocument = BatchDesignSpaceDocumentReader(path, ufoVersion)
