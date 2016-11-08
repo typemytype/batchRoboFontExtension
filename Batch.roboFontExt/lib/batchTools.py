@@ -37,6 +37,13 @@ class Report(object):
         self._data = []
         self._indent = 0
 
+    def append(self, value):
+        try:
+            value = value.encode("utf-8")
+        except:
+            pass
+        self._data.append(value)
+
     def indent(self, value=None):
         if value is None:
             self._indent += 1
@@ -51,7 +58,7 @@ class Report(object):
     def write(self, value):
         indent = self.INDENT * self._indent
         value = value.replace("\n", "\n%s" % indent)
-        self._data.append("%s%s" % (indent, value))
+        self.append("%s%s" % (indent, value))
 
     def writeTitle(self, value, underline="*"):
         self.write(value)
@@ -63,14 +70,14 @@ class Report(object):
                 self.write(i)
 
     def newLine(self):
-        self._data.append("")
+        self.append("")
 
     def writeDict(self, d):
         maxLength = 0
         for key in d:
-            l = len(key)
-            if l > maxLength:
-                maxLength = l
+            length = len(key)
+            if length > maxLength:
+                maxLength = length
 
         for key in sorted(d):
             value = d[key]
