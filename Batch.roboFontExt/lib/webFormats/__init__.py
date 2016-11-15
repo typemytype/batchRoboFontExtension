@@ -571,7 +571,7 @@ class WebFormats(Group):
         reportPath = os.path.join(destDir, "WebFonts Report.txt")
         report.save(reportPath)
 
-        if self.generateHTML():
+        if self.generateHTML.get():
             cssPath = os.path.join(destDir, "font.css")
             report.css.save(cssPath)
 
