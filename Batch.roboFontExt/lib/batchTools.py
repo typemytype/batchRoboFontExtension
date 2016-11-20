@@ -283,7 +283,7 @@ class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
         mutatorItems = []
         for key, (font, location) in self.sources.items():
             mutatorItems.append((location, font))
-        _, mutator = buildMutator(mutatorItems, warpDict=self.warpDict)
+        _, mutator = buildMutator(mutatorItems, axes=self.axes)
         self.mutator = mutator
         self.makeMasterGlyphsCompatible()
         self.process()
@@ -321,10 +321,34 @@ class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
         return func(self._axesValues[axisName])
 
     def getMaxValueForAxis(self, axisName):
-        return self._getValueForAxis(axisName, max)
+        if axisName in self.axes:
+            axis = self.axes[axisName]
+            return axis["maximum"]
+        else:
+            return self._getValueForAxis(axisName, max)
 
     def getMinValueForAxis(self, axisName):
-        return self._getValueForAxis(axisName, min)
+        if axisName in self.axes:
+            axis = self.axes[axisName]
+            return axis["minimum"]
+        else:
+            return self._getValueForAxis(axisName, min)
+
+    def getDefaultValueForAxis(self, axisName, instance):
+        if axisName in self.axes:
+            axis = self.axes[axisName]
+            return axis["default"]
+        else:
+            return instance.locationObject[axisName]
+
+    def getTagForAxis(self, axisName):
+        tag = None
+        if axisName in self.axes:
+            axis = self.axes[axisName]
+            tag = axis["tag"]
+        if tag is None:
+            tag = tagBuilder(axisName)
+        return tag
 
     def makeMasterGlyphsCompatible(self):
         self.generateReport.writeTitle("Making master compatible", "'")
@@ -490,7 +514,7 @@ class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
         axes = []
         for axisName in self.getAxisNames():
             axis = Axis()
-            axis.axisTag = tagBuilder(axisName)
+            axis.axisTag = self.getTagForAxis(axisName)
             axis.nameID = self.axisNameIDMap[axisName]
             axis.minValue = 0
             axis.defaultValue = 0
@@ -505,10 +529,10 @@ class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
 
             positions = dict()
             for axisName in self.getAxisNames():
-                axisTagName = tagBuilder(axisName)
+                axisTagName = self.getTagForAxis(axisName)
                 _, value, _ = normelizePositionValues(
                     self.getMinValueForAxis(axisName),
-                    instance.locationObject[axisName],
+                    self.getDefaultValueForAxis(axisName, instance),
                     self.getMaxValueForAxis(axisName))
 
                 if value < 0 or value > 1:
@@ -543,7 +567,7 @@ class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
         coords.extend([left, right, None, None])  # spacing deltas: left right top bottom
         positions = dict()
         for axisName in self.getAxisNames():
-            axisTagName = tagBuilder(axisName)
+            axisTagName = self.getTagForAxis(axisName)
             positions[axisTagName] = normelizePositionValues(
                 self.getMinValueForAxis(axisName),
                 location[axisName],
