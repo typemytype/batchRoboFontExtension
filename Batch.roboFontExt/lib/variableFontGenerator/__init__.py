@@ -20,10 +20,17 @@ from mutatorMath.objects.mutator import buildMutator
 
 from fontMath.mathGlyph import MathGlyph
 
+from robofab.pens.adapterPens import TransformPointPen
+
 from vanilla import *
 
-from mojo.extensions import getExtensionDefault, setExtensionDefault
+try:
+    from mojo.extensions import getExtensionDefault, setExtensionDefault
+except:
+    print "Executing outside RoboFont"
 
+import sys
+sys.path.append(u"/Users/frederik/Documents/dev/tmt/publicRoboFontExtensions/batchRoboFontExtension/Batch.roboFontExt/lib")
 from batchTools import settingsIdentifier, ufoVersion, Report
 
 
@@ -243,9 +250,11 @@ class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
         _, mutator = buildMutator(mutatorItems, axes=self.axes)
         self.mutator = mutator
         self.makeMasterGlyphsCompatible()
+        self.decomposedMixedGlyphs()
         self.process()
         self.makeMasterGlyphsQuadractic()
         self._generateVariationFont(destPath)
+        return report
 
     def makeMasterGlyphsQuadractic(self):
         fonts_to_quadratic(self.getMasters())
@@ -337,7 +346,6 @@ class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
                     master.newGlyph(glyphName)
                     glyph = master[glyphName]
                     result.extractGlyph(glyph)
-
                     glyphs.append(glyph)
 
             self._compatiblizeGlyphs(glyphs)
@@ -376,6 +384,20 @@ class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
                 contour.drawPoints(pen)
                 contour.clear()
                 pen.drawPoints(contour)
+
+    def decomposedMixedGlyphs(self):
+        masters = self.getMasters()
+        for master in masters:
+            for glyph in master:
+                if len(glyph) and len(glyph.components):
+                    for component in glyph.components:
+                        base = master[component.baseGlyph]
+                        decomposePointPen = DecomposePointPen(master, glyph.getPointPen(), component.transformation)
+                        for contour in base:
+                            contour.drawPoints(decomposePointPen)
+                        for component in base.components:
+                            component.drawPoints(decomposePointPen)
+                    glyph.clearComponents()
 
     def _generateVariationFont(self, outPutPath):
         neutral = self.getNeutral()
@@ -558,4 +580,21 @@ class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
         self.generateReport.dedent()
 
 
+class DecomposePointPen(TransformPointPen):
 
+    def __init__(self, glyphSet, outPen, transformation):
+        TransformPointPen.__init__(self, outPen, transformation)
+        self.glyphSet = glyphSet
+
+    def addComponent(self, glyphName, transformation):
+        try:
+            glyph = self.glyphSet[glyphName]
+        except KeyError:
+            pass
+        else:
+            transfromPointPen = TransformPointPen(self, transformation)
+            # ignore anchors
+            for contour in glyph:
+                contour.drawPoints(transfromPointPen)
+            for component in glyph.components:
+                component.drawPoints(transfromPointPen)
