@@ -24,10 +24,9 @@ from robofab.pens.adapterPens import TransformPointPen
 
 from vanilla import *
 
-try:
-    from mojo.extensions import getExtensionDefault, setExtensionDefault
-except:
-    print "Executing outside RoboFont"
+from lib.tools.compileTools import CurrentFDK
+from mojo.extensions import getExtensionDefault, setExtensionDefault
+
 
 import sys
 sys.path.append(u"/Users/frederik/Documents/dev/tmt/publicRoboFontExtensions/batchRoboFontExtension/Batch.roboFontExt/lib")
@@ -419,6 +418,7 @@ class BatchDesignSpaceDocumentReader(DesignSpaceDocumentReader):
             releaseMode=self.compileSettingReleaseMode,
             glyphOrder=None,
             useMacRoman=False,
+            fdk=CurrentFDK(),
         )
         neutral.lib[shouldAddPointsInSplineConversionLibKey] = False
         try:
