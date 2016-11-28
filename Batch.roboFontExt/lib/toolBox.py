@@ -151,6 +151,10 @@ class ToolBox(BaseWindowController):
             enableDelete=True,
             dragSettings=dict(type=genericListPboardType, callback=self.dragCallback),
             selfDropSettings=dict(type=genericListPboardType, operation=NSDragOperationMove, callback=self.selfDropCallback),
+            selfApplicationDropSettings=dict(
+                type=NSFilenamesPboardType,
+                operation=NSDragOperationCopy,
+                callback=self.dropPathCallback),
             otherApplicationDropSettings=dict(
                 type=NSFilenamesPboardType,
                 operation=NSDragOperationCopy,
