@@ -16,9 +16,9 @@ from mojo.roboFont import AllFonts
 from webFormats import WebFormats
 from batchGenerate import BatchGenerate
 from binaryMerger import BinaryMerger
-from variableFontGenerator import BatchVariableFontGenerate
+from variableFontGenerator import BatchVariableFontGenerate, BatchDesignSpaceDocumentReader
 
-from batchTools import settingsIdentifier, ufoVersion, updateWithDefaultValues, TaskRunner, BatchDesignSpaceDocumentReader
+from batchTools import settingsIdentifier, ufoVersion, updateWithDefaultValues, TaskRunner
 
 defaultOptions = {
     "threaded": False,
