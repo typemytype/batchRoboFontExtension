@@ -11,6 +11,7 @@ from fontTools import varLib
 from cu2qu.ufo import fonts_to_quadratic
 
 from mutatorMath.objects.location import Location
+from mutatorMath.objects.mutator import buildMutator
 
 from robofab.pens.adapterPens import TransformPointPen
 
@@ -219,8 +220,26 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         for master in self.fonts.values():
             glyphNames.extend(master.keys())
         glyphNames = set(glyphNames)
-
+        
+        defaultMaster = self.fonts[self.default.name]
+        
         for glyphName in glyphNames:
+            if glyphName not in defaultMaster:
+                glyphItems = []
+                for sourceDescriptor in self.sources:
+                    master = self.fonts[sourceDescriptor.name]
+                    if glyphName in master:
+                        sourceGlyph = self.mathGlyphClass(master[glyphName])
+                        sourceGlyphLocation = self.locations[sourceDescriptor.name]    
+                        glyphItems.append((sourceGlyphLocation, sourceGlyph))
+                _, mutator = buildMutator(glyphItems)
+                result = mutator.makeInstance(self.defaultLoc)
+                if self.roundGeometry:
+                    result.round()
+                defaultMaster.newGlyph(glyphName)
+                glyph = defaultMaster[glyphName]
+                result.extractGlyph(glyph)
+
             glyphs = []
             for sourceDescriptor in self.sources:
                 master = self.fonts[sourceDescriptor.name]
@@ -365,7 +384,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
 if __name__ is "__main__":
 
     path = u"/Users/frederik/Downloads/adobe-variable-font-prototype-master/RomanMasters/AdobeVFPrototype_rebuilt.designspace"
-    outputPath = u"/Users/frederik/Downloads/adobe-variable-font-prototype-master/test/Adobe VF Prototype_super_test.ttf"
+    path = u"/Users/frederik/Desktop/designSpaceToGVAR/testExt.designspace"
+    outputPath = u"/Users/frederik/Downloads/adobe-variable-font-prototype-master/test/test.ttf"
     document = BatchDesignSpaceProcessor(path)
     result = document.generateVariationFont(outputPath, autohint=False, releaseMode=False, report=None)
     print result.get()
