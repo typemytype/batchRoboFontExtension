@@ -16,7 +16,7 @@ from mojo.roboFont import AllFonts
 from webFormats import WebFormats
 from batchGenerate import BatchGenerate
 from binaryMerger import BinaryMerger
-from variableFontGenerator import BatchVariableFontGenerate, BatchDesignSpaceDocumentReader
+from variableFontGenerator import BatchVariableFontGenerate, BatchDesignSpaceProcessor
 
 from batchTools import settingsIdentifier, ufoVersion, updateWithDefaultValues, TaskRunner
 
@@ -229,10 +229,10 @@ class ToolBox(BaseWindowController):
                     paths.extend(walkDirectoryForFile(path, ext=ext))
             elif flattenDesignSpace and ext == ".designspace":
                 if not hasattr(item, "designSpaceDocument"):
-                    item.designSpaceDocument = BatchDesignSpaceDocumentReader(path, ufoVersion)
-                item.designSpaceDocument.process()
-                paths.extend([f.path for f in item.designSpaceDocument.getMasters()])
-                paths.extend([f.path for f in item.designSpaceDocument.getInstances()])
+                    item.designSpaceDocument = BatchDesignSpaceProcessor(path, ufoVersion)
+                item.designSpaceDocument.generateUFO()
+                paths.extend([f.path for f in item.designSpaceDocument.masterUFOPaths()])
+                paths.extend([f.path for f in item.designSpaceDocument.instancesUFOPaths()])
             else:
                 paths.append(path)
         if supportedExtensions is not None:
