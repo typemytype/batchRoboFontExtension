@@ -228,6 +228,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 glyphItems = []
                 for sourceDescriptor in self.sources:
                     master = self.fonts[sourceDescriptor.name]
+                    if glyphName in sourceDescriptor.mutedGlyphNames:
+                        continue
                     if glyphName in master:
                         sourceGlyph = self.mathGlyphClass(master[glyphName])
                         sourceGlyphLocation = self.locations[sourceDescriptor.name]    
