@@ -1,5 +1,4 @@
 import os
-import tempfile
 
 from vanilla import *
 
@@ -209,6 +208,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
     def __init__(self, path, ufoVersion=2):
         super(BatchDesignSpaceProcessor, self).__init__(ufoVersion=ufoVersion)
         self.read(path)
+        self.checkAxes()
+        self.checkDefault()
 
     def generateUFO(self):
         # make sure it only generates all instances only once
@@ -260,7 +261,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             self.loadFonts()
         if not self.default.copyInfo:
             self.default.copyInfo = True
-            tempPath = tempfile.mkstemp(suffix=".designSpace")[1]
+            # temp path must be in the same root            
+            tempPath = os.path.join(os.path.dirname(path), "temp_%s" % os.path.basename(path))
             self.write(tempPath)
             return tempPath
         return self.path
@@ -405,7 +407,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                             component.drawPoints(decomposePointPen)
                     # remove all components
                     glyph.clearComponents()
-                    self.generateReport.write("Decomposing glyph '%s' in master '%s %s'" % (contourIndex, glyph.name, master.info.familyName, master.info.styleName))
+                    self.generateReport.write("Decomposing glyph '%s' in master '%s %s'" % (glyph.name, master.info.familyName, master.info.styleName))
         self.generateReport.newLine()
 
     def makeMasterGlyphsQuadractic(self):
@@ -516,7 +518,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         # optimize the design space for varlib
         designSpacePath = self.optimizedDesignSpace()
         # let varLib build the variation font
-        varFont, _, _ = varLib.build(self.path, masterBinaryPaths)
+        varFont, _, _ = varLib.build(designSpacePath, masterBinaryPaths)        
         # save the variation font
         varFont.save(outPutPath)
         # remove the temp design space file
@@ -532,7 +534,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
 if __name__ is "__main__":
 
     path = u"/Users/frederik/Downloads/adobe-variable-font-prototype-master/RomanMasters/AdobeVFPrototype_rebuilt.designspace"
-    path = u"/Users/frederik/Desktop/designSpaceToGVAR/testExt.designspace"
+    #path = u"/Users/frederik/Desktop/designSpaceToGVAR/testExt.designspace"
+    path = u"/Users/frederik/Desktop/designSpaceToGVAR/simple.designspace"
     outputPath = u"/Users/frederik/Downloads/adobe-variable-font-prototype-master/test/test.ttf"
     document = BatchDesignSpaceProcessor(path)
     result = document.generateVariationFont(outputPath, autohint=False, releaseMode=False, report=None)
