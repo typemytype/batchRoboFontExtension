@@ -94,6 +94,11 @@ class BatchVariableFontGenerate(Group):
 
 class CompatibleContourPointPen(object):
 
+    """
+    Create a compatible glyphs
+    based on a given list of segmentTypes.
+    """
+
     def __init__(self, types):
         self.types = list(types)
 
@@ -104,12 +109,18 @@ class CompatibleContourPointPen(object):
         self.contour = list()
 
     def endPath(self):
+        # lets start
         newContour = []
         for i, ((x, y), segmentType, args, kwargs) in enumerate(self.contour):
+            # if there is segmentType
             if segmentType is not None:
+                # check with the given list of segmentTypes
                 if segmentType != self.types[0]:
+                    # its different
+                    # get the previous point
                     (px, py), _, _, _ = self.contour[i - 1]
-
+                    # calculate offcurve points
+                    # on 1/3 of the line segment length
                     dx = x - px
                     dy = y - py
 
@@ -118,17 +129,21 @@ class CompatibleContourPointPen(object):
 
                     nx2 = px + dx * 0.666
                     ny2 = py + dy * 0.666
-
+                    # add it to the new contour
                     newContour.append(((nx1, ny1), None, [], {}))
                     newContour.append(((nx2, ny2), None, [], {}))
                     segmentType = self.types[0]
-
+                # remove the first given segmentType
                 self.types.pop(0)
-
+            # add the point
             newContour.append(((x, y), segmentType, args, kwargs))
+        # set the contour
         self.contour = newContour
 
     def drawPoints(self, pointPen, roundCoordinates=1):
+        """
+        Draw into an other pointPen
+        """
         pointPen.beginPath()
         for (x, y), segmentType, args, kwargs in self.contour:
             pointPen.addPoint((x, y), segmentType, *args, **kwargs)
@@ -136,6 +151,11 @@ class CompatibleContourPointPen(object):
 
 
 class DecomposePointPen(TransformPointPen):
+
+    """
+    A simple transform point pen able to decompose components
+    in a given point pen.
+    """
 
     def __init__(self, glyphSet, outPen, transformation):
         TransformPointPen.__init__(self, outPen, transformation)
@@ -157,11 +177,21 @@ class DecomposePointPen(TransformPointPen):
 
 class VarLibMasterFinder(dict):
 
+    """
+    VarLib needs an argement mapping source UFOs to binary fonts.
+    A simple dict which is callable with an source UFO path returning
+    the binary font path.
+    """
+
     def __call__(self, arg):
         return self.get(arg)
 
 
 class BatchDesignSpaceProcessor(DesignSpaceProcessor):
+
+    """
+    A subclass of a DesignSpaceProcessor with support for variation fonts.
+    """
 
     fontClass = compilerObjects.Font
     glyphClass = compilerObjects.Glyph
@@ -181,21 +211,33 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
 
     def generateUFO(self):
         if not hasattr(self, "_didGenerate"):
-            self._didGenerate = True
             super(BatchDesignSpaceProcessor, self).generateUFO()
+            self._didGenerate = True
 
     def masterUFOPaths(self):
+        """
+        Return the master ufo paths.
+        """
         return [sourceDescriptor.path for sourceDescriptor in self.sources]
 
     def instancesUFOPaths(self):
+        """
+        Return the instances ufo paths.
+        Its possible that those paths does not exists yet.
+        call `.generateUFO()` to generate instances.
+        """
         return [instanceDescriptor.path for instanceDescriptor in self.instances if instanceDescriptor.path is not None]
 
-    def generateVariationFont(self, destPath, autohint=False, releaseMode=True, report=None):
+    def generateVariationFont(self, destPath, autohint=False, releaseMode=True, glyphOrder=None, report=None):
+        """
+        Generate a variation font based on a desingSpace.
+        """
         if report is None:
             report = Report()
         self.generateReport = report
         self.compileSettingAutohint = autohint
         self.compileSettingReleaseMode = releaseMode
+        self.compileGlyphOrder = glyphOrder
 
         self.loadFonts()
         self.loadLocations()
@@ -208,23 +250,34 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         return report
 
     def loadLocations(self):
+        """
+        Store all locations similary as the `.fonts` dict.
+        The sourceDescriptor name is the key.
+        """
         self.locations = dict()
         for sourceDescriptor in self.sources:
             location = Location(sourceDescriptor.location)
             self.locations[sourceDescriptor.name] = location
 
     def makeMasterGlyphsCompatible(self):
-        self.generateReport.writeTitle("Making master compatible", "'")
-
+        """
+        Update all masters with missing glyphs.
+        All Masters must have the same glyphs.
+        """
+        self.generateReport.writeTitle("Making master glyphs compatible", "'")
+        # collect all possible glyph names
         glyphNames = []
         for master in self.fonts.values():
             glyphNames.extend(master.keys())
         glyphNames = set(glyphNames)
-        
+        # get the default master
         defaultMaster = self.fonts[self.default.name]
-        
+        # loop over all glyphName
         for glyphName in glyphNames:
+            # first check if the default master has this glyph
             if glyphName not in defaultMaster:
+                # the default does not have the glyph
+                # build a repair mutator to generate a glyph
                 glyphItems = []
                 for sourceDescriptor in self.sources:
                     master = self.fonts[sourceDescriptor.name]
@@ -232,12 +285,13 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                         continue
                     if glyphName in master:
                         sourceGlyph = self.mathGlyphClass(master[glyphName])
-                        sourceGlyphLocation = self.locations[sourceDescriptor.name]    
+                        sourceGlyphLocation = self.locations[sourceDescriptor.name]
                         glyphItems.append((sourceGlyphLocation, sourceGlyph))
                 _, mutator = buildMutator(glyphItems)
                 result = mutator.makeInstance(self.defaultLoc)
                 if self.roundGeometry:
                     result.round()
+                self.generateReport.write("Adding missing glyph '%s' in the default master '%s %s'" % (glyphName, defaultMaster.info.familyName, defaultMaster.info.styleName))
                 defaultMaster.newGlyph(glyphName)
                 glyph = defaultMaster[glyphName]
                 result.extractGlyph(glyph)
@@ -298,44 +352,88 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 pen.drawPoints(contour)
 
     def decomposedMixedGlyphs(self):
+        """
+        Decompose all glyphs which have both contour point data as components.
+        """
+        self.generateReport.writeTitle("Decompose Mixed Glyphs", "'")
         masters = self.fonts.values()
         for master in masters:
             for glyph in master:
+                # check if the glyph has both contour point data as components
                 if len(glyph) and len(glyph.components):
+                    # found, loop over all components and decompose
                     for component in glyph.components:
+                        # get the master font
                         base = master[component.baseGlyph]
+                        # get the decompose pen
                         decomposePointPen = DecomposePointPen(master, glyph.getPointPen(), component.transformation)
+                        # draw the base into the pen
                         for contour in base:
                             contour.drawPoints(decomposePointPen)
+                        # draw the base components into the pen
                         for component in base.components:
                             component.drawPoints(decomposePointPen)
+                    # remove all components
                     glyph.clearComponents()
+                    self.generateReport.write("Decomposing glyph '%s' in master '%s %s'" % (contourIndex, glyph.name, master.info.familyName, master.info.styleName))
+        self.generateReport.newLine()
 
     def makeMasterGlyphsQuadractic(self):
+        """
+        Optimize and convert all master ufo to quad curves.
+        """
         masters = self.fonts.values()
+        # use cu2qu to optimize all masters
         fonts_to_quadratic(masters)
         for master in masters:
             master.segmentType = "qcurve"
 
     def makeMasterKerningCompatible(self):
+        """
+        Optimize kerning data.
+        All masters must have the same kering pairs.
+        Build repair mutators for missing kering pairs
+        and generate the kerning value within the design space.
+        """
+        self.generateReport.writeTitle("Making master kerning compatible", "'")
+        # collect all kerning pairs
         allPairs = list()
+        # collect all groups
         allGroups = dict()
         masters = self.fonts.values()
         for master in masters:
             allPairs.extend(master.kerning.keys())
             allGroups.update(master.groups)
         allPairs = set(allPairs)
-        for master in masters:
-            for pair in allPairs:
+        # loop over all pairs
+        for pair in allPairs:
+            # loop over all masters
+            for sourceDescriptor in self.sources:
+                master = self.fonts[sourceDescriptor.name]
                 if pair not in master.kerning:
-                    master.kerning[pair] = 0
+                    # pair not found
+                    # build a repair mutator
+                    kernItems = []
+                    for kernSourceDescriptor in self.sources:
+                        kernMaster = self.fonts[kernSourceDescriptor.name]
+                        if pair in kernMaster.kerning:
+                            sourceLocation = self.locations[kernSourceDescriptor.name]
+                            sourceValue = kernMaster.kerning[pair]
+                            kernItems.append((sourceLocation, sourceValue))
+                    _, mutator = buildMutator(kernItems)
+                    result = mutator.makeInstance(self.locations[sourceDescriptor.name])
+                    master.kerning[pair] = result
                     first, second = pair
                     if first.startswith("@") and first not in master.groups:
                         master.groups[first] = allGroups[first]
                     if second.startswith("@") and second not in master.groups:
                         master.groups[second] = allGroups[second]
+        self.generateReport.newLine()
 
     def _generateVariationFont(self, outPutPath):
+        """
+        Generate a variation font.
+        """
         dirname = os.path.dirname(outPutPath)
 
         options = dict(
@@ -348,7 +446,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             checkOutlines=False,
             autohint=self.compileSettingAutohint,
             releaseMode=self.compileSettingReleaseMode,
-            glyphOrder=None,
+            glyphOrder=self.compileGlyphOrder,
             useMacRoman=False,
             fdk=CurrentFDK(),
             generateFeaturesWithFontTools=False,
@@ -375,13 +473,14 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             self.generateReport.write(result)
             self.generateReport.dedent()
         self.generateReport.dedent()
-        # let varLib do the work
+        # let varLib build the variation font
         varFont, _, _ = varLib.build(self.path, masterBinaryPaths)
         varFont.save(outPutPath)
 
         for tempPath in masterBinaryPaths.values():
-           if os.path.exists(tempPath):
-               os.remove(tempPath)
+            if os.path.exists(tempPath):
+                os.remove(tempPath)
+
 
 if __name__ is "__main__":
 
