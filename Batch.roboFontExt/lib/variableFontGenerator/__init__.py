@@ -1,4 +1,5 @@
 import os
+import tempfile
 
 from vanilla import *
 
@@ -210,6 +211,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.read(path)
 
     def generateUFO(self):
+        # make sure it only generates all instances only once
         if not hasattr(self, "_didGenerate"):
             super(BatchDesignSpaceProcessor, self).generateUFO()
             self._didGenerate = True
@@ -248,6 +250,20 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.makeMasterKerningCompatible()
         self._generateVariationFont(destPath)
         return report
+
+    def optimizedDesignSpace(self):
+        """
+        Optimize the desingSpace
+        * adding info attribute to sources if it is not set
+        """
+        if self.default is None:
+            self.loadFonts()
+        if not self.default.copyInfo:
+            self.default.copyInfo = True
+            tempPath = tempfile.mkstemp(suffix=".designSpace")[1]
+            self.write(tempPath)
+            return tempPath
+        return self.path
 
     def loadLocations(self):
         """
@@ -288,48 +304,61 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                         sourceGlyphLocation = self.locations[sourceDescriptor.name]
                         glyphItems.append((sourceGlyphLocation, sourceGlyph))
                 _, mutator = buildMutator(glyphItems)
+                # use the repair mutator to generate an instance at the default location
                 result = mutator.makeInstance(self.defaultLoc)
+                # round if necessary
                 if self.roundGeometry:
                     result.round()
                 self.generateReport.write("Adding missing glyph '%s' in the default master '%s %s'" % (glyphName, defaultMaster.info.familyName, defaultMaster.info.styleName))
+                # add the glyph to the default master
                 defaultMaster.newGlyph(glyphName)
                 glyph = defaultMaster[glyphName]
                 result.extractGlyph(glyph)
 
             glyphs = []
+            # fill all masters with missing glyphs
+            # and collect all glyphs from all masters
+            # to send them to optimize contour data
             for sourceDescriptor in self.sources:
                 master = self.fonts[sourceDescriptor.name]
                 if glyphName in master:
+                    # found do nothing
                     glyphs.append(master[glyphName])
                 else:
+                    # get the mutator
                     mutator = self.getGlyphMutator(glyphName)
+                    # get the location
                     location = self.locations[sourceDescriptor.name]
+                    # generate an instance
                     result = mutator.makeInstance(location)
+                    # round if necessary
                     if self.roundGeometry:
                         result.round()
 
                     self.generateReport.write("Adding missing glyph '%s' in master '%s %s'" % (glyphName, master.info.familyName, master.info.styleName))
+                    # add the glyph to the master
                     master.newGlyph(glyphName)
                     glyph = master[glyphName]
                     result.extractGlyph(glyph)
                     glyphs.append(glyph)
-
+            # optimize glyph contour data from all masters
             self.makeGlyphOutlinesCompatible(glyphs)
         self.generateReport.newLine()
 
     def makeGlyphOutlinesCompatible(self, glyphs):
         if len(glyphs) <= 1:
             return
-
-        glyphTypeMap = {}
+        # map all segment type for the given glyphs by contour index
+        glyphSegmentTypeMap = {}
         for glyph in glyphs:
             for i, contour in enumerate(glyph):
                 types = [point.segmentType for point in contour if point.segmentType]
-                if i not in glyphTypeMap:
-                    glyphTypeMap[i] = list()
-                glyphTypeMap[i].append((types, glyph))
+                if i not in glyphSegmentTypeMap:
+                    glyphSegmentTypeMap[i] = list()
+                glyphSegmentTypeMap[i].append((types, glyph))
 
-        for contourIndex, contourTypes in glyphTypeMap.items():
+        for contourIndex, contourTypes in glyphSegmentTypeMap.items():
+            # collect all segment types for a single glyph
             pointTypes = None
             for types, glyph in contourTypes:
                 if pointTypes is None:
@@ -340,10 +369,11 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                             pointTypes[i] = t
 
             master = glyph.getParent()
+            # check if they are different
             for types, glyph in contourTypes:
                 if types == pointTypes:
                     continue
-
+                # add missing off curves
                 self.generateReport.write("Adding missing offcurves in contour %s for glyph '%s' in master '%s %s'" % (contourIndex, glyph.name, master.info.familyName, master.info.styleName))
                 contour = glyph[contourIndex]
                 pen = CompatibleContourPointPen(pointTypes)
@@ -411,7 +441,6 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             for sourceDescriptor in self.sources:
                 master = self.fonts[sourceDescriptor.name]
                 if pair not in master.kerning:
-                    # pair not found
                     # build a repair mutator
                     kernItems = []
                     for kernSourceDescriptor in self.sources:
@@ -420,13 +449,21 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                             sourceLocation = self.locations[kernSourceDescriptor.name]
                             sourceValue = kernMaster.kerning[pair]
                             kernItems.append((sourceLocation, sourceValue))
+                    # get a repair mutotator
                     _, mutator = buildMutator(kernItems)
-                    result = mutator.makeInstance(self.locations[sourceDescriptor.name])
+                    # get the location
+                    location = self.locations[sourceDescriptor.name]
+                    # generate an instance kern value for the given pair
+                    result = mutator.makeInstance(location)
+                    # set the kern value for the given pair
                     master.kerning[pair] = result
+                    # check pairs on group kerning
                     first, second = pair
                     if first.startswith("@") and first not in master.groups:
+                        # add a group
                         master.groups[first] = allGroups[first]
                     if second.startswith("@") and second not in master.groups:
+                        # add a group
                         master.groups[second] = allGroups[second]
         self.generateReport.newLine()
 
@@ -435,7 +472,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         Generate a variation font.
         """
         dirname = os.path.dirname(outPutPath)
-
+        # fontCompiler settings
         options = dict(
             saveFDKPartsNextToUFO=True,
             shouldDecomposeWithCheckOutlines=False,
@@ -455,13 +492,16 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.generateReport.newLine()
         self.generateReport.writeTitle("Generate TTF", "'")
         self.generateReport.indent()
-
+        # map all master ufo paths to generated binaries
         masterBinaryPaths = VarLibMasterFinder()
         for master in self.fonts.values():
+            # get the output path
             outputPath = os.path.join(dirname, "temp_%s-%s.ttf" % (master.info.familyName, master.info.styleName))
             masterBinaryPaths[master.path] = outputPath
+            # set the output path
             options["outputPath"] = outputPath
             try:
+                # generate the font
                 result = generateFont(master, **options)
             except:
                 import traceback
@@ -473,10 +513,17 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             self.generateReport.write(result)
             self.generateReport.dedent()
         self.generateReport.dedent()
+        # optimize the design space for varlib
+        designSpacePath = self.optimizedDesignSpace()
         # let varLib build the variation font
         varFont, _, _ = varLib.build(self.path, masterBinaryPaths)
+        # save the variation font
         varFont.save(outPutPath)
-
+        # remove the temp design space file
+        if designSpacePath != self.path:
+            if os.path.exists(designSpacePath):
+                os.remove(designSpacePath)
+        # remove all temp binaries
         for tempPath in masterBinaryPaths.values():
             if os.path.exists(tempPath):
                 os.remove(tempPath)
