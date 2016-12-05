@@ -252,21 +252,6 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self._generateVariationFont(destPath)
         return report
 
-    def optimizedDesignSpace(self):
-        """
-        Optimize the desingSpace
-        * adding info attribute to sources if it is not set
-        """
-        if self.default is None:
-            self.loadFonts()
-        if not self.default.copyInfo:
-            self.default.copyInfo = True
-            # temp path must be in the same root            
-            tempPath = os.path.join(os.path.dirname(path), "temp_%s" % os.path.basename(path))
-            self.write(tempPath)
-            return tempPath
-        return self.path
-
     def loadLocations(self):
         """
         Store all locations similary as the `.fonts` dict.
@@ -516,27 +501,17 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             self.generateReport.dedent()
         self.generateReport.dedent()
         # optimize the design space for varlib
-        designSpacePath = self.optimizedDesignSpace()
+        designSpacePath = os.path.join(os.path.dirname(self.path), "temp_%s" % os.path.basename(self.path))
+        self.write(designSpacePath)
+        axisMap = {a.name: (a.tag,) for a in self.axes}
         # let varLib build the variation font
-        varFont, _, _ = varLib.build(designSpacePath, masterBinaryPaths)        
+        varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths, axisMap=axisMap)
         # save the variation font
         varFont.save(outPutPath)
         # remove the temp design space file
-        if designSpacePath != self.path:
-            if os.path.exists(designSpacePath):
-                os.remove(designSpacePath)
+        if os.path.exists(designSpacePath):
+            os.remove(designSpacePath)
         # remove all temp binaries
         for tempPath in masterBinaryPaths.values():
             if os.path.exists(tempPath):
                 os.remove(tempPath)
-
-
-if __name__ is "__main__":
-
-    path = u"/Users/frederik/Downloads/adobe-variable-font-prototype-master/RomanMasters/AdobeVFPrototype_rebuilt.designspace"
-    #path = u"/Users/frederik/Desktop/designSpaceToGVAR/testExt.designspace"
-    path = u"/Users/frederik/Desktop/designSpaceToGVAR/simple.designspace"
-    outputPath = u"/Users/frederik/Downloads/adobe-variable-font-prototype-master/test/test.ttf"
-    document = BatchDesignSpaceProcessor(path)
-    result = document.generateVariationFont(outputPath, autohint=False, releaseMode=False, report=None)
-    print result.get()
