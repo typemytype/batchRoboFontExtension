@@ -503,7 +503,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         # optimize the design space for varlib
         designSpacePath = os.path.join(os.path.dirname(self.path), "temp_%s" % os.path.basename(self.path))
         self.write(designSpacePath)
-        axisMap = {a.name: (a.tag,) for a in self.axes}
+        axisMap = {a.name: (a.tag, a.name) for a in self.axes}
         # let varLib build the variation font
         varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths, axisMap=axisMap)
         # save the variation font
