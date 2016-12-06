@@ -19,11 +19,11 @@
 	<key>requiresVersionMajor</key>
 	<string>1</string>
 	<key>requiresVersionMinor</key>
-	<string>7.3</string>
+	<string>8</string>
 	<key>timeStamp</key>
 	<real>1373965736.141633</real>
 	<key>version</key>
-	<string>1.8</string>
+	<string>1.9</string>
 	<key>com.robofontmechanic.Mechanic</key>
 	<dict>
 		<key>repository</key>
