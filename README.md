@@ -2,8 +2,7 @@
 
 An extension to batch generate fonts.
 
-Drag and drop or open a one or multiple UFO's. If a folder is provided Batch will search in that folder for UFO's. 
-Binary fonts are also supported (otf, ttf), they will be imported and generated.
+Drag and drop any ufo, binary font (otf, ttf), designSpace file or folder. If a folder is provided Batch will search for ufo's inside the given folder. A designSpace will be expanded with all his instances and all masters and generated instances will be generated. DesignSpace files are required to build variation font.
 
 
 #### Generate supports:
@@ -26,6 +25,7 @@ A suffix can be added to the file name. The suffix can contain [date time format
 
 #### Web font supports:
 
+* otf
 * ttf
 * woff (otf - ttf)
 * woff2 (otf - ttf)
@@ -45,6 +45,10 @@ A suffix can be added to the file name. The suffix can contain [date time format
 Batch will also generate a HTML preview that with some simple presents.
 
 The html preview can replace `%(familyName)s` and `%(styleName)s` by the values retrieved from the corresponding font.
+
+## Variable Fonts
+
+From a provided designSpace files Batch can generate variable fonts. 
 
 ## Binary Merge 
 
