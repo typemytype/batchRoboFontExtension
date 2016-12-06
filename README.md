@@ -50,6 +50,13 @@ The html preview can replace `%(familyName)s` and `%(styleName)s` by the values 
 
 From a provided designSpace files Batch can generate variable fonts. 
 
+Batch will optimize your designSpace file:
+
+* Adding off curves where needed, Batch will place them on 1/3 of the line segment.
+* Adding axes in the design space file, if they are missing
+* Adding missing glyphs by generating them fromout the design space
+
+
 ## Binary Merge 
 
 Will merge specific tables from a source. Only avaialbe when when a UFO is provided and when the UFO has the source path in the `font.lib`.
