@@ -17,6 +17,7 @@ from robofab.pens.adapterPens import TransformPointPen
 
 from lib.tools.compileTools import CurrentFDK
 from mojo.extensions import getExtensionDefault, setExtensionDefault
+from mojo.UI import getDefault
 
 from batchTools import settingsIdentifier, ufoVersion, Report
 
@@ -461,7 +462,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         dirname = os.path.dirname(outPutPath)
         # fontCompiler settings
         options = dict(
-            saveFDKPartsNextToUFO=True,
+            saveFDKPartsNextToUFO=getDefault("saveFDKPartsNextToUFO"),
             shouldDecomposeWithCheckOutlines=False,
             fontGenerateCheckComponentMatrix=True,
             defaultDrawingSegmentType="qcurve",
@@ -503,6 +504,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         # optimize the design space for varlib
         designSpacePath = os.path.join(os.path.dirname(self.path), "temp_%s" % os.path.basename(self.path))
         self.write(designSpacePath)
+        # build a axis map to support all non default axis
         axisMap = {a.name: (a.tag, a.name) for a in self.axes}
         # let varLib build the variation font
         varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths, axisMap=axisMap)
