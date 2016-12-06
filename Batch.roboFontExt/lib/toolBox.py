@@ -298,7 +298,11 @@ class ToolBox(BaseWindowController):
         self.paths.set(items)
 
     def toolbarOpen(self, sender):
-        self.showGetFile(self.supportedFontFileFormats + [""], self._toolbarOpen)
+        # remove the .
+        fileFormats = [ext[1:] for ext in self.supportedExtensions]
+        # add support for folders
+        fileFormats.append("")
+        self.showGetFile(fileFormats, self._toolbarOpen)
 
     def toolbarAddOpenFonts(self, sender):
         fonts = AllFonts()
