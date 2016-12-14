@@ -253,7 +253,7 @@ class ToolBox(BaseWindowController):
         # filter the existing paths out of the proposed paths
         paths = dropInfo["data"]
         paths = [path for path in paths if path not in existingPaths]
-        # only include UFOs
+        # only include supported formats and folders
         paths = [path for path in paths if os.path.splitext(path)[-1].lower() in self.supportedFontFileFormats or os.path.isdir(path)]
         # no paths, return False
         if not paths:
@@ -299,7 +299,7 @@ class ToolBox(BaseWindowController):
 
     def toolbarOpen(self, sender):
         # remove the .
-        fileFormats = [ext[1:] for ext in self.supportedExtensions]
+        fileFormats = [ext[1:] for ext in self.supportedFontFileFormats]
         # add support for folders
         fileFormats.append("")
         self.showGetFile(fileFormats, self._toolbarOpen)
