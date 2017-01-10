@@ -293,7 +293,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                         glyphItems.append((sourceGlyphLocation, sourceGlyph))
                 _, mutator = buildMutator(glyphItems)
                 # use the repair mutator to generate an instance at the default location
-                result = mutator.makeInstance(self.defaultLoc)
+                result = mutator.makeInstance(Location(self.defaultLoc))
                 # round if necessary
                 if self.roundGeometry:
                     result.round()
@@ -318,7 +318,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     # get the location
                     location = self.locations[sourceDescriptor.name]
                     # generate an instance
-                    result = mutator.makeInstance(location)
+                    result = mutator.makeInstance(Location(location))
                     # round if necessary
                     if self.roundGeometry:
                         result.round()
@@ -442,7 +442,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     # get the location
                     location = self.locations[sourceDescriptor.name]
                     # generate an instance kern value for the given pair
-                    result = mutator.makeInstance(location)
+                    result = mutator.makeInstance(Location(location))
                     # set the kern value for the given pair
                     master.kerning[pair] = result
                     # check pairs on group kerning
