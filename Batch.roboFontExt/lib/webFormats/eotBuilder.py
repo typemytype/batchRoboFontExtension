@@ -3,7 +3,6 @@ import tempfile
 
 from fontTools.ttLib import TTFont
 
-from mojo.compile import executeCommand
 
 ttf2eot = os.path.join(os.path.dirname(__file__), "ttf2eot")
 os.chmod(ttf2eot, 0777)
@@ -11,7 +10,8 @@ os.chmod(ttf2eot, 0777)
 
 def generateEOT(source, dest):
     # ttf2eot has this weird 'ttf2eot < source.ttf > out.eot' commandline input..
-    os.system("%s < %s > %s" % (ttf2eot, source, dest))
+    cmd = "'%s' < '%s' > '%s'" % (ttf2eot, source, dest)
+    os.system(cmd)
 
 
 def _winStr(content):
@@ -68,6 +68,6 @@ def _optimizeForEOT(sourcePath, destPath):
 def EOTBuilder(sourcePath, destinationPath):
     tempTTF = tempfile.mkstemp(suffix=".ttf")[1]
     _optimizeForEOT(sourcePath, tempTTF)
-    generateEOT(tempTTF, destinationPath)        
+    generateEOT(tempTTF, destinationPath)
     if os.path.exists(tempTTF):
         os.remove(tempTTF)
