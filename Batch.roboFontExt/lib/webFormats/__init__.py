@@ -70,7 +70,7 @@ def convertToTTF(otfPath, dest, report):
         if attr not in defaultFontInfoAttributes:
             setattr(font.info, attr, None)
 
-    result = font.generate(temp, "ttf", decompose=False, checkOutlines=False, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
+    result = font.generate(path=temp, format="ttf", decompose=False, checkOutlines=False, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
     font.close()
     report.write(result)
 
@@ -105,7 +105,7 @@ def convertToOTF(ttfPath, dest, report):
         if attr not in defaultFontInfoAttributes:
             setattr(font.info, attr, None)
 
-    result = font.generate(temp, "otf", decompose=False, checkOutlines=False, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
+    result = font.generate(path=temp, format="otf", decompose=False, checkOutlines=False, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
     font.close()
     report.write(result)
 
@@ -129,7 +129,7 @@ def generateTTF(ufoPath, dest, report):
     font = OpenFont(ufoPath, showUI=False)
     font.lib[shouldAddPointsInSplineConversionLibKey] = 1
 
-    result = font.generate(tempDest, "ttf", decompose=False, checkOutlines=True, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
+    result = font.generate(path=tempDest, format="ttf", decompose=False, checkOutlines=True, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
     font.close()
     report.write(result)
 
@@ -143,7 +143,7 @@ def generateTTF(ufoPath, dest, report):
 def generateOTF(ufoPath, dest, report):
     font = OpenFont(ufoPath, showUI=False)
 
-    result = font.generate(dest, "otf", decompose=False, checkOutlines=True, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
+    result = font.generate(path=dest, format="otf", decompose=False, checkOutlines=True, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
     font.close()
     report.write(result)
 
