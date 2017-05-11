@@ -128,6 +128,6 @@ class BinaryMerger(Group):
         self.controller.runTask(self.run, destDir=destDir)
 
     def generateCallback(self, sender):
-        if not self.controller.hasSourceFonts("No Fonts to Merge.", "Add Open, drop or add Open Fonts fonts to batch them.", ext=["ufo"]):
+        if not self.controller.hasSourceFonts("No Fonts to Merge.", "Add Open, drop or add Open Fonts fonts to batch them.", supportedExtensions=["ufo"]):
             return
         self.controller.showGetFolder(self._generate)
