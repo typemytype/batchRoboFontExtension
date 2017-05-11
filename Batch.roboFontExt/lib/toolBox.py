@@ -101,7 +101,7 @@ class ToolBox(BaseWindowController):
 
     pathItemClass = BatchPathWrapper
 
-    supportedFontFileFormats = [".%s" % ext.lower() for ext in doodleSupportedExportFileTypes + ["woff", "pfb", "ttx", "designspace"]]
+    supportedFontFileFormats = [".%s" % ext.lower() for ext in doodleSupportedExportFileTypes + ["ufo", "woff", "pfb", "ttx", "designspace"]]
 
     def __init__(self):
         h = 530
@@ -302,7 +302,7 @@ class ToolBox(BaseWindowController):
         fileFormats = [ext[1:] for ext in self.supportedFontFileFormats]
         # add support for folders
         fileFormats.append("")
-        self.showGetFile(fileFormats, self._toolbarOpen)
+        self.showGetFile(fileFormats, self._toolbarOpen, allowsMultipleSelection=True)
 
     def toolbarAddOpenFonts(self, sender):
         fonts = AllFonts()
