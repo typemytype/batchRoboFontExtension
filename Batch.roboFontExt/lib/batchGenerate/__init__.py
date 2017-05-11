@@ -136,7 +136,7 @@ class BatchGenerate(Group):
                 buildTree(fontDir)
                 path = os.path.join(fontDir, fileName)
                 report.write("path: %s" % path)
-                result = font.generate(path, format,
+                result = font.generate(path=path, format=format,
                               decompose=decompose,
                               checkOutlines=removeOverlap,
                               autohint=autohint,
