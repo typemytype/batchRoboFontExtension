@@ -2,7 +2,10 @@ import os
 
 from vanilla import *
 
-from designSpaceDocument.ufo import DesignSpaceProcessor
+try:
+    from designSpaceDocument.ufo import DesignSpaceProcessor
+except:
+    from designSpaceDocument.ufoProcessor import DesignSpaceProcessor
 
 import fontCompiler.objects as compilerObjects
 from fontCompiler.compiler import generateFont
