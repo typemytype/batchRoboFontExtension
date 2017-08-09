@@ -1,7 +1,12 @@
 from AppKit import *
 
-from lib.baseObjects import CallbackWrapper
-
+try:
+    # RF 2.0
+    from mojo.tools import CallbackWrapper
+except:
+    # RF 1.8
+    from lib.baseObjects import CallbackWrapper
+    
 import toolBox
 
 
