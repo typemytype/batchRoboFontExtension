@@ -467,7 +467,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         options = dict(
             saveFDKPartsNextToUFO=getDefault("saveFDKPartsNextToUFO"),
             shouldDecomposeWithCheckOutlines=False,
-            fontGenerateCheckComponentMatrix=True,
+            generateCheckComponentMatrix=True,
             defaultDrawingSegmentType="qcurve",
             format="ttf",
             decompose=False,
