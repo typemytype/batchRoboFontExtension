@@ -1,10 +1,14 @@
 import AppKit
 import os
 
+from mojo.roboFont import version
 
 settingsIdentifier = "com.typemytype.toolbox"
 
-ufoVersion = 2
+if version < 2:
+    ufoVersion = 2
+else:
+    ufoVersion = 3
 
 
 class Report(object):
