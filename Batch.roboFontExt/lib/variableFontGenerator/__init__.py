@@ -442,7 +442,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         for sourceDescriptor in self.sources:
             master = self.fonts[sourceDescriptor.name]
             location = self.locations[sourceDescriptor.name]
-            kerningItems.append((location, self.mathKerningClass(master.kerning)))
+            kerningItems.append((location, self.mathKerningClass(master.kerning, master.groups)))
         _, kerningMutator = buildMutator(kerningItems)
         kerningCache = dict()
         # loop over all pairs
