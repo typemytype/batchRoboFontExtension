@@ -231,8 +231,8 @@ class ToolBox(BaseWindowController):
                 if not hasattr(item, "designSpaceDocument"):
                     item.designSpaceDocument = BatchDesignSpaceProcessor(path, ufoVersion)
                 item.designSpaceDocument.generateUFO()
-                paths.extend([f.path for f in item.designSpaceDocument.masterUFOPaths()])
-                paths.extend([f.path for f in item.designSpaceDocument.instancesUFOPaths()])
+                paths.extend([path for path in item.designSpaceDocument.masterUFOPaths()])
+                paths.extend([path for path in item.designSpaceDocument.instancesUFOPaths()])
             else:
                 paths.append(path)
         if supportedExtensions is not None:
