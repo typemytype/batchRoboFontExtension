@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from vanilla import *
 
@@ -260,11 +261,23 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.loadFonts()
         self.loadLocations()
 
+        self._generatedFiles = set()
+
         self.makeMasterGlyphsCompatible()
         self.decomposedMixedGlyphs()
         self.makeMasterGlyphsQuadractic()
         self.makeMasterKerningCompatible()
-        self._generateVariationFont(destPath)
+        self.makeMasterOnDefaultLocation()
+        try:
+            self._generateVariationFont(destPath)
+        finally:
+            # remove generated files
+            for path in self._generatedFiles:
+                if os.path.exists(path):
+                    if os.path.isdir(path):
+                        shutil.rmtree(path)
+                    else:
+                        os.remove(path)
         return report
 
     def loadLocations(self):
@@ -277,12 +290,36 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             location = Location(sourceDescriptor.location)
             self.locations[sourceDescriptor.name] = location
 
+    def makeMasterOnDefaultLocation(self):
+        # create default location
+        # which is on the crossing of all axis
+        defaultLocation = Location()
+        for axis in self.axes:
+            defaultLocation[axis.name] = axis.default
+        # compare default location with locations all of sources
+        for sourceDescriptor in self.sources:
+            if defaultLocation == sourceDescriptor.location:
+                # found the default location
+                # do nothing
+                return
+        self.generateReport.writeTitle("Setting a master on the default", "'")
+        self.generateReport.indent()
+        # there is no master at the default location
+        # change the defaults of each axis so it fits with a given master
+        neutralLocation = self.locations[self.default.name]
+        for axis in self.axes:
+            axis.default = neutralLocation[axis.name]
+        self.generateReport.writeDict(neutralLocation)
+        self.generateReport.dedent()
+        self.generateReport.newLine()
+
     def makeMasterGlyphsCompatible(self):
         """
         Update all masters with missing glyphs.
         All Masters must have the same glyphs.
         """
         self.generateReport.writeTitle("Making master glyphs compatible", "'")
+        self.generateReport.indent()
         # collect all possible glyph names
         glyphNames = []
         for master in self.fonts.values():
@@ -345,6 +382,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     glyphs.append(glyph)
             # optimize glyph contour data from all masters
             self.makeGlyphOutlinesCompatible(glyphs)
+        self.generateReport.dedent()
         self.generateReport.newLine()
 
     def makeGlyphOutlinesCompatible(self, glyphs):
@@ -388,6 +426,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         Decompose all glyphs which have both contour point data as components.
         """
         self.generateReport.writeTitle("Decompose Mixed Glyphs", "'")
+        self.generateReport.indent()
         masters = self.fonts.values()
         for master in masters:
             for glyph in master:
@@ -408,6 +447,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     # remove all components
                     glyph.clearComponents()
                     self.generateReport.write("Decomposing glyph '%s' in master '%s %s'" % (glyph.name, master.info.familyName, master.info.styleName))
+        self.generateReport.dedent()
         self.generateReport.newLine()
 
     def makeMasterGlyphsQuadractic(self):
@@ -428,6 +468,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         and generate the kerning value within the design space.
         """
         self.generateReport.writeTitle("Making master kerning compatible", "'")
+        self.generateReport.indent()
         # collect all kerning pairs
         allPairs = list()
         # collect all groups and all pairs
@@ -440,6 +481,9 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         # build a kerning mutator
         kerningItems = []
         for sourceDescriptor in self.sources:
+            # ignore muted kerning sources
+            if sourceDescriptor.muteKerning:
+                continue
             master = self.fonts[sourceDescriptor.name]
             location = self.locations[sourceDescriptor.name]
             kerningItems.append((location, self.mathKerningClass(master.kerning, master.groups)))
@@ -473,7 +517,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     self.generateReport.write("Adding missing kerning pairs in %s %s: %s" % (master.info.familyName, master.info.styleName, ", ".join(["(%s, %s)" % (s1, s2) for s1, s2 in missingPairs])))
                 if missingGroups:
                     self.generateReport.write("Adding missing kerning groups in %s %s: %s" % (master.info.familyName, master.info.styleName, ", ".join(["(%s, %s)" % (s1, s2) for s1, s2 in missingGroups])))
-
+        self.generateReport.dedent()
         self.generateReport.newLine()
 
     def _generateVariationFont(self, outPutPath):
@@ -506,12 +550,13 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             # get the output path
             outputPath = os.path.join(dirname, "temp_%s-%s.ttf" % (master.info.familyName, master.info.styleName))
             masterBinaryPaths[master.path] = outputPath
+            self._generatedFiles.add(outputPath)
             # set the output path
             options.outputPath = outputPath
             try:
                 # generate the font
                 result = generateFont(master, options=options)
-            except:
+            except Exception:
                 import traceback
                 result = traceback.format_exc()
                 print result
@@ -524,14 +569,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         # optimize the design space for varlib
         designSpacePath = os.path.join(os.path.dirname(self.path), "temp_%s" % os.path.basename(self.path))
         self.write(designSpacePath)
+        self._generatedFiles.add(designSpacePath)
         # let varLib build the variation font
         varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths)
         # save the variation font
         varFont.save(outPutPath)
-        # remove the temp design space file
-        if os.path.exists(designSpacePath):
-            os.remove(designSpacePath)
-        # remove all temp binaries
-        for tempPath in masterBinaryPaths.values():
-            if os.path.exists(tempPath):
-                os.remove(tempPath)
