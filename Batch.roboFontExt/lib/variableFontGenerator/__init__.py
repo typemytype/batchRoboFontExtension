@@ -8,7 +8,7 @@ except:
     from designSpaceDocument.ufoProcessor import DesignSpaceProcessor
 
 import fontCompiler.objects as compilerObjects
-from fontCompiler.compiler import generateFont
+from fontCompiler.compiler import generateFont, FontCompilerOptions
 
 from fontTools import varLib
 from cu2qu.ufo import fonts_to_quadratic
@@ -16,7 +16,16 @@ from cu2qu.ufo import fonts_to_quadratic
 from mutatorMath.objects.location import Location
 from mutatorMath.objects.mutator import buildMutator
 
-from robofab.pens.adapterPens import TransformPointPen
+try:
+    from fontPens.transformPointPen import TransformPointPen
+except:
+    from robofab.pens.adapterPens import TransformPointPen
+
+try:
+    from ufo2fdk.kernFeatureWriter import side1Prefix, side2Prefix
+except:
+    side1Prefix = side2Prefix = "@"
+
 
 from lib.tools.compileTools import CurrentFDK
 from mojo.extensions import getExtensionDefault, setExtensionDefault
@@ -116,6 +125,8 @@ class CompatibleContourPointPen(object):
         # lets start
         newContour = []
         for i, ((x, y), segmentType, args, kwargs) in enumerate(self.contour):
+            if not self.types:
+                continue
             # if there is segmentType
             if segmentType is not None:
                 # check with the given list of segmentTypes
@@ -419,43 +430,50 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.generateReport.writeTitle("Making master kerning compatible", "'")
         # collect all kerning pairs
         allPairs = list()
-        # collect all groups
+        # collect all groups and all pairs
         allGroups = dict()
         masters = self.fonts.values()
         for master in masters:
             allPairs.extend(master.kerning.keys())
             allGroups.update(master.groups)
         allPairs = set(allPairs)
+        # build a kerning mutator
+        kerningItems = []
+        for sourceDescriptor in self.sources:
+            master = self.fonts[sourceDescriptor.name]
+            location = self.locations[sourceDescriptor.name]
+            kerningItems.append((location, self.mathKerningClass(master.kerning)))
+        _, kerningMutator = buildMutator(kerningItems)
+        kerningCache = dict()
         # loop over all pairs
         for pair in allPairs:
             # loop over all masters
             for sourceDescriptor in self.sources:
                 master = self.fonts[sourceDescriptor.name]
+                missingPairs = []
+                missingGroups = []
                 if pair not in master.kerning:
-                    # build a repair mutator
-                    kernItems = []
-                    for kernSourceDescriptor in self.sources:
-                        kernMaster = self.fonts[kernSourceDescriptor.name]
-                        if pair in kernMaster.kerning:
-                            sourceLocation = self.locations[kernSourceDescriptor.name]
-                            sourceValue = kernMaster.kerning[pair]
-                            kernItems.append((sourceLocation, sourceValue))
-                    # get a repair mutotator
-                    _, mutator = buildMutator(kernItems)
-                    # get the location
-                    location = self.locations[sourceDescriptor.name]
-                    # generate an instance kern value for the given pair
-                    result = mutator.makeInstance(Location(location))
-                    # set the kern value for the given pair
-                    master.kerning[pair] = result
+                    missingPairs.append(pair)
+                    kerningInstance = kerningCache.get(sourceDescriptor.name)
+                    if kerningInstance is None:
+                        location = self.locations[sourceDescriptor.name]
+                        kerningInstance = kerningMutator.makeInstance(Location(location))
+                    master.kerning[pair] = kerningInstance[pair]
                     # check pairs on group kerning
-                    first, second = pair
-                    if first.startswith("@") and first not in master.groups:
+                    side1, side2 = pair
+                    if side1.startswith(side1Prefix) and side1 not in master.groups:
                         # add a group
-                        master.groups[first] = allGroups[first]
-                    if second.startswith("@") and second not in master.groups:
+                        master.groups[side1] = allGroups[side1]
+                        missingGroups.append(side1)
+                    if side2.startswith(side2Prefix) and side2 not in master.groups:
                         # add a group
-                        master.groups[second] = allGroups[second]
+                        master.groups[side2] = allGroups[side2]
+                        missingGroups.append(side2)
+                if missingPairs:
+                    self.generateReport.write("Adding missing kerning pairs in %s %s: %s" % (master.info.familyName, master.info.styleName, ", ".join(["(%s, %s)" % (s1, s2) for s1, s2 in missingPairs])))
+                if missingGroups:
+                    self.generateReport.write("Adding missing kerning groups in %s %s: %s" % (master.info.familyName, master.info.styleName, ", ".join(["(%s, %s)" % (s1, s2) for s1, s2 in missingGroups])))
+
         self.generateReport.newLine()
 
     def _generateVariationFont(self, outPutPath):
@@ -464,21 +482,20 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         """
         dirname = os.path.dirname(outPutPath)
         # fontCompiler settings
-        options = dict(
-            saveFDKPartsNextToUFO=getDefault("saveFDKPartsNextToUFO"),
-            shouldDecomposeWithCheckOutlines=False,
-            generateCheckComponentMatrix=True,
-            defaultDrawingSegmentType="qcurve",
-            format="ttf",
-            decompose=False,
-            checkOutlines=False,
-            autohint=self.compileSettingAutohint,
-            releaseMode=self.compileSettingReleaseMode,
-            glyphOrder=self.compileGlyphOrder,
-            useMacRoman=False,
-            fdk=CurrentFDK(),
-            generateFeaturesWithFontTools=False,
-        )
+        options = FontCompilerOptions()
+        options.saveFDKPartsNextToUFO = getDefault("saveFDKPartsNextToUFO")
+        options.shouldDecomposeWithCheckOutlines = False
+        options.generateCheckComponentMatrix = True
+        options.defaultDrawingSegmentType = "qcurve"
+        options.format = "ttf"
+        options.decompose = False
+        options.checkOutlines = False
+        options.autohint = self.compileSettingAutohint
+        options.releaseMode = self.compileSettingReleaseMode
+        options.glyphOrder = self.compileGlyphOrder
+        options.useMacRoman = False
+        options.fdk = CurrentFDK()
+        options.generateFeaturesWithFontTools = False
 
         self.generateReport.newLine()
         self.generateReport.writeTitle("Generate TTF", "'")
@@ -490,10 +507,10 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             outputPath = os.path.join(dirname, "temp_%s-%s.ttf" % (master.info.familyName, master.info.styleName))
             masterBinaryPaths[master.path] = outputPath
             # set the output path
-            options["outputPath"] = outputPath
+            options.outputPath = outputPath
             try:
                 # generate the font
-                result = generateFont(master, **options)
+                result = generateFont(master, options=options)
             except:
                 import traceback
                 result = traceback.format_exc()
