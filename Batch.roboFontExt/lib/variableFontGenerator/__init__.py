@@ -271,8 +271,12 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.makeMasterOnDefaultLocation()
         try:
             self._generateVariationFont(destPath)
+        except Exception:
+            import traceback
+            result = traceback.format_exc()
+            print result
         finally:
-            if getDefault("Batch.Debug", False):
+            if not getDefault("Batch.Debug", False):
                 # remove generated files
                 for path in self._generatedFiles:
                     if os.path.exists(path):
@@ -572,7 +576,13 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         designSpacePath = os.path.join(os.path.dirname(self.path), "temp_%s" % os.path.basename(self.path))
         self.write(designSpacePath)
         self._generatedFiles.add(designSpacePath)
-        # let varLib build the variation font
-        varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths)
-        # save the variation font
-        varFont.save(outPutPath)
+        try:
+            # let varLib build the variation font
+            varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths)
+            # save the variation font
+            varFont.save(outPutPath)
+        except Exception:
+            import traceback
+            result = traceback.format_exc()
+            print result
+
