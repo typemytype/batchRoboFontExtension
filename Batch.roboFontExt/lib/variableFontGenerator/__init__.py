@@ -37,7 +37,7 @@ from batchTools import settingsIdentifier, ufoVersion, Report
 
 class BatchVariableFontGenerate(Group):
 
-    generateSettings = ["Autohint", "Release Mode"]
+    generateSettings = ["Autohint", "Interpolate to fit axes extremes", "Release Mode"]
 
     def __init__(self, posSize, controller):
         super(BatchVariableFontGenerate, self).__init__(posSize)
@@ -67,6 +67,7 @@ class BatchVariableFontGenerate(Group):
 
         autohint = self.autohint.get()
         releaseMode = self.release_mode.get()
+        fitToExtremes = self.interpolate_to_fit_axes_extremes.get()
 
         if report is None:
             report = Report()
@@ -84,7 +85,7 @@ class BatchVariableFontGenerate(Group):
             progress.update("Generating design space ... %s" % fileName)
 
             desingSpace = BatchDesignSpaceProcessor(path, ufoVersion)
-            desingSpace.generateVariationFont(outputPath, autohint=autohint, releaseMode=releaseMode, report=report)
+            desingSpace.generateVariationFont(outputPath, autohint=autohint, releaseMode=releaseMode, fitToExtremes=fitToExtremes, report=report)
             report.dedent()
 
         reportPath = os.path.join(destDir, "Batch Generated Variable Fonts Report.txt")
@@ -247,7 +248,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         """
         return [instanceDescriptor.path for instanceDescriptor in self.instances if instanceDescriptor.path is not None]
 
-    def generateVariationFont(self, destPath, autohint=False, releaseMode=True, glyphOrder=None, report=None):
+    def generateVariationFont(self, destPath, autohint=False, fitToExtremes=False, releaseMode=True, glyphOrder=None, report=None):
         """
         Generate a variation font based on a desingSpace.
         """
@@ -271,13 +272,14 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         try:
             self._generateVariationFont(destPath)
         finally:
-            # remove generated files
-            for path in self._generatedFiles:
-                if os.path.exists(path):
-                    if os.path.isdir(path):
-                        shutil.rmtree(path)
-                    else:
-                        os.remove(path)
+            if getDefault("Batch.Debug", False):
+                # remove generated files
+                for path in self._generatedFiles:
+                    if os.path.exists(path):
+                        if os.path.isdir(path):
+                            shutil.rmtree(path)
+                        else:
+                            os.remove(path)
         return report
 
     def loadLocations(self):
