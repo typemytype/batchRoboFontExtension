@@ -516,7 +516,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 if missingPairs:
                     self.generateReport.write("Adding missing kerning pairs in %s %s: %s" % (master.info.familyName, master.info.styleName, ", ".join(["(%s, %s)" % (s1, s2) for s1, s2 in missingPairs])))
                 if missingGroups:
-                    self.generateReport.write("Adding missing kerning groups in %s %s: %s" % (master.info.familyName, master.info.styleName, ", ".join(["(%s, %s)" % (s1, s2) for s1, s2 in missingGroups])))
+                    self.generateReport.write("Adding missing kerning groups in %s %s: %s" % (master.info.familyName, master.info.styleName, ", ".join(missingGroups)))
         self.generateReport.dedent()
         self.generateReport.newLine()
 
