@@ -127,31 +127,30 @@ class CompatibleContourPointPen(object):
         # lets start
         newContour = []
         for i, ((x, y), segmentType, args, kwargs) in enumerate(self.contour):
-            if not self.types:
-                continue
-            # if there is segmentType
-            if segmentType is not None:
-                # check with the given list of segmentTypes
-                if segmentType != self.types[0]:
-                    # its different
-                    # get the previous point
-                    (px, py), _, _, _ = self.contour[i - 1]
-                    # calculate offcurve points
-                    # on 1/3 of the line segment length
-                    dx = x - px
-                    dy = y - py
+            if self.types:
+                # if there is segmentType
+                if segmentType is not None:
+                    # check with the given list of segmentTypes
+                    if segmentType != self.types[0]:
+                        # its different
+                        # get the previous point
+                        (px, py), _, _, _ = self.contour[i - 1]
+                        # calculate offcurve points
+                        # on 1/3 of the line segment length
+                        dx = x - px
+                        dy = y - py
 
-                    nx1 = px + dx * 0.333
-                    ny1 = py + dy * 0.333
+                        nx1 = px + dx * 0.333
+                        ny1 = py + dy * 0.333
 
-                    nx2 = px + dx * 0.666
-                    ny2 = py + dy * 0.666
-                    # add it to the new contour
-                    newContour.append(((nx1, ny1), None, [], {}))
-                    newContour.append(((nx2, ny2), None, [], {}))
-                    segmentType = self.types[0]
-                # remove the first given segmentType
-                self.types.pop(0)
+                        nx2 = px + dx * 0.666
+                        ny2 = py + dy * 0.666
+                        # add it to the new contour
+                        newContour.append(((nx1, ny1), None, [], {}))
+                        newContour.append(((nx2, ny2), None, [], {}))
+                        segmentType = self.types[0]
+                    # remove the first given segmentType
+                    self.types.pop(0)
             # add the point
             newContour.append(((x, y), segmentType, args, kwargs))
         # set the contour
