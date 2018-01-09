@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from AppKit import *
 import os
 
@@ -221,9 +223,9 @@ class ToolBox(BaseWindowController):
                     paths.append(path)
                 else:
                     message = "%s has no family name or style name" % path
-                    print "*" * len(message)
-                    print message
-                    print "*" * len(message)
+                    print("*" * len(message))
+                    print(message)
+                    print("*" * len(message))
             elif os.path.isdir(path):
                 for ext in self.supportedFontFileFormats:
                     paths.extend(walkDirectoryForFile(path, ext=ext))

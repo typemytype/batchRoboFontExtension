@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import AppKit
 import os
 
@@ -117,5 +119,5 @@ class TaskRunner(AppKit.NSObject):
                 traceback.format_exc(),
                 "*" * 30
             ]
-            print "\n".join(errorMessage)
+            print("\n".join(errorMessage))
         self._progress.close()

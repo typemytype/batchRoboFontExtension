@@ -5,7 +5,7 @@ from fontTools.ttLib import TTFont
 
 
 ttf2eot = os.path.join(os.path.dirname(__file__), "ttf2eot")
-os.chmod(ttf2eot, 0777)
+os.chmod(ttf2eot, 0o0777)
 
 
 def generateEOT(source, dest):

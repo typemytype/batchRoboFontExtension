@@ -273,7 +273,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         except Exception:
             import traceback
             result = traceback.format_exc()
-            print result
+            print(result)
         finally:
             if not getDefault("Batch.Debug", False):
                 # remove generated files
@@ -564,7 +564,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             except Exception:
                 import traceback
                 result = traceback.format_exc()
-                print result
+                print(result)
             self.generateReport.newLine()
             self.generateReport.write("Generate %s %s" % (master.info.familyName, master.info.styleName))
             self.generateReport.indent()
@@ -583,5 +583,5 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         except Exception:
             import traceback
             result = traceback.format_exc()
-            print result
+            print(result)
 

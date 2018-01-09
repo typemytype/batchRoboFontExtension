@@ -4,7 +4,7 @@ import shutil
 from mojo.compile import executeCommand
 
 woff2_compress = os.path.join(os.path.dirname(__file__), "woff2_compress")
-os.chmod(woff2_compress, 0777)
+os.chmod(woff2_compress, 0o0777)
 
 
 def generateWOFF2(source, dest):
