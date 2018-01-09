@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from AppKit import *
 
 try:
@@ -6,7 +8,7 @@ try:
 except:
     # RF 1.8
     from lib.baseObjects import CallbackWrapper
-    
+
 import toolBox
 
 

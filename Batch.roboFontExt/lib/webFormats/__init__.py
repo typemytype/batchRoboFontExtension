@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import os
 import tempfile
 import shutil
@@ -23,12 +25,12 @@ from mojo.roboFont import OpenFont
 from mojo.extensions import getExtensionDefault, setExtensionDefault
 from mojo.compile import autohint as OTFAutohint
 
-from woffBuilder import WOFFBuilder
-from woff2Builder import WOFF2Builder
-from eotBuilder import EOTBuilder
-from svgBuilder import SVGBuilder
-from autohint import TTFAutohint, defaultOptions, TTFAutoHintGroup
-from htmlWriter import HTMLWriter, CSSWriter
+from .woffBuilder import WOFFBuilder
+from .woff2Builder import WOFF2Builder
+from .eotBuilder import EOTBuilder
+from .svgBuilder import SVGBuilder
+from .autohint import TTFAutohint, defaultOptions, TTFAutoHintGroup
+from .htmlWriter import HTMLWriter, CSSWriter
 
 from batchTools import Report, settingsIdentifier, buildTree
 

@@ -7,7 +7,7 @@ from mojo.roboFont import version
 
 settingsIdentifier = "com.typemytype.toolbox"
 
-if version < 2:
+if version < "2":
     ufoVersion = 2
 else:
     ufoVersion = 3
