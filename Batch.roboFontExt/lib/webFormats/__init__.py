@@ -223,7 +223,7 @@ class TTHAutoHintSettings(BaseWindowController):
     def closeCallback(self, sender):
         self.w.close()
 
-_percentageRe = re.compile("%(?!\((familyName|styleName)\)s)")
+_percentageRe = re.compile(r"%(?!\((familyName|styleName)\)s)")
 
 
 class BatchRadioGroup(RadioGroup):
