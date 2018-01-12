@@ -73,9 +73,8 @@ class Report(object):
             self.write(str(i))
 
     def save(self, path):
-        f = file(path, "w")
-        f.write(self.get())
-        f.close()
+        with open(path, "w") as f:
+            f.write(self.get())
 
     def get(self):
         return "\n".join(self._data)
