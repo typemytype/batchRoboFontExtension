@@ -1,4 +1,5 @@
 from __future__ import print_function
+from fontTools.misc.py23 import PY2
 
 import AppKit
 import os
@@ -23,7 +24,8 @@ class Report(object):
 
     def append(self, value):
         try:
-            value = value.encode("utf-8")
+            if PY2:
+                value = value.encode("utf-8")
         except:
             pass
         self._data.append(value)

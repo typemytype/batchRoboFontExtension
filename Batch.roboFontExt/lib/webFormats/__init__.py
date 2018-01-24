@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from fontTools.misc.py23 import unichr
 
 import os
 import tempfile
@@ -35,7 +36,6 @@ from .htmlWriter import HTMLWriter, CSSWriter
 from batchTools import Report, settingsIdentifier, buildTree
 
 hasUfo2svg = True
-
 try:
     import ufo2svg
 except:
@@ -519,7 +519,7 @@ class WebFormats(Group):
         html = getExtensionDefault("%s.htmlPreview" % settingsIdentifier, htmlPreviewDefault)
         html = _percentageRe.sub("&#37;", html)
         html = html % dict(familyName=familyName, styleName=styleName)
-        htmlWriter.write(html.encode("ascii", 'xmlcharrefreplace'))
+        htmlWriter.write(html.encode("ascii", 'xmlcharrefreplace').decode("utf-8"))
         htmlWriter.write("</div>")
 
     def run(self, destDir, progress):

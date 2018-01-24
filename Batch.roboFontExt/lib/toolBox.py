@@ -1,4 +1,5 @@
 from __future__ import print_function, absolute_import
+from fontTools.misc.py23 import unichr
 
 from AppKit import *
 import os

@@ -1,3 +1,6 @@
+from fontTools.misc.py23 import *
+from fontTools.misc.py23 import PY2
+
 import os
 import tempfile
 
@@ -17,7 +20,8 @@ def generateEOT(source, dest):
 def _winStr(content):
     s = content.replace('\x00', "")
     s = "".join(s)
-    s = str(unicode(s, "utf8"))
+    if PY2:
+        s = str(unicode(s, "utf8"))
     s = s.strip()
     return s.encode("utf_16_be")
 
@@ -26,7 +30,9 @@ def _macStr(content):
     s = content.replace('\x00', "")
     s = "".join(s)
     s = s.strip()
-    return unicode(s, "utf8").encode("latin1")
+    if PY2:
+        s = unicode(s, "utf8").encode("latin-1")
+    return s
 
 
 def _optimizeForEOT(sourcePath, destPath):
