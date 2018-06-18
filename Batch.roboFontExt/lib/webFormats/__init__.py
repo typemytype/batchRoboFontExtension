@@ -188,11 +188,11 @@ class TTHAutoHintSettings(BaseWindowController):
         y = 10
         self.w.tabs[1].htmlText = TextBox((10, y, 100, 22), "HTML preview:")
         y += 30
-        self.w.tabs[1].html = self.html = CodeEditor((10, y, -10, 250), getExtensionDefault("%s.htmlPreview" % settingsIdentifier, htmlPreviewDefault), lexer="html", showlineNumbers=False)
+        self.w.tabs[1].html = self.html = CodeEditor((10, y, -10, 250), getExtensionDefault("%s.htmlPreview" % settingsIdentifier, htmlPreviewDefault), lexer="html", showLineNumbers=False)
         y += 260
         self.w.tabs[1].globalCssText = TextBox((10, y, 100, 22), "CSS Style:")
         y += 30
-        self.w.tabs[1].globalCss = self.globalCss = CodeEditor((10, y, -10, -10), getExtensionDefault("%s.globalCSSPreview" % settingsIdentifier, ""), lexer="css", showlineNumbers=False)
+        self.w.tabs[1].globalCss = self.globalCss = CodeEditor((10, y, -10, -10), getExtensionDefault("%s.globalCSSPreview" % settingsIdentifier, ""), lexer="css", showLineNumbers=False)
 
         self.w.saveButton = Button((-100, -30, -10, 20), "Save settings", callback=self.saveCallback, sizeStyle="small")
         self.w.setDefaultButton(self.w.saveButton)
