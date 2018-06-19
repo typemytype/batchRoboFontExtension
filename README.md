@@ -67,7 +67,7 @@ The following webfont formats are supported:
   <dt>preserve hints</dt>
   <dd>Check this option to prevent autohinting of binary TTF fonts.</dd>
   <dt>suffix</dt>
-  <dd>Add a suffix to the output file names. The suffix can contain [date time formatting](https://docs.python.org/2/library/time.html#time.strftime).</dd>
+  <dd>Add a suffix to the output file names. The suffix can contain <a href='http://docs.python.org/2/library/time.html#time.strftime'>date time formatting</a>.</dd>
   <dt>ttfautohint</dt>
   <dd>Opens a sheet to choose ttfautohint settings.</dd>
   <dt>generate html</dt>
@@ -126,7 +126,7 @@ The following binary output formats are supported:
 
 <dl>
   <dt>suffix</dt>
-  <dd>Add a suffix to the output file names. The suffix can contain [date time formatting](https://docs.python.org/2/library/time.html#time.strftime).</dd>
+  <dd>Add a suffix to the output file names. The suffix can contain <a href='http://docs.python.org/2/library/time.html#time.strftime'>date time formatting</a>.</dd>
 </dl>
 
 
