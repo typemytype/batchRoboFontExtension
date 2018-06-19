@@ -31,14 +31,14 @@ The following types of input files are supported:
 
 ### Options
 
-add open fonts
-:	Use the toolbar button *Add Open Fonts* to include all open fonts to the list.
-
-UFOs folder
-:	If a folder is provided, Batch will search for all UFOs inside it.
-
-designSpace files
-:	If a designSpace file is provided, it will be expanded into all its masters and instances, and the instances can be generated.
+<dl>
+  <dt>add open fonts</dt>
+  <dd>Use the toolbar button *Add Open Fonts* to add all open fonts to the list.</dd>
+  <dt>UFOs folder</dt>
+  <dd>If a folder is provided, Batch will search for all UFOs inside it.</dd>
+  <dt>designSpace files</dt>
+  <dd>If a designSpace file is provided, it will be expanded into all its masters and instances, and the instances can be generated.</dd>
+</dl>
 
 
 Web fonts
@@ -59,24 +59,20 @@ The following webfont formats are supported:
 
 ### Options
 
-woff
-:	Creates WOFF metadata based on the info in the font, if available.
-
-woff2
-:	Does not create any metadata – the fonts are simply compressed.
-
-preserve hints
-:	Check this option to prevent autohinting of binary TTF fonts.
-
-suffix
-:	Add a suffix to the output file names. The suffix can contain [date time formatting](https://docs.python.org/2/library/time.html#time.strftime).
-
-ttfautohint
-:	Opens a sheet to choose ttfautohint settings. 
-
-generate html
-:	Generates a HTML preview with some simple presets.
-
+<dl>
+  <dt>woff</dt>
+  <dd>Creates WOFF metadata based on the info in the font, if available.</dd>
+  <dt>woff2</dt>
+  <dd>Does not create any metadata – the fonts are simply compressed.</dd>
+  <dt>preserve hints</dt>
+  <dd>Check this option to prevent autohinting of binary TTF fonts.</dd>
+  <dt>suffix</dt>
+  <dd>Add a suffix to the output file names. The suffix can contain [date time formatting](https://docs.python.org/2/library/time.html#time.strftime).</dd>
+  <dt>ttfautohint</dt>
+  <dd>Opens a sheet to choose ttfautohint settings.</dd>
+  <dt>generate html</dt>
+  <dd>Generates a HTML preview with some simple presets.</dd>
+</dl>
 
 ### ttfautohint
 
@@ -128,14 +124,16 @@ The following binary output formats are supported:
 * autohint
 * release mode
 
-suffix
-:	Add a suffix to the output file names. The suffix can contain [date time formatting](https://docs.python.org/2/library/time.html#time.strftime).
+<dl>
+  <dt>suffix</dt>
+  <dd>Add a suffix to the output file names. The suffix can contain [date time formatting](https://docs.python.org/2/library/time.html#time.strftime).</dd>
+</dl>
 
 
 Variable Fonts
 --------------
 
-Use the *Batch Generate* section to generate variable fonts. 
+Use the *Batch Generate* section to generate variable fonts.
 
 *Note: It is required to provide a designSpace file.*
 
@@ -150,14 +148,15 @@ Batch will try to optimize the designSpace data by performing the following acti
 
 ### Options
 
-autohint
-:	...
+<dl>
+  <dt>autohint</dt>
+  <dd>...</dd>
+  <dt>interpolate to fit axes extremes</dt>
+  <dd>...</dd>
+</dl>
 
-interpolate to fit axes extremes
-:	...
 
-
-Binary Merge 
+Binary Merge
 ------------
 
 Use the *Binary Merge* section to merge specific tables from a source.
@@ -176,11 +175,11 @@ Click on the gears icon in the toolbar to open the *Settings* sheet.
 
 ![](imgs/settings.png)
 
-threaded
-:	...
-
-export in subfolders
-:	Create subfolders for different types of file.
-
-keep file names
-:	Use the same file names as the input fonts.
+<dl>
+  <dt>threaded</dt>
+  <dd>...</dd>
+  <dt>export in subfolders</dt>
+  <dd>Create subfolders for different types of file.</dd>
+  <dt>keep file names</dt>
+  <dd>Use the same file names as the input fonts.</dd>
+</dl>
