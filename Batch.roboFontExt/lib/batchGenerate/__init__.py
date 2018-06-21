@@ -79,7 +79,7 @@ class BatchGenerate(Group):
 
         fonts = []
         for path in paths:
-            font = OpenFont(path, showUI=False)
+            font = OpenFont(path, showInterface=False)
             fonts.append(font)
 
         if decompose:

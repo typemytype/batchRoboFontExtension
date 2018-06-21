@@ -86,7 +86,7 @@ class BinaryMerger(Group):
         tableNames = [item["tableName"] for item in self.tableList if item["add"]]
 
         for fontIndex, path in enumerate(paths):
-            font = OpenFont(path, showUI=False)
+            font = OpenFont(path, showInterface=False)
             binarySourcepath = font.lib.get("com.typemytype.robofont.binarySource")
             tempExportPath = tempExportPaths[fontIndex]
             if binarySourcepath:
