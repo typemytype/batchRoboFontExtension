@@ -3,30 +3,23 @@ import shutil
 
 from vanilla import *
 
-try:
-    from designSpaceDocument.ufo import DesignSpaceProcessor
-except:
-    from designSpaceDocument.ufoProcessor import DesignSpaceProcessor
+from ufoProcessor import DesignSpaceProcessor
 
 import fontCompiler.objects as compilerObjects
 from fontCompiler.compiler import generateFont, FontCompilerOptions
 
 from fontTools import varLib
+from fontTools.varLib.featureVars import addFeatureVariations
+from fontTools.varLib.models import normalizeLocation
+
 from cu2qu.ufo import fonts_to_quadratic
 
 from mutatorMath.objects.location import Location
 from mutatorMath.objects.mutator import buildMutator
 
-try:
-    from fontPens.transformPointPen import TransformPointPen
-except:
-    from robofab.pens.adapterPens import TransformPointPen
+from fontPens.transformPointPen import TransformPointPen
 
-try:
-    from ufo2fdk.kernFeatureWriter import side1Prefix, side2Prefix
-except:
-    side1Prefix = side2Prefix = "@"
-
+from ufo2fdk.kernFeatureWriter import side1Prefix, side2Prefix
 
 from lib.tools.compileTools import CurrentFDK
 from mojo.extensions import getExtensionDefault, setExtensionDefault
@@ -224,8 +217,6 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
     def __init__(self, path, ufoVersion=2):
         super(BatchDesignSpaceProcessor, self).__init__(ufoVersion=ufoVersion)
         self.read(path)
-        self.checkAxes()
-        self.checkDefault()
 
     def generateUFO(self):
         # make sure it only generates all instances only once
@@ -578,6 +569,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         try:
             # let varLib build the variation font
             varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths)
+            # add feature variations
+            self.buildFeatureVariations(varFont)
             # save the variation font
             varFont.save(outPutPath)
         except Exception:
@@ -585,3 +578,33 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             result = traceback.format_exc()
             print(result)
 
+    def buildFeatureVariations(self, font):
+        axesMap = {}
+        axesLocation = {}
+        for axis in self.axes:
+            axesMap[axis.name] = axis.minimum, axis.default, axis.maximum, axis.tag
+            axesLocation[axis.tag] = axis.minimum, axis.default, axis.maximum
+
+        condSubst = []
+        for rule in self.rules:
+            regions = []
+            for conditionSet in rule.conditionSets:
+                for condition in conditionSet:
+                    minimum, default, maximum, tag = axesMap[condition["name"]]
+                    space = dict()
+                    ruleMinimum = condition["minimum"]
+                    if ruleMinimum is None:
+                        ruleMinimum = minimum
+                    ruleMaximum = condition["maximum"]
+                    if ruleMaximum is None:
+                        ruleMaximum = maximum
+
+                    normalizedMinimum = normalizeLocation({tag: ruleMinimum}, axesLocation)
+                    normalizedMaximum = normalizeLocation({tag: ruleMaximum}, axesLocation)
+                    space[tag] = (normalizedMinimum[tag], normalizedMaximum[tag])
+                    regions.append(space)
+
+            glyphNameMap = {g1: g2 for g1, g2 in rule.subs}
+            condSubst.append((regions, glyphNameMap))
+
+        addFeatureVariations(font, condSubst)
