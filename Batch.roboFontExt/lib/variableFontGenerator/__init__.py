@@ -449,18 +449,19 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 if i not in glyphSegmentTypeMap:
                     glyphSegmentTypeMap[i] = list()
                 glyphSegmentTypeMap[i].append((types, glyph))
-
         for contourIndex, contourTypes in glyphSegmentTypeMap.items():
             # collect all segment types for a single glyph
             pointTypes = None
             for types, glyph in contourTypes:
+                print(glyph.layer.name)
+                print(len(types))
                 if pointTypes is None:
                     pointTypes = list(types)
                 else:
                     for i, t in enumerate(types):
                         if t in ("curve", "qcurve"):
                             pointTypes[i] = t
-
+            
             font = glyph.font
             # check if they are different
             for types, glyph in contourTypes:
