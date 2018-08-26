@@ -6,13 +6,19 @@ Batch
 - supports UFO, OpenType (TTF/CFF) and designSpace files as input
 - generates .otf .ttf .pfa .vfb .woff .woff2 .eot .svg & variable fonts
 
-### Table of contents
+## Documentation
 
-[TOC]
+- [Fonts](#fonts)
+- [Web fonts](#web-fonts)
+- [Batch generate](#batch-generate)
+- [Variable Fonts](#variable-fonts)
+- [Binary Merge](#binary-merge)
+- [Settings](#settings)
+
 
 Once installed, Batch will add itself to the *File* menu:
 
-![](batch-menu.png)
+![](imgs/batch-menu.png)
 
 
 Fonts
@@ -20,7 +26,7 @@ Fonts
 
 Use the *Fonts* section to choose which fonts to use as input.
 
-![](fonts.png)
+![](imgs/fonts.png)
 
 **Add fonts by dragging files into the list.**
 
@@ -48,7 +54,7 @@ Web fonts
 
 Use the *Web fonts* section to generate webfont formats and related test files.
 
-![](web-fonts.png)
+![](imgs/web-fonts.png)
 
 The following webfont formats are supported:
 
@@ -82,7 +88,7 @@ TrueType autohinting with [ttfautohint] is available when generating OpenType-Tr
 
 Click on the gears icon to open the ttfautohint settings.
 
-![](ttfautohint.png)
+![](imgs/ttfautohint.png)
 
 See the [ttfautohint documentation] for details about each setting.
 
@@ -93,7 +99,7 @@ See the [ttfautohint documentation] for details about each setting.
 
 If *Generate HTML*  is selected, Batch will generate a simple HTML+CSS test page to preview the webfonts.
 
-![](html-preview.png)
+![](imgs/html-preview.png)
 
 Use the top text area to edit the HTML code, and the bottom one to edit the CSS.
 
@@ -105,7 +111,7 @@ Batch generate
 
 Use the *Batch Generate* section to generate desktop fonts, and to convert fonts to VFB format.
 
-![](batch-generate.png)
+![](imgs/batch-generate.png)
 
 The following binary output formats are supported:
 
@@ -139,7 +145,7 @@ Use the *Batch Generate* section to generate variable fonts.
 
 *Note: It is required to provide a designSpace file.*
 
-![](variable-fonts.png)
+![](imgs/variable-fonts.png)
 
 Batch will try to optimize the designSpace data by performing the following actions:
 
@@ -165,7 +171,7 @@ Use the *Binary Merge* section to merge specific tables from a source.
 
 **This option is available only when a UFO is provided, and when the UFO has the source path in the `font.lib`.**
 
-![](binary-merge.png)
+![](imgs/binary-merge.png)
 
 Binary Merge will use the output settings selected in the *Batch Generate* section.
 
@@ -175,7 +181,7 @@ Settings
 
 Click on the gears icon in the toolbar to open the *Settings* sheet.
 
-![](settings.png)
+![](imgs/settings.png)
 
 <dl>
   <dt>threaded</dt>
