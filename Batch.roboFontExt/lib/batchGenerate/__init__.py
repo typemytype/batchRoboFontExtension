@@ -80,6 +80,12 @@ class BatchGenerate(Group):
         fonts = []
         for path in paths:
             font = OpenFont(path, showInterface=False)
+            # check font info
+            requiredFontInfo = dict(descender=-250, xHeight=500, ascender=750, capHeight=750, unitsPerEm=1000)
+            for attr, value in requiredFontInfo.items():
+                existingValue = getattr(font.info, attr)
+                if existingValue is None:
+                    setattr(font.info, attr, value)
             fonts.append(font)
 
         if decompose:
@@ -120,8 +126,10 @@ class BatchGenerate(Group):
             for format in formats:
                 report.writeTitle("Generate %s" % format, "'")
                 report.indent()
-                familyName = font.info.familyName.replace(" ", "")
-                styleName = font.info.styleName.replace(" ", "")
+                familyName = font.info.familyName or "familyName-%s" % index
+                familyName = familyName.replace(" ", "")
+                styleName = font.info.styleName or "styleName-%s" % index
+                styleName = styleName.replace(" ", "")
                 if not self.controller.keepFileNames():
                     fileName = "%s-%s%s.%s" % (familyName, styleName, suffix, format)
                 else:

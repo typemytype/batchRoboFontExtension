@@ -3,30 +3,25 @@ import shutil
 
 from vanilla import *
 
-try:
-    from designSpaceDocument.ufo import DesignSpaceProcessor
-except:
-    from designSpaceDocument.ufoProcessor import DesignSpaceProcessor
+import defcon
+
+from ufoProcessor import DesignSpaceProcessor
 
 import fontCompiler.objects as compilerObjects
 from fontCompiler.compiler import generateFont, FontCompilerOptions
 
 from fontTools import varLib
+from fontTools.varLib.featureVars import addFeatureVariations
+from fontTools.varLib.models import normalizeLocation
+
 from cu2qu.ufo import fonts_to_quadratic
 
 from mutatorMath.objects.location import Location
 from mutatorMath.objects.mutator import buildMutator
 
-try:
-    from fontPens.transformPointPen import TransformPointPen
-except:
-    from robofab.pens.adapterPens import TransformPointPen
+from fontPens.transformPointPen import TransformPointPen
 
-try:
-    from ufo2fdk.kernFeatureWriter import side1Prefix, side2Prefix
-except:
-    side1Prefix = side2Prefix = "@"
-
+from ufo2fdk.kernFeatureWriter import side1Prefix, side2Prefix
 
 from lib.tools.compileTools import CurrentFDK
 from mojo.extensions import getExtensionDefault, setExtensionDefault
@@ -203,6 +198,29 @@ class VarLibMasterFinder(dict):
         return self.get(arg)
 
 
+class BatchLayer(compilerObjects.Layer):
+
+    def _get_info(self):
+        return self.font.info
+
+    info = property(_get_info)
+
+    def _get_kerning(self):
+        return self.font.kerning
+
+    kerning = property(_get_kerning)
+
+    def _get_groups(self):
+        return self.font.groups
+
+    groups = property(_get_groups)
+
+    def _get_path(self):
+        return self.font.path
+
+    path = property(_get_path)
+
+
 class BatchDesignSpaceProcessor(DesignSpaceProcessor):
 
     """
@@ -210,6 +228,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
     """
 
     fontClass = compilerObjects.Font
+    layerClass = BatchLayer
     glyphClass = compilerObjects.Glyph
     libClass = compilerObjects.Lib
     glyphContourClass = compilerObjects.Contour
@@ -224,8 +243,6 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
     def __init__(self, path, ufoVersion=2):
         super(BatchDesignSpaceProcessor, self).__init__(ufoVersion=ufoVersion)
         self.read(path)
-        self.checkAxes()
-        self.checkDefault()
 
     def generateUFO(self):
         # make sure it only generates all instances only once
@@ -260,6 +277,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
 
         self.loadFonts()
         self.loadLocations()
+        self.loadMasters()
 
         self._generatedFiles = set()
 
@@ -268,6 +286,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.makeMasterGlyphsQuadractic()
         self.makeMasterKerningCompatible()
         self.makeMasterOnDefaultLocation()
+        self.makeLayerMaster()
         try:
             self._generateVariationFont(destPath)
         except Exception:
@@ -294,6 +313,31 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         for sourceDescriptor in self.sources:
             location = Location(sourceDescriptor.location)
             self.locations[sourceDescriptor.name] = location
+
+    def loadMasters(self):
+        """
+        Store all masters, layers in a single dict.
+        """
+        self.masters = dict()
+        for sourceDescriptor in self.sources:
+            masterFont = self.fonts[sourceDescriptor.name]
+            if sourceDescriptor.layerName is None:
+                layer = masterFont.layers.defaultLayer
+            else:
+                layer = masterFont.layers[sourceDescriptor.layerName]
+            if layer is not None:
+                self.masters[sourceDescriptor.name] = layer
+
+    def makeLayerMaster(self):
+        """
+        If there a layer name in a source description add it as seperate master in the source description.
+        """
+        for sourceDescriptor in self.sources:
+            if sourceDescriptor.layerName is not None:
+                path, ext = os.path.splitext(sourceDescriptor.path)
+                sourceDescriptor.path = "%s-%s%s" % (path, sourceDescriptor.layerName, ext)
+                sourceDescriptor.filename = None
+                sourceDescriptor.layerName = None
 
     def makeMasterOnDefaultLocation(self):
         # create default location
@@ -327,11 +371,11 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.generateReport.indent()
         # collect all possible glyph names
         glyphNames = []
-        for master in self.fonts.values():
+        for master in self.masters.values():
             glyphNames.extend(master.keys())
         glyphNames = set(glyphNames)
         # get the default master
-        defaultMaster = self.fonts[self.default.name]
+        defaultMaster = self.masters[self.default.name]
         # loop over all glyphName
         for glyphName in glyphNames:
             # first check if the default master has this glyph
@@ -340,7 +384,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 # build a repair mutator to generate a glyph
                 glyphItems = []
                 for sourceDescriptor in self.sources:
-                    master = self.fonts[sourceDescriptor.name]
+                    master = self.masters[sourceDescriptor.name]
                     if glyphName in sourceDescriptor.mutedGlyphNames:
                         continue
                     if glyphName in master:
@@ -353,7 +397,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 # round if necessary
                 if self.roundGeometry:
                     result.round()
-                self.generateReport.write("Adding missing glyph '%s' in the default master '%s %s'" % (glyphName, defaultMaster.info.familyName, defaultMaster.info.styleName))
+                self.generateReport.write("Adding missing glyph '%s' in the default master '%s %s (%s)'" % (glyphName, defaultMaster.font.info.familyName, defaultMaster.font.info.styleName, defaultMaster.name))
                 # add the glyph to the default master
                 defaultMaster.newGlyph(glyphName)
                 glyph = defaultMaster[glyphName]
@@ -364,13 +408,17 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             # and collect all glyphs from all masters
             # to send them to optimize contour data
             for sourceDescriptor in self.sources:
-                master = self.fonts[sourceDescriptor.name]
+                master = self.masters[sourceDescriptor.name]
                 if glyphName in master:
                     # found do nothing
                     glyphs.append(master[glyphName])
                 else:
                     # get the mutator
-                    mutator = self.getGlyphMutator(glyphName)
+                    try:
+                        mutator = self.getGlyphMutator(glyphName)
+                    except Exception as e:
+                        print("\n".join(self.problems))
+                        raise e
                     # get the location
                     location = self.locations[sourceDescriptor.name]
                     # generate an instance
@@ -379,7 +427,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     if self.roundGeometry:
                         result.round()
 
-                    self.generateReport.write("Adding missing glyph '%s' in master '%s %s'" % (glyphName, master.info.familyName, master.info.styleName))
+                    self.generateReport.write("Adding missing glyph '%s' in master '%s %s (%s)'" % (glyphName, master.font.info.familyName, master.font.info.styleName, master.name))
                     # add the glyph to the master
                     master.newGlyph(glyphName)
                     glyph = master[glyphName]
@@ -401,25 +449,26 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 if i not in glyphSegmentTypeMap:
                     glyphSegmentTypeMap[i] = list()
                 glyphSegmentTypeMap[i].append((types, glyph))
-
         for contourIndex, contourTypes in glyphSegmentTypeMap.items():
             # collect all segment types for a single glyph
             pointTypes = None
             for types, glyph in contourTypes:
+                print(glyph.layer.name)
+                print(len(types))
                 if pointTypes is None:
                     pointTypes = list(types)
                 else:
                     for i, t in enumerate(types):
                         if t in ("curve", "qcurve"):
                             pointTypes[i] = t
-
-            master = glyph.getParent()
+            
+            font = glyph.font
             # check if they are different
             for types, glyph in contourTypes:
                 if types == pointTypes:
                     continue
                 # add missing off curves
-                self.generateReport.write("Adding missing offcurves in contour %s for glyph '%s' in master '%s %s'" % (contourIndex, glyph.name, master.info.familyName, master.info.styleName))
+                self.generateReport.write("Adding missing offcurves in contour %s for glyph '%s' in master '%s %s'" % (contourIndex, glyph.name, font.info.familyName, font.info.styleName))
                 contour = glyph[contourIndex]
                 pen = CompatibleContourPointPen(pointTypes)
                 contour.drawPoints(pen)
@@ -432,7 +481,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         """
         self.generateReport.writeTitle("Decompose Mixed Glyphs", "'")
         self.generateReport.indent()
-        masters = self.fonts.values()
+        masters = self.masters.values()
         for master in masters:
             for glyph in master:
                 # check if the glyph has both contour point data as components
@@ -451,7 +500,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                             component.drawPoints(decomposePointPen)
                     # remove all components
                     glyph.clearComponents()
-                    self.generateReport.write("Decomposing glyph '%s' in master '%s %s'" % (glyph.name, master.info.familyName, master.info.styleName))
+                    self.generateReport.write("Decomposing glyph '%s' in master '%s %s (%s)'" % (glyph.name, master.font.info.familyName, master.font.info.styleName, master.name))
         self.generateReport.dedent()
         self.generateReport.newLine()
 
@@ -459,11 +508,11 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         """
         Optimize and convert all master ufo to quad curves.
         """
-        masters = self.fonts.values()
+        masters = self.masters.values()
         # use cu2qu to optimize all masters
         fonts_to_quadratic(masters)
         for master in masters:
-            master.segmentType = "qcurve"
+            master.font.segmentType = "qcurve"
 
     def makeMasterKerningCompatible(self):
         """
@@ -498,10 +547,10 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         for pair in allPairs:
             # loop over all masters
             for sourceDescriptor in self.sources:
-                master = self.fonts[sourceDescriptor.name]
+                font = self.fonts[sourceDescriptor.name]
                 missingPairs = []
                 missingGroups = []
-                if pair not in master.kerning:
+                if pair not in font.kerning:
                     missingPairs.append(pair)
                     kerningInstance = kerningCache.get(sourceDescriptor.name)
                     if kerningInstance is None:
@@ -519,9 +568,9 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                         master.groups[side2] = allGroups[side2]
                         missingGroups.append(side2)
                 if missingPairs:
-                    self.generateReport.write("Adding missing kerning pairs in %s %s: %s" % (master.info.familyName, master.info.styleName, ", ".join(["(%s, %s)" % (s1, s2) for s1, s2 in missingPairs])))
+                    self.generateReport.write("Adding missing kerning pairs in %s %s: %s" % (font.info.familyName, font.info.styleName, ", ".join(["(%s, %s)" % (s1, s2) for s1, s2 in missingPairs])))
                 if missingGroups:
-                    self.generateReport.write("Adding missing kerning groups in %s %s: %s" % (master.info.familyName, master.info.styleName, ", ".join(missingGroups)))
+                    self.generateReport.write("Adding missing kerning groups in %s %s: %s" % (font.info.familyName, font.info.styleName, ", ".join(missingGroups)))
         self.generateReport.dedent()
         self.generateReport.newLine()
 
@@ -551,22 +600,34 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.generateReport.indent()
         # map all master ufo paths to generated binaries
         masterBinaryPaths = VarLibMasterFinder()
-        for master in self.fonts.values():
+        for sourceDescriptor in self.sources:
+            master = self.masters[sourceDescriptor.name]
             # get the output path
-            outputPath = os.path.join(dirname, "temp_%s-%s.ttf" % (master.info.familyName, master.info.styleName))
-            masterBinaryPaths[master.path] = outputPath
+            outputPath = os.path.join(dirname, "temp_%s-%s-%s.ttf" % (master.font.info.familyName, master.font.info.styleName, master.name))
+            masterBinaryPaths[sourceDescriptor.path] = outputPath
             self._generatedFiles.add(outputPath)
             # set the output path
             options.outputPath = outputPath
+            options.layerName = master.name
             try:
                 # generate the font
-                result = generateFont(master, options=options)
+                result = generateFont(master.font, options=options)
+                if getDefault("Batch.Debug", False):
+                    tempSavePath = os.path.join(dirname, "temp_%s-%s-%s.ufo" % (master.font.info.familyName, master.font.info.styleName, master.name))
+                    font = master.font
+                    font.save(tempSavePath)
+                    if font.layers.defaultLayer.name != master.name:
+                        tempFont = defcon.Font(tempSavePath)
+                        tempFont.layers.defaultLayer = tempFont.layers[master.name]
+                        tempFont.save()
+                        self._generatedFiles.add(tempSavePath)
+
             except Exception:
                 import traceback
                 result = traceback.format_exc()
                 print(result)
             self.generateReport.newLine()
-            self.generateReport.write("Generate %s %s" % (master.info.familyName, master.info.styleName))
+            self.generateReport.write("Generate %s %s (%s)" % (master.font.info.familyName, master.font.info.styleName, master.name))
             self.generateReport.indent()
             self.generateReport.write(result)
             self.generateReport.dedent()
@@ -578,6 +639,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         try:
             # let varLib build the variation font
             varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths)
+            # add feature variations
+            self.buildFeatureVariations(varFont)
             # save the variation font
             varFont.save(outPutPath)
         except Exception:
@@ -585,3 +648,34 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             result = traceback.format_exc()
             print(result)
 
+    def buildFeatureVariations(self, font):
+        # see https://github.com/fonttools/fonttools/tree/master/Doc/source/designspaceLib#rules
+        axesMap = {}
+        axesLocation = {}
+        for axis in self.axes:
+            axesMap[axis.name] = axis.minimum, axis.default, axis.maximum, axis.tag
+            axesLocation[axis.tag] = axis.minimum, axis.default, axis.maximum
+
+        condSubst = []
+        for rule in self.rules:
+            regions = []
+            for conditionSet in rule.conditionSets:
+                space = dict()
+                for condition in conditionSet:
+                    minimum, default, maximum, tag = axesMap[condition["name"]]
+
+                    ruleMinimum = condition["minimum"]
+                    if ruleMinimum is None:
+                        ruleMinimum = minimum
+                    ruleMaximum = condition["maximum"]
+                    if ruleMaximum is None:
+                        ruleMaximum = maximum
+
+                    normalizedMinimum = normalizeLocation({tag: ruleMinimum}, axesLocation)
+                    normalizedMaximum = normalizeLocation({tag: ruleMaximum}, axesLocation)
+                    space[tag] = (normalizedMinimum[tag], normalizedMaximum[tag])
+                regions.append(space)
+            glyphNameMap = {g1: g2 for g1, g2 in rule.subs}
+            condSubst.append((regions, glyphNameMap))
+
+        addFeatureVariations(font, condSubst)

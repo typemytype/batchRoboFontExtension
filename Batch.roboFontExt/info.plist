@@ -17,9 +17,9 @@
 	<key>name</key>
 	<string>Batch</string>
 	<key>requiresVersionMajor</key>
-	<string>1</string>
+	<string>3</string>
 	<key>requiresVersionMinor</key>
-	<string>8</string>
+	<string>2</string>
 	<key>timeStamp</key>
 	<real>1373965736.141633</real>
 	<key>version</key>
