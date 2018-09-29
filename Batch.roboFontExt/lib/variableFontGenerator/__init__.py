@@ -461,7 +461,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     for i, t in enumerate(types):
                         if t in ("curve", "qcurve"):
                             pointTypes[i] = t
-            
+
             font = glyph.font
             # check if they are different
             for types, glyph in contourTypes:
@@ -639,43 +639,9 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         try:
             # let varLib build the variation font
             varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths)
-            # add feature variations
-            self.buildFeatureVariations(varFont)
             # save the variation font
             varFont.save(outPutPath)
         except Exception:
             import traceback
             result = traceback.format_exc()
             print(result)
-
-    def buildFeatureVariations(self, font):
-        # see https://github.com/fonttools/fonttools/tree/master/Doc/source/designspaceLib#rules
-        axesMap = {}
-        axesLocation = {}
-        for axis in self.axes:
-            axesMap[axis.name] = axis.minimum, axis.default, axis.maximum, axis.tag
-            axesLocation[axis.tag] = axis.minimum, axis.default, axis.maximum
-
-        condSubst = []
-        for rule in self.rules:
-            regions = []
-            for conditionSet in rule.conditionSets:
-                space = dict()
-                for condition in conditionSet:
-                    minimum, default, maximum, tag = axesMap[condition["name"]]
-
-                    ruleMinimum = condition["minimum"]
-                    if ruleMinimum is None:
-                        ruleMinimum = minimum
-                    ruleMaximum = condition["maximum"]
-                    if ruleMaximum is None:
-                        ruleMaximum = maximum
-
-                    normalizedMinimum = normalizeLocation({tag: ruleMinimum}, axesLocation)
-                    normalizedMaximum = normalizeLocation({tag: ruleMaximum}, axesLocation)
-                    space[tag] = (normalizedMinimum[tag], normalizedMaximum[tag])
-                regions.append(space)
-            glyphNameMap = {g1: g2 for g1, g2 in rule.subs}
-            condSubst.append((regions, glyphNameMap))
-
-        addFeatureVariations(font, condSubst)
