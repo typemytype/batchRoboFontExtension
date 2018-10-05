@@ -468,8 +468,6 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             # collect all segment types for a single glyph
             pointTypes = None
             for types, glyph in contourTypes:
-                print(glyph.layer.name)
-                print(len(types))
                 if pointTypes is None:
                     pointTypes = list(types)
                 else:
