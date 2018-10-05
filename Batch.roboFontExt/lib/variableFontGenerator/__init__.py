@@ -632,7 +632,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     font = master.font
                     font.save(tempSavePath)
                     if font.layers.defaultLayer.name != master.name:
-                        tempFont = defcon.objects.font.Font(tempSavePath)
+                        tempFont = defcon.Font(tempSavePath)
                         tempFont.layers.defaultLayer = tempFont.layers[master.name]
                         tempFont.save()
                         self._generatedFiles.add(tempSavePath)
