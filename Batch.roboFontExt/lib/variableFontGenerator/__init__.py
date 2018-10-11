@@ -613,12 +613,14 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.generateReport.indent()
         # map all master ufo paths to generated binaries
         masterBinaryPaths = VarLibMasterFinder()
+        masterCount = 0
         for sourceDescriptor in self.sources:
             master = self.masters[sourceDescriptor.name]
             # get the output path
-            outputPath = os.path.join(dirname, "temp_%s-%s-%s.ttf" % (master.font.info.familyName, master.font.info.styleName, master.name))
+            outputPath = os.path.join(dirname, "temp_%02d_%s-%s-%s.ttf" % (masterCount, master.font.info.familyName, master.font.info.styleName, master.name))
             masterBinaryPaths[sourceDescriptor.path] = outputPath
             self._generatedFiles.add(outputPath)
+            masterCount += 1
             # set the output path
             options.outputPath = outputPath
             options.layerName = master.name
