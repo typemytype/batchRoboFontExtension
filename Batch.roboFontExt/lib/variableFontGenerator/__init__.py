@@ -6,6 +6,7 @@ from vanilla import *
 import defcon
 
 from ufoProcessor import DesignSpaceProcessor
+from ufoProcessor.emptyPen import checkGlyphIsEmpty
 
 import fontCompiler.objects as compilerObjects
 from fontCompiler.compiler import generateFont, FontCompilerOptions
@@ -242,6 +243,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
 
     def __init__(self, path, ufoVersion=2):
         super(BatchDesignSpaceProcessor, self).__init__(ufoVersion=ufoVersion)
+        self.useVarlib = True
         self.read(path)
 
     def generateUFO(self):
@@ -381,7 +383,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             # first check if the default master has this glyph
             if glyphName not in defaultMaster:
                 # the default does not have the glyph
-                # build a repair mutator to generate a glyph
+                # build a repair mutator to generate a glyph.
                 glyphItems = []
                 for sourceDescriptor in self.sources:
                     master = self.masters[sourceDescriptor.name]
@@ -391,6 +393,10 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                         sourceGlyph = self.mathGlyphClass(master[glyphName])
                         sourceGlyphLocation = self.locations[sourceDescriptor.name]
                         glyphItems.append((sourceGlyphLocation, sourceGlyph))
+                # Note: this needs to be a mutatormath mutator, not a varlib.model.
+                # A varlib model can't work without in the missing default.
+                # Filling in the default is a bit of a hack: it will make the font work,
+                # but it is a bit of a guess.
                 _, mutator = buildMutator(glyphItems)
                 # use the repair mutator to generate an instance at the default location
                 result = mutator.makeInstance(Location(self.defaultLoc))
@@ -401,7 +407,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 # add the glyph to the default master
                 defaultMaster.newGlyph(glyphName)
                 glyph = defaultMaster[glyphName]
-                result.extractGlyph(glyph)
+                result.extractGlyph(glyph, onlyGeometry=True)
 
             glyphs = []
             # fill all masters with missing glyphs
@@ -409,32 +415,41 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             # to send them to optimize contour data
             for sourceDescriptor in self.sources:
                 master = self.masters[sourceDescriptor.name]
+                hasGlyph = False
                 if glyphName in master:
-                    # found do nothing
-                    glyphs.append(master[glyphName])
-                else:
-                    # get the mutator
+                    # Glyph is present in the master.
+                    # This checks for points, components and so on. 
+                    if not checkGlyphIsEmpty(master[glyphName], allowWhiteSpace=True):
+                        glyphs.append(master[glyphName])
+                        hasGlyph = True
+                if not hasGlyph:
+                    # Get the varlibmodel to generate a filler glyph.
+                    # These is probably a support with just a few glyphs.
                     try:
+                        self.useVarlib = True
                         mutator = self.getGlyphMutator(glyphName)
                     except Exception as e:
+                        print("Problem in %s" % glyphName)
                         print("\n".join(self.problems))
                         raise e
-                    # get the location
-                    location = self.locations[sourceDescriptor.name]
                     # generate an instance
-                    result = mutator.makeInstance(Location(location))
+                    result = mutator.makeInstance(Location(sourceDescriptor.location))
                     # round if necessary
                     if self.roundGeometry:
                         result.round()
-
                     self.generateReport.write("Adding missing glyph '%s' in master '%s %s (%s)'" % (glyphName, master.font.info.familyName, master.font.info.styleName, master.name))
                     # add the glyph to the master
                     master.newGlyph(glyphName)
-                    glyph = master[glyphName]
-                    result.extractGlyph(glyph)
-                    glyphs.append(glyph)
+                    result.extractGlyph(master[glyphName], onlyGeometry=True)
+                    glyphs.append(master[glyphName])
             # optimize glyph contour data from all masters
             self.makeGlyphOutlinesCompatible(glyphs)
+        if getDefault("Batch.Debug", False):
+            for k, m in self.masters.items():
+                orgPath = m.font.path
+                tempPath = m.font.path.replace(".ufo", "_%s.ufo" % k)
+                m.font.save(tempPath)
+
         self.generateReport.dedent()
         self.generateReport.newLine()
 
@@ -453,8 +468,6 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             # collect all segment types for a single glyph
             pointTypes = None
             for types, glyph in contourTypes:
-                print(glyph.layer.name)
-                print(len(types))
                 if pointTypes is None:
                     pointTypes = list(types)
                 else:
@@ -621,7 +634,6 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                         tempFont.layers.defaultLayer = tempFont.layers[master.name]
                         tempFont.save()
                         self._generatedFiles.add(tempSavePath)
-
             except Exception:
                 import traceback
                 result = traceback.format_exc()
