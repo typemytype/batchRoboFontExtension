@@ -617,7 +617,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         for sourceDescriptor in self.sources:
             master = self.masters[sourceDescriptor.name]
             # get the output path
-            outputPath = os.path.join(dirname, "temp_%s-%s-%s-%d.ttf" % (master.font.info.familyName, master.font.info.styleName, master.name, masterCount))
+            outputPath = os.path.join(dirname, "temp_%02d_%s-%s-%s.ttf" % (masterCount, master.font.info.familyName, master.font.info.styleName, master.name))
             masterBinaryPaths[sourceDescriptor.path] = outputPath
             self._generatedFiles.add(outputPath)
             masterCount += 1
