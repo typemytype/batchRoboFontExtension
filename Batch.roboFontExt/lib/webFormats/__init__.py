@@ -73,7 +73,8 @@ def convertToTTF(otfPath, dest, report):
             setattr(font.info, attr, None)
 
     result = font.generate(path=temp, format="ttf", decompose=False, checkOutlines=False, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
-    font.close()
+    if not font.hasInterface():
+        font.close()
     report.write(result)
 
     sourceFont = TTFont(temp)
@@ -108,7 +109,8 @@ def convertToOTF(ttfPath, dest, report):
             setattr(font.info, attr, None)
 
     result = font.generate(path=temp, format="otf", decompose=False, checkOutlines=False, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
-    font.close()
+    if not font.hasInterface():
+        font.close()
     report.write(result)
 
     sourceFont = TTFont(temp)
@@ -132,7 +134,8 @@ def generateTTF(ufoPath, dest, report):
     font.lib[shouldAddPointsInSplineConversionLibKey] = 1
 
     result = font.generate(path=tempDest, format="ttf", decompose=False, checkOutlines=True, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
-    font.close()
+    if not font.hasInterface():
+        font.close()
     report.write(result)
 
     autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
@@ -146,7 +149,8 @@ def generateOTF(ufoPath, dest, report):
     font = OpenFont(ufoPath, showInterface=False)
 
     result = font.generate(path=dest, format="otf", decompose=False, checkOutlines=True, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
-    font.close()
+    if not font.hasInterface():
+        font.close()
     report.write(result)
 
     result = OTFAutohint(dest)
