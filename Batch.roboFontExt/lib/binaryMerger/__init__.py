@@ -119,7 +119,8 @@ class BinaryMerger(Group):
                         report.newLine()
                         tempFont.close()
                         binarySource.close()
-            font.close()
+            if not font.hasInterface():
+                font.close()
 
         reportPath = os.path.join(destDir, "Binary Merge Report.txt")
         report.save(reportPath)
