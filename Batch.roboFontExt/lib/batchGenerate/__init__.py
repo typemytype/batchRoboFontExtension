@@ -157,7 +157,8 @@ class BatchGenerate(Group):
                 exportPaths.append(path)
                 report.dedent()
                 report.newLine()
-            font.close()
+            if not font.hasInterface():
+                font.close()
         reportPath = os.path.join(destDir, "Batch Generate Report.txt")
         report.save(reportPath)
         return exportPaths
