@@ -33,7 +33,7 @@ from batchTools import settingsIdentifier, ufoVersion, Report
 
 class BatchVariableFontGenerate(Group):
 
-    generateSettings = ["Autohint", "Interpolate to fit axes extremes", "Release Mode"]
+    generateSettings = ["Interpolate to fit axes extremes", "Autohint"]
 
     def __init__(self, posSize, controller):
         super(BatchVariableFontGenerate, self).__init__(posSize)
@@ -62,7 +62,6 @@ class BatchVariableFontGenerate(Group):
         paths = self.controller.get(supportedExtensions=["designspace"], flattenDesignSpace=False)
 
         autohint = self.autohint.get()
-        releaseMode = self.release_mode.get()
         fitToExtremes = self.interpolate_to_fit_axes_extremes.get()
 
         if report is None:
@@ -81,7 +80,7 @@ class BatchVariableFontGenerate(Group):
             progress.update("Generating design space ... %s" % fileName)
 
             desingSpace = BatchDesignSpaceProcessor(path, ufoVersion)
-            desingSpace.generateVariationFont(outputPath, autohint=autohint, releaseMode=releaseMode, fitToExtremes=fitToExtremes, report=report)
+            desingSpace.generateVariationFont(outputPath, autohint=autohint, releaseMode=True, fitToExtremes=fitToExtremes, report=report)
             report.dedent()
 
         reportPath = os.path.join(destDir, "Batch Generated Variable Fonts Report.txt")
@@ -158,6 +157,9 @@ class CompatibleContourPointPen(object):
         """
         pointPen.beginPath()
         for (x, y), segmentType, args, kwargs in self.contour:
+            # identifiers are not needed here
+            # but the could cause errors, so remove them
+            kwargs["identifier"] = None
             pointPen.addPoint((x, y), segmentType, *args, **kwargs)
         pointPen.endPath()
 
@@ -173,7 +175,14 @@ class DecomposePointPen(TransformPointPen):
         TransformPointPen.__init__(self, outPen, transformation)
         self.glyphSet = glyphSet
 
-    def addComponent(self, glyphName, transformation):
+    def beginPath(self, identifier=None):
+        super().beginPath()
+
+    def addPoint(self, pt, segmentType=None, smooth=False, name=None, **kwargs):
+        kwargs["identifier"] = None
+        super().addPoint(pt, segmentType=segmentType, smooth=smooth, name=name, **kwargs)
+
+    def addComponent(self, glyphName, transformation, identifier=None):
         try:
             glyph = self.glyphSet[glyphName]
         except KeyError:
@@ -418,7 +427,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 hasGlyph = False
                 if glyphName in master:
                     # Glyph is present in the master.
-                    # This checks for points, components and so on. 
+                    # This checks for points, components and so on.
                     if not checkGlyphIsEmpty(master[glyphName], allowWhiteSpace=True):
                         glyphs.append(master[glyphName])
                         hasGlyph = True
@@ -428,12 +437,16 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     try:
                         self.useVarlib = True
                         mutator = self.getGlyphMutator(glyphName)
+                        if mutator is None:
+                            self.useVarlib = False
+                            mutator = self.getGlyphMutator(glyphName)
+                            self.useVarlib = True
+                        # generate an instance
+                        result = mutator.makeInstance(Location(sourceDescriptor.location))
                     except Exception as e:
                         print("Problem in %s" % glyphName)
                         print("\n".join(self.problems))
                         raise e
-                    # generate an instance
-                    result = mutator.makeInstance(Location(sourceDescriptor.location))
                     # round if necessary
                     if self.roundGeometry:
                         result.round()
@@ -446,9 +459,14 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             self.makeGlyphOutlinesCompatible(glyphs)
         if getDefault("Batch.Debug", False):
             for k, m in self.masters.items():
-                orgPath = m.font.path
                 tempPath = m.font.path.replace(".ufo", "_%s.ufo" % k)
                 m.font.save(tempPath)
+
+        if self.compileGlyphOrder is None:
+            self.compileGlyphOrder = defaultMaster.font.lib.get("public.glyphOrder", [])
+            for glyphName in sorted(glyphNames):
+                if glyphName not in self.compileGlyphOrder:
+                    self.compileGlyphOrder.append(glyphName)
 
         self.generateReport.dedent()
         self.generateReport.newLine()
