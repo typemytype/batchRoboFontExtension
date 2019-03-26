@@ -8,7 +8,7 @@ from vanilla import *
 from fontTools.ttLib import TTFont
 
 from mojo.extensions import getExtensionDefault, setExtensionDefault
-from mojo.roboFont import OpenFont
+from mojo.roboFont import RFont
 from mojo.UI import getDefault
 
 from batchTools import settingsIdentifier, Report
@@ -90,11 +90,12 @@ class BinaryMerger(Group):
         tableNames = [item["tableName"] for item in self.tableList if item["add"]]
 
         for fontIndex, path in enumerate(paths):
-            font = OpenFont(path, document=False, showInterface=False)
+            font = RFont(path, document=False, showInterface=False)
             binarySourcepath = font.lib.get("com.typemytype.robofont.binarySource")
             tempExportPath = tempExportPaths[fontIndex]
             if binarySourcepath:
-                binaryIsOpenType = os.path.splitext(binarySourcepath)[1].lower() in [".ttf", ".otf"]
+                binaryIs
+                Type = os.path.splitext(binarySourcepath)[1].lower() in [".ttf", ".otf"]
                 tempIsOpenType = os.path.splitext(tempExportPath)[1].lower() in [".ttf", ".otf"]
                 if binaryIsOpenType and tempIsOpenType:
                     if os.path.exists(binarySourcepath) and os.path.exists(tempExportPath):

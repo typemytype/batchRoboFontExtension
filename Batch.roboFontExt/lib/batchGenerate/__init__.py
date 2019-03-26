@@ -7,7 +7,7 @@ from vanilla import *
 from lib.settings import doodleSupportedExportFileTypes
 
 from mojo.extensions import getExtensionDefault, setExtensionDefault
-from mojo.roboFont import OpenFont
+from mojo.roboFont import RFont
 
 from batchTools import settingsIdentifier, Report, buildTree
 
@@ -79,7 +79,7 @@ class BatchGenerate(Group):
 
         fonts = []
         for path in paths:
-            font = OpenFont(path, document=False, showInterface=False)
+            font = RFont(path, document=False, showInterface=False)
             # check font info
             requiredFontInfo = dict(descender=-250, xHeight=500, ascender=750, capHeight=750, unitsPerEm=1000)
             for attr, value in requiredFontInfo.items():

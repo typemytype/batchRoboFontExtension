@@ -22,7 +22,7 @@ from compositor import Font as CompositorFont
 from lib.settings import shouldAddPointsInSplineConversionLibKey
 from lib.scripting.codeEditor import CodeEditor
 
-from mojo.roboFont import OpenFont
+from mojo.roboFont import RFont
 from mojo.extensions import getExtensionDefault, setExtensionDefault
 from mojo.compile import autohint as OTFAutohint
 
@@ -64,7 +64,7 @@ def convertToTTF(otfPath, dest, report):
     temp = tempfile.mkstemp(suffix=".ttf")[1]
     tempDest = tempfile.mkstemp(suffix=".ttf")[1]
 
-    font = OpenFont(otfPath, document=False, showInterface=False)
+    font = RFont(otfPath, document=False, showInterface=False)
     font.lib[shouldAddPointsInSplineConversionLibKey] = 1
     font.kerning.clear()
 
@@ -102,7 +102,7 @@ def convertToTTF(otfPath, dest, report):
 def convertToOTF(ttfPath, dest, report):
     temp = tempfile.mkstemp(suffix=".otf")[1]
 
-    font = OpenFont(ttfPath, document=False, showInterface=False)
+    font = RFont(ttfPath, document=False, showInterface=False)
     font.kerning.clear()
     for attr in font.info.asDict().keys():
         if attr not in defaultFontInfoAttributes:
@@ -130,7 +130,7 @@ def convertToOTF(ttfPath, dest, report):
 def generateTTF(ufoPath, dest, report):
     tempDest = tempfile.mkstemp(suffix=".ttf")[1]
 
-    font = OpenFont(ufoPath, document=False, showInterface=False)
+    font = RFont(ufoPath, document=False, showInterface=False)
     font.lib[shouldAddPointsInSplineConversionLibKey] = 1
 
     result = font.generate(path=tempDest, format="ttf", decompose=False, checkOutlines=True, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
@@ -146,7 +146,7 @@ def generateTTF(ufoPath, dest, report):
 
 
 def generateOTF(ufoPath, dest, report):
-    font = OpenFont(ufoPath, document=False, showInterface=False)
+    font = RFont(ufoPath, document=False, showInterface=False)
 
     result = font.generate(path=dest, format="otf", decompose=False, checkOutlines=True, autohint=False, releaseMode=True, glyphOrder=font.glyphOrder)
     if not font.hasInterface():
@@ -386,7 +386,7 @@ class WebFormats(Group):
         if ext in [".ttf", ".otf"]:
             font = CompositorFont(path)
         else:
-            font = OpenFont(path, document=False, showInterface=False)
+            font = RFont(path, document=False, showInterface=False)
 
         familyName = font.info.familyName
         styleName = font.info.styleName
