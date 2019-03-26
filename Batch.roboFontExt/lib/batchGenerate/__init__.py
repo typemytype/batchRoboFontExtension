@@ -79,7 +79,7 @@ class BatchGenerate(Group):
 
         fonts = []
         for path in paths:
-            font = OpenFont(path, showInterface=False)
+            font = OpenFont(path, document=False, showInterface=False)
             # check font info
             requiredFontInfo = dict(descender=-250, xHeight=500, ascender=750, capHeight=750, unitsPerEm=1000)
             for attr, value in requiredFontInfo.items():
