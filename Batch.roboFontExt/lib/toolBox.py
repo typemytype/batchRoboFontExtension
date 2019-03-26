@@ -330,4 +330,3 @@ class ToolBox(BaseWindowController):
 
     def toolbarHelp(self, sender):
         ExtensionBundle("Batch").openHelp()
-
