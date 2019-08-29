@@ -1,6 +1,3 @@
-from __future__ import print_function, absolute_import
-from fontTools.misc.py23 import unichr
-
 from AppKit import *
 import os
 
@@ -59,7 +56,7 @@ class Settings(BaseWindowController):
 
         self.w.closeButton = Button((-190, y, -110, 20), "Cancel", callback=self.closeCallback, sizeStyle="small")
         self.w.closeButton.bind(".", ["command"])
-        self.w.closeButton.bind(unichr(27), [])
+        self.w.closeButton.bind(chr(27), [])
 
         self.w.resetButton = Button((-280, y, -200, 20), "Reset", callback=self.resetCallback, sizeStyle="small")
 

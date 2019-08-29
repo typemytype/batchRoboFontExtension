@@ -1,6 +1,3 @@
-from __future__ import absolute_import
-from fontTools.misc.py23 import unichr
-
 import os
 import tempfile
 import shutil
@@ -205,7 +202,7 @@ class TTHAutoHintSettings(BaseWindowController):
 
         self.w.closeButton = Button((-190, -30, -110, 20), "Cancel", callback=self.closeCallback, sizeStyle="small")
         self.w.closeButton.bind(".", ["command"])
-        self.w.closeButton.bind(unichr(27), [])
+        self.w.closeButton.bind(chr(27), [])
 
         self.w.resetButton = Button((-280, -30, -200, 20), "Reset", callback=self.resetCallback, sizeStyle="small")
         self.w.open()

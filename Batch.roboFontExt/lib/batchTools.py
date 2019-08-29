@@ -1,5 +1,4 @@
 from __future__ import print_function
-from fontTools.misc.py23 import PY2
 
 import AppKit
 import os
@@ -23,11 +22,6 @@ class Report(object):
         self._indent = 0
 
     def append(self, value):
-        try:
-            if PY2:
-                value = value.encode("utf-8")
-        except:
-            pass
         self._data.append(value)
 
     def indent(self, value=None):
