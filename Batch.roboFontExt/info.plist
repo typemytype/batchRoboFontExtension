@@ -23,13 +23,6 @@
 	<key>timeStamp</key>
 	<real>1373965736.141633</real>
 	<key>version</key>
-	<string>1.9.8</string>
-	<key>com.robofontmechanic.Mechanic</key>
-	<dict>
-		<key>repository</key>
-		<string>typemytype/batchRoboFontExtension</string>
-		<key>summary</key>
-		<string>Batch generate fonts to various formats.</string>
-	</dict>
+	<string>1.9.9</string>
 </dict>
 </plist>
