@@ -91,7 +91,7 @@ class Settings(BaseWindowController):
 genericListPboardType = "genericListPboardType"
 
 
-class BatchPathWrapper(NSObject): # metaclass=ClassNameIncrementer
+class BatchPathWrapper(NSObject):
 
     def __new__(cls, *arg, **kwargs):
         return cls.alloc().init()
@@ -332,9 +332,3 @@ class ToolBox(BaseWindowController):
 
     def toolbarHelp(self, sender):
         ExtensionBundle("Batch").openHelp()
-
-
-if __name__ == '__main__':
-
-    from mojo.roboFont import OpenWindow
-    OpenWindow(ToolBox)
