@@ -41,7 +41,7 @@ The following types of input files are supported:
 
 <dl>
   <dt>add open fonts</dt>
-  <dd>Use the toolbar button *Add Open Fonts* to add all open fonts to the list.</dd>
+  <dd>Use the toolbar button <em>Add Open Fonts</em> to add all open fonts to the list.</dd>
   <dt>UFOs folder</dt>
   <dd>If a folder is provided, Batch will search for all UFOs inside it.</dd>
   <dt>designSpace files</dt>
