@@ -9,13 +9,88 @@
         </head>
         <body>
         <h1>Batch</h1>
-<p><strong>Batch is a RoboFont extension to generate binary fonts in batch.</strong></p>
+<p>A RoboFont extension to generate binary fonts in batch.</p>
+<p>Once installed, Batch will add itself to the <em>File</em> menu:</p>
+<p><img alt="" src="imgs/batch-menu.png" /></p>
+<h2 id="supported-formats">Supported formats</h2>
+<h3 id="input">Input</h3>
+<table>
+<thead>
+<tr>
+<th>file extension</th>
+<th>format description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.ufo</code></td>
+<td><a href="http://unifiedfontobject.org/">Unified Font Object (UFO)</a></td>
+</tr>
+<tr>
+<td><code>.otf</code></td>
+<td><a href="http://docs.microsoft.com/en-us/typography/opentype/spec/">OpenType CFF</a></td>
+</tr>
+<tr>
+<td><code>.ttf</code></td>
+<td><a href="http://developer.apple.com/fonts/TrueType-Reference-Manual/">OpenType TTF</a></td>
+</tr>
+<tr>
+<td><code>.designSpace</code></td>
+<td><a href="http://github.com/fonttools/fonttools/tree/master/Doc/source/designspaceLib">DesignSpaceDocument</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="output">Output</h3>
+<table>
+<thead>
+<tr>
+<th>file extension</th>
+<th>format description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.otf</code></td>
+<td><a href="http://docs.microsoft.com/en-us/typography/opentype/spec/">OpenType CFF</a></td>
+</tr>
+<tr>
+<td><code>.ttf</code></td>
+<td><a href="http://developer.apple.com/fonts/TrueType-Reference-Manual/">OpenType TTF</a></td>
+</tr>
+<tr>
+<td><code>.pfa</code></td>
+<td><a href="http://www.adobe.com/content/dam/acom/en/devnet/font/pdfs/T1_SPEC.pdf">PostScript Type 1</a></td>
+</tr>
+<tr>
+<td><code>.vfb</code></td>
+<td><a href="http://www.fontlab.com/font-editor/fontlab-studio/">FontLab Studio 5</a>*</td>
+</tr>
+<tr>
+<td><code>.woff</code></td>
+<td><a href="http://www.w3.org/TR/WOFF/">Web Open Font Format 1</a></td>
+</tr>
+<tr>
+<td><code>.woff2</code></td>
+<td><a href="http://www.w3.org/TR/WOFF2/">Web Open Font Format 2</a></td>
+</tr>
+<tr>
+<td><code>.eot</code></td>
+<td><a href="http://www.w3.org/Submission/EOT/">Embedded OpenType Format</a></td>
+</tr>
+<tr>
+<td><code>.svg</code></td>
+<td><a href="http://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/SVG_fonts">SVG font</a></td>
+</tr>
+<tr>
+<td><code>.ttf</code></td>
+<td><a href="http://docs.microsoft.com/en-us/typography/opentype/spec/">OpenType Variable Font</a></td>
+</tr>
+</tbody>
+</table>
+<p>* requires <a href="#">vfb2ufo</a></p>
+<h2 id="table-of-contents">Table of Contents</h2>
 <ul>
-<li>supports UFO, OpenType (TTF/CFF) and designSpace files as input</li>
-<li>generates .otf .ttf .pfa .vfb .woff .woff2 .eot .svg &amp; variable fonts</li>
-</ul>
-<h2 id="documentation">Documentation</h2>
-<ul>
+<li><a href="#supported-formats">Supported formats</a></li>
 <li><a href="#fonts">Fonts</a></li>
 <li><a href="#web-fonts">Web fonts</a></li>
 <li><a href="#batch-generate">Batch generate</a></li>
@@ -23,8 +98,6 @@
 <li><a href="#binary-merge">Binary Merge</a></li>
 <li><a href="#settings">Settings</a></li>
 </ul>
-<p>Once installed, Batch will add itself to the <em>File</em> menu:</p>
-<p><img alt="" src="imgs/batch-menu.png" /></p>
 <h2 id="fonts">Fonts</h2>
 <p>Use the <em>Fonts</em> section to choose which fonts to use as input.</p>
 <p><img alt="" src="imgs/fonts.png" /></p>
@@ -39,7 +112,7 @@
 <h3 id="options">Options</h3>
 <dl>
   <dt>add open fonts</dt>
-  <dd>Use the toolbar button *Add Open Fonts* to add all open fonts to the list.</dd>
+  <dd>Use the toolbar button <em>Add Open Fonts</em> to add all open fonts to the list.</dd>
   <dt>UFOs folder</dt>
   <dd>If a folder is provided, Batch will search for all UFOs inside it.</dd>
   <dt>designSpace files</dt>

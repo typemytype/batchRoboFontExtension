@@ -1,24 +1,64 @@
 Batch
 =====
 
-**Batch is a RoboFont extension to generate binary fonts in batch.**
+A RoboFont extension to generate binary fonts in batch.
 
-- supports UFO, OpenType (TTF/CFF) and designSpace files as input
-- generates .otf .ttf .pfa .vfb .woff .woff2 .eot .svg & variable fonts
+Once installed, Batch will add itself to the *File* menu:
 
-## Documentation
+![](imgs/batch-menu.png)
 
+
+Supported formats
+-----------------
+
+### Input
+
+| file extension | format description |
+|-|-|
+| `.ufo` | [Unified Font Object (UFO)][UFO] |
+| `.otf` | [OpenType CFF][OpenType] | 
+| `.ttf` | [OpenType TTF][TrueType] |
+| `.designSpace` | [DesignSpaceDocument][designSpace] |
+
+### Output
+
+| file extension | format description |
+|-|-|
+| `.otf` | [OpenType CFF][OpenType] |
+| `.ttf` | [OpenType TTF][TrueType] |
+| `.pfa` | [PostScript Type 1][Type1] |
+| `.vfb` | [FontLab Studio 5][vfb]* | 
+| `.woff` | [Web Open Font Format 1][WOFF1] |
+| `.woff2` | [Web Open Font Format 2][WOFF2] |
+| `.eot` | [Embedded OpenType Format][EOT] |
+| `.svg` | [SVG font] |
+| `.ttf` | [OpenType Variable Font][OpenType] |
+
+\* requires [vfb2ufo](#)
+
+[UFO]: http://unifiedfontobject.org/
+[OpenType]: http://docs.microsoft.com/en-us/typography/opentype/spec/
+[TrueType]: http://developer.apple.com/fonts/TrueType-Reference-Manual/
+[designSpace]: http://github.com/fonttools/fonttools/tree/master/Doc/source/designspaceLib
+[Type1]: http://www.adobe.com/content/dam/acom/en/devnet/font/pdfs/T1_SPEC.pdf
+[vfb]: http://www.fontlab.com/font-editor/fontlab-studio/
+[vfb2ufo]: http://blog.fontlab.com/font-utility/vfb2ufo/
+[WOFF1]: http://www.w3.org/TR/WOFF/
+[WOFF2]: http://www.w3.org/TR/WOFF2/
+[EOT]: http://www.w3.org/Submission/EOT/
+[SVG font]: http://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/SVG_fonts
+[RoboFont Mechanic]: #
+
+Table of Contents
+-----------------
+
+- [Supported formats](#supported-formats)
 - [Fonts](#fonts)
 - [Web fonts](#web-fonts)
 - [Batch generate](#batch-generate)
 - [Variable Fonts](#variable-fonts)
 - [Binary Merge](#binary-merge)
 - [Settings](#settings)
-
-
-Once installed, Batch will add itself to the *File* menu:
-
-![](imgs/batch-menu.png)
 
 
 Fonts
@@ -41,7 +81,7 @@ The following types of input files are supported:
 
 <dl>
   <dt>add open fonts</dt>
-  <dd>Use the toolbar button *Add Open Fonts* to add all open fonts to the list.</dd>
+  <dd>Use the toolbar button <em>Add Open Fonts</em> to add all open fonts to the list.</dd>
   <dt>UFOs folder</dt>
   <dd>If a folder is provided, Batch will search for all UFOs inside it.</dd>
   <dt>designSpace files</dt>
