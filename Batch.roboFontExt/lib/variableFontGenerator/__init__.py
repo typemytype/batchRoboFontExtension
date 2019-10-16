@@ -353,9 +353,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
     def makeMasterOnDefaultLocation(self):
         # create default location
         # which is on the crossing of all axis
-        defaultLocation = Location()
-        for axis in self.axes:
-            defaultLocation[axis.name] = axis.default
+        #defaultLocation = Location()
+        defaultLocation = self.newDefaultLocation(bend=True)
         # compare default location with locations all of sources
         for sourceDescriptor in self.sources:
             if defaultLocation == sourceDescriptor.location:
@@ -408,7 +407,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 # but it is a bit of a guess.
                 _, mutator = buildMutator(glyphItems)
                 # use the repair mutator to generate an instance at the default location
-                result = mutator.makeInstance(Location(self.defaultLoc))
+                result = mutator.makeInstance(Location(self.newDefaultLocation()))
                 # round if necessary
                 if self.roundGeometry:
                     result.round()
