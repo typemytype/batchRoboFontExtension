@@ -8,7 +8,7 @@ def generateSVG(source, dest):
     try:
         extractUFO(source, font)
         convertUFOToSVGFont(font, dest)
-    except:
+    except Exception:
         return ("Failed to generate SVG.", "")
     return ("", "")
 
