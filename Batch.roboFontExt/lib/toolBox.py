@@ -9,7 +9,7 @@ from lib.formatters import PathFormatter
 from lib.tools.misc import walkDirectoryForFile
 from lib.settings import doodleSupportedExportFileTypes
 
-from mojo.UI import AccordionView
+from mojo.UI import AccordionView, getDefault, setDefault
 from mojo.extensions import getExtensionDefault, setExtensionDefault, ExtensionBundle
 from mojo.roboFont import AllFonts
 
@@ -35,6 +35,7 @@ class Settings(BaseWindowController):
 
         data = getExtensionDefault(self.identifier, dict())
         updateWithDefaultValues(data, defaultOptions)
+        data["debug"] = getDefault("Batch.Debug", False)
 
         width = 380
         height = 1000
@@ -49,6 +50,9 @@ class Settings(BaseWindowController):
 
         y += 30
         self.w.keepFileNames = CheckBox((10, y, -10, 22), "Keep file names (otherwise use familyName-styleName)", value=data["keepFileNames"])
+
+        y += 30
+        self.w.debug = CheckBox((10, y, -10, 22), "Debug", value=data["debug"])
 
         y += 35
         self.w.saveButton = Button((-100, y, -10, 20), "Save settings", callback=self.saveCallback, sizeStyle="small")
@@ -68,6 +72,8 @@ class Settings(BaseWindowController):
     def resetCallback(self, sender):
         self.w.threaded.set(defaultOptions["threaded"])
         self.w.exportInFolders.set(defaultOptions["exportInFolders"])
+        self.w.keepFileNames.set(defaultOptions["keepFileNames"])
+        self.w.debug.set(False)
 
     def saveCallback(self, sender):
         data = {
@@ -76,6 +82,7 @@ class Settings(BaseWindowController):
             "keepFileNames": self.w.keepFileNames.get()
         }
         setExtensionDefault(self.identifier, data)
+        setDefault("Batch.Debug", self.w.debug.get())
         self.closeCallback(sender)
 
     def closeCallback(self, sender):
