@@ -590,16 +590,17 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     if kerningInstance is None:
                         location = self.locations[sourceDescriptor.name]
                         kerningInstance = kerningMutator.makeInstance(Location(location))
-                    master.kerning[pair] = kerningInstance[pair]
+                        kerningCache[sourceDescriptor.name] = kerningInstance
+                    font.kerning[pair] = kerningInstance[pair]
                     # check pairs on group kerning
                     side1, side2 = pair
-                    if side1.startswith(side1Prefix) and side1 not in master.groups:
+                    if side1.startswith(side1Prefix) and side1 not in font.groups:
                         # add a group
-                        master.groups[side1] = allGroups[side1]
+                        font.groups[side1] = allGroups[side1]
                         missingGroups.append(side1)
-                    if side2.startswith(side2Prefix) and side2 not in master.groups:
+                    if side2.startswith(side2Prefix) and side2 not in font.groups:
                         # add a group
-                        master.groups[side2] = allGroups[side2]
+                        font.groups[side2] = allGroups[side2]
                         missingGroups.append(side2)
                 if missingPairs:
                     self.generateReport.write("Adding missing kerning pairs in %s %s: %s" % (font.info.familyName, font.info.styleName, ", ".join(["(%s, %s)" % (s1, s2) for s1, s2 in missingPairs])))
