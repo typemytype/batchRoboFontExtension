@@ -349,6 +349,10 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 sourceDescriptor.path = "%s-%s%s" % (path, sourceDescriptor.layerName, ext)
                 sourceDescriptor.filename = None
                 sourceDescriptor.layerName = None
+                if getDefault("Batch.Debug", False):
+                    masterFont = self.fonts[sourceDescriptor.name]
+                    layerPath = os.path.join(os.path.dirname(self.path), sourceDescriptor.path)
+                    masterFont.save(layerPath)
 
     def makeMasterOnDefaultLocation(self):
         # create default location
@@ -458,7 +462,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             self.makeGlyphOutlinesCompatible(glyphs)
         if getDefault("Batch.Debug", False):
             for k, m in self.masters.items():
-                tempPath = m.font.path.replace(".ufo", "_%s.ufo" % k)
+                tempPath = os.path.join(os.path.dirname(m.font.path), "%s_%s" % (k, os.path.basename(m.font.path)))
                 m.font.save(tempPath)
 
         if self.compileGlyphOrder is None:
@@ -652,7 +656,6 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                         tempFont = defcon.Font(tempSavePath)
                         tempFont.layers.defaultLayer = tempFont.layers[master.name]
                         tempFont.save()
-                        self._generatedFiles.add(tempSavePath)
             except Exception:
                 import traceback
                 result = traceback.format_exc()
@@ -673,6 +676,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             # save the variation font
             varFont.save(outPutPath)
         except Exception:
+            if getDefault("Batch.Debug", False):
+                print("masterBinaryPaths:", masterBinaryPaths)
             import traceback
             result = traceback.format_exc()
             print(result)
