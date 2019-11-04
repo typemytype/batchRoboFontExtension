@@ -358,7 +358,6 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
     def makeMasterOnDefaultLocation(self):
         # create default location
         # which is on the crossing of all axis
-        #defaultLocation = Location()
         defaultLocation = self.newDefaultLocation(bend=True)
         # compare default location with locations all of sources
         for sourceDescriptor in self.sources:
