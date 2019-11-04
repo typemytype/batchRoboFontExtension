@@ -347,6 +347,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             if sourceDescriptor.layerName is not None:
                 path, ext = os.path.splitext(sourceDescriptor.path)
                 sourceDescriptor.path = "%s-%s%s" % (path, sourceDescriptor.layerName, ext)
+                sourceDescriptor.styleName = "%s %s" % (sourceDescriptor.styleName, sourceDescriptor.layerName)
                 sourceDescriptor.filename = None
                 sourceDescriptor.layerName = None
                 if getDefault("Batch.Debug", False):
