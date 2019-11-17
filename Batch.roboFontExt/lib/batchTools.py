@@ -69,7 +69,7 @@ class Report(object):
             self.write(str(i))
 
     def save(self, path):
-        with open(path, "w") as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write(self.get())
 
     def get(self):
