@@ -628,7 +628,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         options.glyphOrder = self.compileGlyphOrder
         options.useMacRoman = False
         options.fdk = CurrentFDK()
-        options.generateFeaturesWithFontTools = False
+        options.generateFeaturesWithFontTools = True
 
         self.generateReport.newLine()
         self.generateReport.writeTitle("Generate TTF", "'")
