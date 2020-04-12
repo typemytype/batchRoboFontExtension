@@ -15,7 +15,11 @@ from fontTools import varLib
 from fontTools.varLib.featureVars import addFeatureVariations
 from fontTools.varLib.models import normalizeLocation
 
-from cu2qu.ufo import fonts_to_quadratic
+try:
+    # cu2qu moved to fontTools
+    from fontTools.cu2qu.ufo import fonts_to_quadratic
+except ImportError:
+    from cu2qu.ufo import fonts_to_quadratic
 
 from mutatorMath.objects.location import Location
 from mutatorMath.objects.mutator import buildMutator
