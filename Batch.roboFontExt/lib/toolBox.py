@@ -1,4 +1,4 @@
-from AppKit import *
+import AppKit
 import os
 
 from vanilla import *
@@ -92,7 +92,7 @@ class Settings(BaseWindowController):
 genericListPboardType = "genericListPboardType"
 
 
-class BatchPathWrapper(NSObject):
+class BatchPathWrapper(AppKit.NSObject):
 
     def __new__(cls, *arg, **kwargs):
         return cls.alloc().init()
@@ -127,7 +127,7 @@ class ToolBox(BaseWindowController):
                 imageNamed="toolbarScriptNew",
                 callback=self.toolbarAddOpenFonts,
             ),
-            dict(itemIdentifier=NSToolbarFlexibleSpaceItemIdentifier),
+            dict(itemIdentifier=AppKit.NSToolbarFlexibleSpaceItemIdentifier),
 
             dict(
                 itemIdentifier="Help",
@@ -157,14 +157,14 @@ class ToolBox(BaseWindowController):
             allowsMultipleSelection=True,
             enableDelete=True,
             dragSettings=dict(type=genericListPboardType, callback=self.dragCallback),
-            selfDropSettings=dict(type=genericListPboardType, operation=NSDragOperationMove, callback=self.selfDropCallback),
+            selfDropSettings=dict(type=genericListPboardType, operation=AppKit.NSDragOperationMove, callback=self.selfDropCallback),
             selfApplicationDropSettings=dict(
-                type=NSFilenamesPboardType,
-                operation=NSDragOperationCopy,
+                type=AppKit.NSFilenamesPboardType,
+                operation=AppKit.NSDragOperationCopy,
                 callback=self.dropPathCallback),
             otherApplicationDropSettings=dict(
-                type=NSFilenamesPboardType,
-                operation=NSDragOperationCopy,
+                type=AppKit.NSFilenamesPboardType,
+                operation=AppKit.NSDragOperationCopy,
                 callback=self.dropPathCallback),
         )
 

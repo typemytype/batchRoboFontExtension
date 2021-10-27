@@ -2,7 +2,7 @@ import os
 import tempfile
 import shutil
 
-from AppKit import *
+import AppKit
 
 import string
 import re
@@ -284,7 +284,7 @@ class WebFormats(Group):
         y += 30
 
         self.convert = Button((-100, -30, -10, 22), "Generate", callback=self.convertCallback)
-        self.settings = ImageButton((-130, -28, 20, 20), bordered=False, imageNamed=NSImageNameSmartBadgeTemplate, callback=self.settingsCallback)
+        self.settings = ImageButton((-130, -28, 20, 20), bordered=False, imageNamed=AppKit.NSImageNameSmartBadgeTemplate, callback=self.settingsCallback)
 
         self.height = y
 

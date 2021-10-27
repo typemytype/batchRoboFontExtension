@@ -1,7 +1,5 @@
 import os
 
-from AppKit import *
-
 from fontTools.ttLib import TTFont
 
 from mojo.compile import executeCommand

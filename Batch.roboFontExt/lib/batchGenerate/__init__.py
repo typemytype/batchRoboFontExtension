@@ -1,4 +1,3 @@
-from AppKit import *
 import os
 import time
 

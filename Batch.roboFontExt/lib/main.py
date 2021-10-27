@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from AppKit import *
+import AppKit
 
 try:
     # RF 2.0
@@ -16,7 +16,7 @@ class BatchMenu(object):
 
     def __init__(self):
         title = "Batch..."
-        mainMenu = NSApp().mainMenu()
+        mainMenu = AppKit.NSApp().mainMenu()
         fileMenu = mainMenu.itemWithTitle_("File")
 
         if not fileMenu:
@@ -30,7 +30,7 @@ class BatchMenu(object):
         index = fileMenu.indexOfItemWithTitle_("Generate Font")
         self.target = CallbackWrapper(self.callback)
 
-        newItem = NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(title, "action:", "")
+        newItem = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_(title, "action:", "")
         newItem.setTarget_(self.target)
 
         fileMenu.insertItem_atIndex_(newItem, index + 1)
