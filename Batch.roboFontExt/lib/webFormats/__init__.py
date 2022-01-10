@@ -446,10 +446,10 @@ class WebFormats(Group):
 
         # convert to woff2
         if saveWOFF2:
-            if saveWOFFFormat == WOFF_TTF_FORMAT:
+            if saveWOFF2Format == WOFF_TTF_FORMAT:
                 func = self._getTempTTF
                 reportFormat = "TTF"
-            elif saveWOFFFormat == WOFF_OTF_FORMAT:
+            elif saveWOFF2Format == WOFF_OTF_FORMAT:
                 func = self._getTempOTF
                 reportFormat = "OTF"
             report.writeTitle("Build WOFF2 (%s)" % reportFormat, "'")
