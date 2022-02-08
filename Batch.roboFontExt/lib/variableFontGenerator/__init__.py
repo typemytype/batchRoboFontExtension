@@ -424,6 +424,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 defaultMaster.newGlyph(glyphName)
                 glyph = defaultMaster[glyphName]
                 result.extractGlyph(glyph, onlyGeometry=True)
+                glyph.unicodes = list(result.unicodes)
 
             glyphs = []
             # fill all masters with missing glyphs
@@ -461,6 +462,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     # add the glyph to the master
                     master.newGlyph(glyphName)
                     result.extractGlyph(master[glyphName], onlyGeometry=True)
+                    glyph.unicodes = list(result.unicodes)
                     glyphs.append(master[glyphName])
             # optimize glyph contour data from all masters
             self.makeGlyphOutlinesCompatible(glyphs)
