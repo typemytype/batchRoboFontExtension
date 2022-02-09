@@ -461,6 +461,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     self.generateReport.write("Adding missing glyph '%s' in master '%s %s (%s)'" % (glyphName, master.font.info.familyName, master.font.info.styleName, master.name))
                     # add the glyph to the master
                     master.newGlyph(glyphName)
+                    glyph = master[glyphName]
                     result.extractGlyph(master[glyphName], onlyGeometry=True)
                     glyph.unicodes = list(result.unicodes)
                     glyphs.append(master[glyphName])
