@@ -462,9 +462,9 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                     # add the glyph to the master
                     master.newGlyph(glyphName)
                     glyph = master[glyphName]
-                    result.extractGlyph(master[glyphName], onlyGeometry=True)
+                    result.extractGlyph(glyph, onlyGeometry=True)
                     glyph.unicodes = list(result.unicodes)
-                    glyphs.append(master[glyphName])
+                    glyphs.append(glyph)
             # optimize glyph contour data from all masters
             self.makeGlyphOutlinesCompatible(glyphs)
         if getDefault("Batch.Debug", False):
