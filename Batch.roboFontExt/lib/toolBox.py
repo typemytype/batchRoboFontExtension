@@ -143,7 +143,7 @@ class ToolBox(BaseWindowController):
             ),
         ]
 
-        self.w.addToolbar(toolbarIdentifier="ToolBoxToolbar", toolbarItems=toolbarItems, addStandardItems=False)
+        self.w.addToolbar(toolbarIdentifier="ToolBoxToolbar", toolbarItems=toolbarItems, addStandardItems=False, toolbarStyle="preference")
 
         y = 10
 
