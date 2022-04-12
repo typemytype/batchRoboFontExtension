@@ -143,7 +143,10 @@ class ToolBox(BaseWindowController):
             ),
         ]
 
-        self.w.addToolbar(toolbarIdentifier="ToolBoxToolbar", toolbarItems=toolbarItems, addStandardItems=False, toolbarStyle="preference")
+        self.w.addToolbar(toolbarIdentifier="ToolBoxToolbar", toolbarItems=toolbarItems, addStandardItems=False)
+        # some older RF have older vanilla with no support for toolbarStyle
+        if hasattr(self.w, "setToolbarStyle"):
+            self.w.setToolbarStyle("preference")
 
         y = 10
 
