@@ -167,7 +167,7 @@ def convertToEot(ttfPath, dest):
 
 
 def convertToSVG(ttfPath, dest):
-    SVGBuilder(ttfPath, dest)
+    return SVGBuilder(ttfPath, dest)
 
 
 htmlPreviewDefault = string.ascii_letters + string.digits
@@ -478,7 +478,11 @@ class WebFormats(Group):
             report.indent()
             report.write("path: %s" % svgPath)
             buildTree(fontDir)
-            convertToSVG(path, svgPath)
+            message = convertToSVG(path, svgPath)
+            if message:
+                report.indent()
+                report.write(message)
+                report.dedent()
             report.dedent()
             report.newLine()
 
