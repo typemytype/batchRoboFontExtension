@@ -635,7 +635,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         options.glyphOrder = self.compileGlyphOrder
         options.useMacRoman = False
         options.fdk = CurrentFDK()
-        options.generateFeaturesWithFontTools = True
+        # the generate features with fontTools flag is a users decision and should be extracted from the lib
+        # options.generateFeaturesWithFontTools = True
 
         self.generateReport.newLine()
         self.generateReport.writeTitle("Generate TTF", "'")
