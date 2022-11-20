@@ -7,6 +7,7 @@ import defcon
 
 from ufoProcessor import DesignSpaceProcessor
 from ufoProcessor.emptyPen import checkGlyphIsEmpty
+import ufoProcessor
 
 import fontCompiler.objects as compilerObjects
 from fontCompiler.compiler import generateFont, FontCompilerOptions
@@ -41,6 +42,8 @@ class BatchVariableFontGenerate(Group):
 
     def __init__(self, posSize, controller):
         super(BatchVariableFontGenerate, self).__init__(posSize)
+        print('BatchVariableFontGenerate')
+        print('ufoProcessor', ufoProcessor.__file__, ufoProcessor._version.version)
         self.controller = controller
 
         y = 10
@@ -62,6 +65,19 @@ class BatchVariableFontGenerate(Group):
             value = getattr(self, key).get()
             setExtensionDefault("%s.%s" % (settingsIdentifier, key), value)
 
+    def _discreteLocationToNiceName(self, discreteLocation):
+        # make a nicer readable name from a discreteLocation dict
+        if discreteLocation is None:
+            return ""
+        t = ['Loc']
+        axisNames = list(discreteLocation.keys())
+        axisNames.sort()
+        for name in axisNames:
+            t.append(f'{name}{discreteLocation[name]}')
+        niceName = "_".join(t)
+        print(f'_discreteLocationToNiceName {niceName}')
+        return niceName
+
     def run(self, destDir, progress, report=None):
         paths = self.controller.get(supportedExtensions=["designspace"], flattenDesignSpace=False)
 
@@ -75,20 +91,27 @@ class BatchVariableFontGenerate(Group):
         report.newLine()
 
         for path in paths:
-            fileName = os.path.basename(path)
-            outputPath = os.path.join(destDir, "%s.ttf" % os.path.splitext(fileName)[0])
-            report.write("source: %s" % path)
-            report.write("path: %s" % outputPath)
-            report.indent()
 
-            progress.update("Generating design space ... %s" % fileName)
+            designSpace = BatchDesignSpaceProcessor(path, ufoVersion)
+            for discreteLocation in designSpace.getDiscreteLocations():
 
-            desingSpace = BatchDesignSpaceProcessor(path, ufoVersion)
-            desingSpace.generateVariationFont(outputPath, autohint=autohint, releaseMode=True, fitToExtremes=fitToExtremes, report=report)
-            report.dedent()
+                fileName = os.path.basename(path)
+                locationTag = self._discreteLocationToNiceName(discreteLocation)
+                outputPath = os.path.join(destDir, f"{os.path.splitext(fileName)[0]}_{locationTag}.ttf")
+                report.write("source: %s" % path)
+                report.write("path: %s" % outputPath)
+                #report.indent()
 
+                progress.update("Generating design space ... %s" % fileName)
+
+                report.write(f"generating discrete location: {discreteLocation}")
+                try:
+                    designSpace.generateVariationFont(outputPath, autohint=autohint, releaseMode=True, fitToExtremes=fitToExtremes, report=report, discreteLocation=discreteLocation)
+                finally:
+                    report.dedent()
         reportPath = os.path.join(destDir, "Batch Generated Variable Fonts Report.txt")
         report.save(reportPath)
+        print(f"report saved at {reportPath}")
 
     def _generate(self, destDir):
         if not destDir:
@@ -97,7 +120,7 @@ class BatchVariableFontGenerate(Group):
         self.controller.runTask(self.run, destDir=destDir)
 
     def generateCallback(self, sender):
-        if not self.controller.hasSourceFonts("No Design Space to Generate.", "Drop or add desing space files to generate from.", supportedExtensions=["designspace"], flattenDesignSpace=False):
+        if not self.controller.hasSourceFonts("No Design Space to Generate.", "Drop or add design space files to generate from.", supportedExtensions=["designspace"], flattenDesignSpace=False):
             return
         self.controller.showGetFolder(self._generate)
 
@@ -257,7 +280,13 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
     def __init__(self, path, ufoVersion=2):
         super(BatchDesignSpaceProcessor, self).__init__(ufoVersion=ufoVersion)
         self.useVarlib = True
+        print("hello from BatchDesignSpaceProcessor")
         self.read(path)
+        if hasattr(self, "getOrderedDiscreteAxes"):
+            discreteAxes = self.getOrderedDiscreteAxes()
+            print(f"{path} has discreteAxes: {[axis.name for axis in discreteAxes]}")
+        else:
+            print("the current version of ufoProcessor does not support discrete axes")
 
     def generateUFO(self):
         # make sure it only generates all instances only once
@@ -279,9 +308,9 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         """
         return [instanceDescriptor.path for instanceDescriptor in self.instances if instanceDescriptor.path is not None]
 
-    def generateVariationFont(self, destPath, autohint=False, fitToExtremes=False, releaseMode=True, glyphOrder=None, report=None):
+    def generateVariationFont(self, destPath, autohint=False, fitToExtremes=False, releaseMode=True, glyphOrder=None, report=None, discreteLocation=None):
         """
-        Generate a variation font based on a desingSpace.
+        Generate a variation font based on a designSpace.
         """
         if report is None:
             report = Report()
@@ -292,21 +321,21 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
 
         self.loadFonts()
         self.loadLocations()
-        self.loadMasters()
+        self.loadMasters(discreteLocation=discreteLocation)
 
         self._generatedFiles = set()
-
-        self.makeMasterGlyphsCompatible()
-        self.decomposedMixedGlyphs()
-        self.makeMasterGlyphsQuadractic()
-        self.makeMasterKerningCompatible()
-        self.makeMasterOnDefaultLocation()
-        self.makeLayerMaster()
         try:
+            self.makeMasterGlyphsCompatible(discreteLocation=discreteLocation)
+            self.decomposedMixedGlyphs()
+            self.makeMasterGlyphsQuadractic()
+            self.makeMasterKerningCompatible()
+            self.makeMasterOnDefaultLocation()
+            self.makeLayerMaster()
             self._generateVariationFont(destPath)
         except Exception:
             import traceback
             result = traceback.format_exc()
+            report.write(f"Traceback: {result}")
             print(result)
         finally:
             if not getDefault("Batch.Debug", False):
@@ -329,12 +358,19 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             location = Location(sourceDescriptor.location)
             self.locations[sourceDescriptor.name] = location
 
-    def loadMasters(self):
+    def loadMasters(self, discreteLocation=None):
         """
         Store all masters, layers in a single dict.
+        Only the sources for the discreteLocation are loaded.
         """
         self.masters = dict()
-        for sourceDescriptor in self.sources:
+        candidateSources = []
+        if discreteLocation is not None:
+            for sourceDescriptor in self.findSourceDescriptorsForDiscreteLocation(discreteLocDict=discreteLocation):
+                candidateSources.append(sourceDescriptor)
+        else:
+            candidateSources = self.sources
+        for sourceDescriptor in candidateSources:
             masterFont = self.fonts[sourceDescriptor.name]
             if sourceDescriptor.layerName is None:
                 layer = masterFont.layers.defaultLayer
@@ -342,6 +378,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
                 layer = masterFont.layers[sourceDescriptor.layerName]
             if layer is not None:
                 self.masters[sourceDescriptor.name] = layer
+        print(f"loadMasters {self.masters} using discreteLocation {discreteLocation}")
 
     def makeLayerMaster(self):
         """
@@ -380,7 +417,7 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.generateReport.dedent()
         self.generateReport.newLine()
 
-    def makeMasterGlyphsCompatible(self):
+    def makeMasterGlyphsCompatible(self, discreteLocation=None):
         """
         Update all masters with missing glyphs.
         All Masters must have the same glyphs.
@@ -392,8 +429,10 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         for master in self.masters.values():
             glyphNames.extend(master.keys())
         glyphNames = set(glyphNames)
-        # get the default master
-        defaultMaster = self.masters[self.default.name]
+        # get the default master for this particular discrete location
+        defaultSourceDescriptor =  self.findDefault(discreteLocation=discreteLocation)
+        print(f'makeMasterGlyphsCompatible: defaultSourceDescriptor for {discreteLocation} {defaultSourceDescriptor}')
+        defaultMaster = self.masters[defaultSourceDescriptor.name]
         # loop over all glyphName
         for glyphName in glyphNames:
             # first check if the default master has this glyph
@@ -430,8 +469,10 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             # fill all masters with missing glyphs
             # and collect all glyphs from all masters
             # to send them to optimize contour data
-            for sourceDescriptor in self.sources:
-                master = self.masters[sourceDescriptor.name]
+            #for sourceDescriptor in self.sources:
+            for sourceDescriptorName in self.masters.keys():
+                #master = self.masters[sourceDescriptor.name]
+                master = sourceDescriptor = self.masters[sourceDescriptorName]
                 hasGlyph = False
                 if glyphName in master:
                     # Glyph is present in the master.
@@ -644,8 +685,9 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         # map all master ufo paths to generated binaries
         masterBinaryPaths = VarLibMasterFinder()
         masterCount = 0
-        for sourceDescriptor in self.sources:
-            master = self.masters[sourceDescriptor.name]
+        #for sourceDescriptor in self.sources:
+        for sourceDescriptorName in self.masters.keys():
+            master = sourceDescriptor = self.masters[sourceDescriptorName]
             # get the output path
             outputPath = os.path.join(dirname, "temp_%02d_%s-%s-%s.ttf" % (masterCount, master.font.info.familyName, master.font.info.styleName, master.name))
             masterBinaryPaths[sourceDescriptor.path] = outputPath
