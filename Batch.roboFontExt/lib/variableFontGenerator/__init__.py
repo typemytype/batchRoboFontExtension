@@ -15,6 +15,7 @@ from fontCompiler.compiler import generateFont, FontCompilerOptions
 from fontTools import varLib
 from fontTools.varLib.featureVars import addFeatureVariations
 from fontTools.varLib.models import normalizeLocation
+from fontTools.designspaceLib.split import splitInterpolable
 
 try:
     # cu2qu moved to fontTools
@@ -34,6 +35,20 @@ from mojo.extensions import getExtensionDefault, setExtensionDefault
 from mojo.UI import getDefault
 
 from batchTools import settingsIdentifier, ufoVersion, Report
+
+
+def _discreteLocationToNiceName(discreteLocation):
+    # make a nicer readable name from a discreteLocation dict
+    if discreteLocation is None:
+        return ""
+    t = ['Loc']
+    axisNames = list(discreteLocation.keys())
+    axisNames.sort()
+    for name in axisNames:
+        t.append(f'{name}{discreteLocation[name]}')
+    niceName = "_".join(t)
+    #print(f'_discreteLocationToNiceName {niceName}')
+    return niceName
 
 
 class BatchVariableFontGenerate(Group):
@@ -65,19 +80,6 @@ class BatchVariableFontGenerate(Group):
             value = getattr(self, key).get()
             setExtensionDefault("%s.%s" % (settingsIdentifier, key), value)
 
-    def _discreteLocationToNiceName(self, discreteLocation):
-        # make a nicer readable name from a discreteLocation dict
-        if discreteLocation is None:
-            return ""
-        t = ['Loc']
-        axisNames = list(discreteLocation.keys())
-        axisNames.sort()
-        for name in axisNames:
-            t.append(f'{name}{discreteLocation[name]}')
-        niceName = "_".join(t)
-        print(f'_discreteLocationToNiceName {niceName}')
-        return niceName
-
     def run(self, destDir, progress, report=None):
         paths = self.controller.get(supportedExtensions=["designspace"], flattenDesignSpace=False)
 
@@ -96,7 +98,7 @@ class BatchVariableFontGenerate(Group):
             for discreteLocation in designSpace.getDiscreteLocations():
 
                 fileName = os.path.basename(path)
-                locationTag = self._discreteLocationToNiceName(discreteLocation)
+                locationTag = _discreteLocationToNiceName(discreteLocation)
                 outputPath = os.path.join(destDir, f"{os.path.splitext(fileName)[0]}_{locationTag}.ttf")
                 report.write("source: %s" % path)
                 report.write("path: %s" % outputPath)
@@ -319,42 +321,58 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self.compileSettingReleaseMode = releaseMode
         self.compileGlyphOrder = glyphOrder
 
-        self.loadFonts()
-        self.loadLocations()
-        self.loadMasters(discreteLocation=discreteLocation)
+        # loop here
+        variableFonts = self.getVariableFonts()
+        print("variableFonts", variableFonts)
 
-        self._generatedFiles = set()
-        try:
-            self.makeMasterGlyphsCompatible(discreteLocation=discreteLocation)
-            self.decomposedMixedGlyphs()
-            self.makeMasterGlyphsQuadractic()
-            self.makeMasterKerningCompatible()
-            self.makeMasterOnDefaultLocation()
-            self.makeLayerMaster()
-            self._generateVariationFont(destPath)
-        except Exception:
-            import traceback
-            result = traceback.format_exc()
-            report.write(f"Traceback: {result}")
-            print(result)
-        finally:
-            if not getDefault("Batch.Debug", False):
-                # remove generated files
-                for path in self._generatedFiles:
-                    if os.path.exists(path):
-                        if os.path.isdir(path):
-                            shutil.rmtree(path)
-                        else:
-                            os.remove(path)
+        for thisDiscreteLocation, thisSpace in splitInterpolable(self, expandLocations=False):
+            thisSpaceName = _discreteLocationToNiceName(thisDiscreteLocation)
+            thisSpacePath = os.path.join(os.path.dirname(destPath), f"subSpace_{thisSpaceName}.designspace")
+            thisSpace.write(thisSpacePath)
+
+            thisSpaceProcessor = self.__class__(path=thisSpacePath)
+            #thisSpaceProcessor.read(thisSpacePath)
+
+            print(f"preparing {thisDiscreteLocation} at {thisSpacePath}")
+
+            thisSpaceProcessor.loadFonts()
+            thisSpaceProcessor.loadLocations()
+            thisSpaceProcessor.loadMasters()
+
+            self._generatedFiles = set()
+            try:
+                thisSpaceProcessor.makeMasterGlyphsCompatible()
+                thisSpaceProcessor.decomposedMixedGlyphs()
+                thisSpaceProcessor.makeMasterGlyphsQuadractic()
+                thisSpaceProcessor.makeMasterKerningCompatible()
+                thisSpaceProcessor.makeMasterOnDefaultLocation()
+                thisSpaceProcessor.makeLayerMaster()
+
+                thisVFPath = thisSpacePath.replace(".designspace", ".ttf")
+                thisSpaceProcessor._generateVariationFont(thisVFPath)
+            except Exception:
+                import traceback
+                result = traceback.format_exc()
+                report.write(f"Traceback: {result}")
+                print(result)
+            finally:
+                if not getDefault("Batch.Debug", False):
+                    # remove generated files
+                    for path in self._generatedFiles:
+                        if os.path.exists(path):
+                            if os.path.isdir(path):
+                                shutil.rmtree(path)
+                            else:
+                                os.remove(path)
         return report
 
-    def loadLocations(self):
+    def loadLocations(self, discreteLocation=None):
         """
         Store all locations similary as the `.fonts` dict.
         The sourceDescriptor name is the key.
         """
         self.locations = dict()
-        for sourceDescriptor in self.sources:
+        for sourceDescriptor in self.findSourceDescriptorsForDiscreteLocation(discreteLocDict=discreteLocation):
             location = Location(sourceDescriptor.location)
             self.locations[sourceDescriptor.name] = location
 
@@ -685,7 +703,6 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         # map all master ufo paths to generated binaries
         masterBinaryPaths = VarLibMasterFinder()
         masterCount = 0
-        #for sourceDescriptor in self.sources:
         for sourceDescriptorName in self.masters.keys():
             master = sourceDescriptor = self.masters[sourceDescriptorName]
             # get the output path
@@ -718,8 +735,10 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             self.generateReport.dedent()
         self.generateReport.dedent()
         # optimize the design space for varlib
+        originalPath = self.path
         designSpacePath = os.path.join(os.path.dirname(self.path), "temp_%s" % os.path.basename(self.path))
         self.write(designSpacePath)
+        self.path = originalPath
         self._generatedFiles.add(designSpacePath)
         try:
             # let varLib build the variation font
