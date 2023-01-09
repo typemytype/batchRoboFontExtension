@@ -5,7 +5,11 @@ from vanilla import *
 
 import defcon
 
-from ufoProcessor import DesignSpaceProcessor
+import ufoProcessor.ufoOperator
+import importlib
+importlib.reload(ufoProcessor.ufoOperator)
+
+#from ufoProcessor.ufoOperator import UFOOperator
 from ufoProcessor.emptyPen import checkGlyphIsEmpty
 import ufoProcessor
 
@@ -260,7 +264,7 @@ class BatchLayer(compilerObjects.Layer):
     path = property(_get_path)
 
 
-class BatchDesignSpaceProcessor(DesignSpaceProcessor):
+class BatchDesignSpaceProcessor(ufoProcessor.ufoOperator.UFOOperator):
 
     """
     A subclass of a DesignSpaceProcessor with support for variation fonts.
@@ -281,6 +285,12 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
 
     def __init__(self, path, ufoVersion=2):
         super(BatchDesignSpaceProcessor, self).__init__(ufoVersion=ufoVersion)
+        self.generateReport = Report()
+        self.compileSettingAutohint = False
+        self.compileSettingReleaseMode = False
+        self.compileGlyphOrder = None
+        self._generatedFiles = set()
+
         self.useVarlib = True
         print("hello from BatchDesignSpaceProcessor")
         self.read(path)
@@ -742,6 +752,8 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
         self._generatedFiles.add(designSpacePath)
         try:
             # let varLib build the variation font
+            print("masterBinaryPaths", masterBinaryPaths)
+            print("designSpacePath", designSpacePath)
             varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths)
             # save the variation font
             varFont.save(outPutPath)
@@ -751,3 +763,27 @@ class BatchDesignSpaceProcessor(DesignSpaceProcessor):
             import traceback
             result = traceback.format_exc()
             print(result)
+
+
+if __name__ == "__main__":
+    path = "/Users/erik/code/ufoProcessor/Tests/ds5/ds5.designspace"
+    doc = BatchDesignSpaceProcessor(path)
+    # well that works
+    doc.generateUFO()
+    destDir = os.path.join(os.path.dirname(path), "VF_output")
+    if not os.path.exists(destDir):
+        os.makedirs(destDir)
+    
+    #doc.generateVariationFont()
+    fileName = os.path.basename(path)
+    for discreteLocation in doc.getDiscreteLocations():
+        print("discreteLocation", discreteLocation)
+        locationTag = _discreteLocationToNiceName(discreteLocation)
+        outputPath = os.path.join(destDir, f"{os.path.splitext(fileName)[0]}_{locationTag}.ttf")
+        autohint = False
+        fitToExtremes = False
+        report = None
+        print(outputPath)
+        doc.generateVariationFont(outputPath, autohint=autohint, releaseMode=True, fitToExtremes=fitToExtremes, discreteLocation=discreteLocation)
+    
+    
