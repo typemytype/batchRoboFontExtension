@@ -45,13 +45,13 @@ def _discreteLocationToNiceName(discreteLocation):
     # make a nicer readable name from a discreteLocation dict
     if discreteLocation is None:
         return ""
-    t = ['Loc']
+    t = []
     axisNames = list(discreteLocation.keys())
     axisNames.sort()
     for name in axisNames:
         t.append(f'{name}{discreteLocation[name]}')
     niceName = "_".join(t)
-    #print(f'_discreteLocationToNiceName {niceName}')
+    print(f'_discreteLocationToNiceName {discreteLocation} -> {niceName}')
     return niceName
 
 
@@ -322,7 +322,7 @@ class BatchDesignSpaceProcessor(ufoProcessor.ufoOperator.UFOOperator):
 
     def generateVariationFont(self, destPath, autohint=False, fitToExtremes=False, releaseMode=True, glyphOrder=None, report=None, discreteLocation=None):
         """
-        Generate a variation font based on a designSpace.
+        Generate all variation fonts available in a designSpace.
         """
         if report is None:
             report = Report()
@@ -332,10 +332,13 @@ class BatchDesignSpaceProcessor(ufoProcessor.ufoOperator.UFOOperator):
         self.compileGlyphOrder = glyphOrder
 
         # loop here
-        variableFonts = self.getVariableFonts()
-        print("variableFonts", variableFonts)
-
+        #variableFonts = self.getVariableFonts()
+        #print("variableFonts", variableFonts)
+        #for vf in variableFonts:
+        #    # this would be the place to add support for variableFontDescriptors
+            
         for thisDiscreteLocation, thisSpace in splitInterpolable(self, expandLocations=False):
+            # make a designspace file for the subSpace in thisSapce
             thisSpaceName = _discreteLocationToNiceName(thisDiscreteLocation)
             thisSpacePath = os.path.join(os.path.dirname(destPath), f"subSpace_{thisSpaceName}.designspace")
             thisSpace.write(thisSpacePath)
@@ -351,14 +354,15 @@ class BatchDesignSpaceProcessor(ufoProcessor.ufoOperator.UFOOperator):
 
             self._generatedFiles = set()
             try:
-                thisSpaceProcessor.makeMasterGlyphsCompatible()
-                thisSpaceProcessor.decomposedMixedGlyphs()
+                #thisSpaceProcessor.makeMasterGlyphsCompatible()
+                #thisSpaceProcessor.decomposedMixedGlyphs()
                 thisSpaceProcessor.makeMasterGlyphsQuadractic()
                 thisSpaceProcessor.makeMasterKerningCompatible()
                 thisSpaceProcessor.makeMasterOnDefaultLocation()
                 thisSpaceProcessor.makeLayerMaster()
 
                 thisVFPath = thisSpacePath.replace(".designspace", ".ttf")
+                print("_generateVariationFont thisVFPath", thisVFPath)
                 thisSpaceProcessor._generateVariationFont(thisVFPath)
             except Exception:
                 import traceback
@@ -394,8 +398,7 @@ class BatchDesignSpaceProcessor(ufoProcessor.ufoOperator.UFOOperator):
         self.masters = dict()
         candidateSources = []
         if discreteLocation is not None:
-            for sourceDescriptor in self.findSourceDescriptorsForDiscreteLocation(discreteLocDict=discreteLocation):
-                candidateSources.append(sourceDescriptor)
+            candidateSources = self.findSourceDescriptorsForDiscreteLocation(discreteLocDict=discreteLocation)
         else:
             candidateSources = self.sources
         for sourceDescriptor in candidateSources:
@@ -459,9 +462,11 @@ class BatchDesignSpaceProcessor(ufoProcessor.ufoOperator.UFOOperator):
         glyphNames = set(glyphNames)
         # get the default master for this particular discrete location
         defaultSourceDescriptor =  self.findDefault(discreteLocation=discreteLocation)
+        if defaultSourceDescriptor is None:
+            print(f"defaultSourceDescriptor for {discreteLocation} is None")
         print(f'makeMasterGlyphsCompatible: defaultSourceDescriptor for {discreteLocation} {defaultSourceDescriptor}')
         defaultMaster = self.masters[defaultSourceDescriptor.name]
-        # loop over all glyphName
+        # loop over all glyphNames
         for glyphName in glyphNames:
             # first check if the default master has this glyph
             if glyphName not in defaultMaster:
@@ -737,7 +742,7 @@ class BatchDesignSpaceProcessor(ufoProcessor.ufoOperator.UFOOperator):
             except Exception:
                 import traceback
                 result = traceback.format_exc()
-                print(result)
+                print("_generateVariationFont tb:", result)
             self.generateReport.newLine()
             self.generateReport.write("Generate %s %s (%s)" % (master.font.info.familyName, master.font.info.styleName, master.name))
             self.generateReport.indent()
@@ -752,8 +757,16 @@ class BatchDesignSpaceProcessor(ufoProcessor.ufoOperator.UFOOperator):
         self._generatedFiles.add(designSpacePath)
         try:
             # let varLib build the variation font
-            print("masterBinaryPaths", masterBinaryPaths)
-            print("designSpacePath", designSpacePath)
+            #print("masterBinaryPaths", masterBinaryPaths)
+            #print("designSpacePath", designSpacePath)
+            
+            print("")
+            debugDoc = ufoProcessor.ufoOperator.UFOOperator(designSpacePath)
+            #print(debugDoc)
+            for name in masterBinaryPaths.keys():
+                print(os.path.exists(name), name)
+            for s in debugDoc.sources:
+                print(s.path, masterBinaryPaths.get(s.path, "XX"))
             varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths)
             # save the variation font
             varFont.save(outPutPath)
@@ -769,11 +782,12 @@ if __name__ == "__main__":
     path = "/Users/erik/code/ufoProcessor/Tests/ds5/ds5.designspace"
     doc = BatchDesignSpaceProcessor(path)
     # well that works
+    
     doc.generateUFO()
     destDir = os.path.join(os.path.dirname(path), "VF_output")
     if not os.path.exists(destDir):
         os.makedirs(destDir)
-    
+        
     #doc.generateVariationFont()
     fileName = os.path.basename(path)
     for discreteLocation in doc.getDiscreteLocations():
@@ -785,5 +799,4 @@ if __name__ == "__main__":
         report = None
         print(outputPath)
         doc.generateVariationFont(outputPath, autohint=autohint, releaseMode=True, fitToExtremes=fitToExtremes, discreteLocation=discreteLocation)
-    
     
