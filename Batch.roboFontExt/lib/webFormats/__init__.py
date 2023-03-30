@@ -393,24 +393,35 @@ class WebFormats(Group):
         fileName += suffix
         fileName = fileName.replace(" ", "_")
 
+        # if Export in Sub Folder is selected, build a directory for each format
         if self.controller.exportInFolders():
-            fontDir = os.path.join(destDir, familyName.replace(" ", ""), styleName.replace(" ", ""))
+            otfDir = os.path.join(destDir, 'otf')
+            ttfDir = os.path.join(destDir, 'ttf')
+            woffDir = os.path.join(destDir, 'woff')
+            woff2Dir = os.path.join(destDir, 'woff2')
+            eotDir = os.path.join(destDir, 'eot')
+            svgDir = os.path.join(destDir, 'svg')
         else:
-            fontDir = destDir
+            otfDir = destDir
+            ttfDir = destDir
+            woffDir = destDir
+            woff2Dir = destDir
+            eotDir = destDir
+            svgDir = destDir
 
-        otfPath = os.path.join(fontDir, fileName + ".otf")
-        ttfPath = os.path.join(fontDir, fileName + ".ttf")
-        woffPath = os.path.join(fontDir, fileName + ".woff")
-        woff2Path = os.path.join(fontDir, fileName + ".woff2")
-        eotPath = os.path.join(fontDir, fileName + ".eot")
-        svgPath = os.path.join(fontDir, fileName + ".svg")
+        otfPath = os.path.join(otfDir, fileName + ".otf")
+        ttfPath = os.path.join(ttfDir, fileName + ".ttf")
+        woffPath = os.path.join(woffDir, fileName + ".woff")
+        woff2Path = os.path.join(woff2Dir, fileName + ".woff2")
+        eotPath = os.path.join(eotDir, fileName + ".eot")
+        svgPath = os.path.join(svgDir, fileName + ".svg")
 
         # save otf
         if saveOTF:
             report.writeTitle("Build OTF", "'")
             report.indent()
             report.write("path: %s" % otfPath)
-            buildTree(fontDir)
+            buildTree(otfDir)
             temp = self._getTempOTF(path, report=report, preserveTTFhints=preserveTTFhints)
             shutil.copyfile(temp, otfPath)
             report.dedent()
@@ -421,7 +432,7 @@ class WebFormats(Group):
             report.writeTitle("Build TTF", "'")
             report.indent()
             report.write("path: %s" % ttfPath)
-            buildTree(fontDir)
+            buildTree(ttfDir)
             temp = self._getTempTTF(path, report=report, preserveTTFhints=preserveTTFhints)
             shutil.copyfile(temp, ttfPath)
             report.dedent()
@@ -438,7 +449,7 @@ class WebFormats(Group):
             report.writeTitle("Build WOFF (%s)" % reportFormat, "'")
             report.indent()
             report.write("path: %s" % woffPath)
-            buildTree(fontDir)
+            buildTree(woffDir)
             temp = func(path, report=report, preserveTTFhints=preserveTTFhints)
             convertToWoff(temp, woffPath)
             report.dedent()
@@ -455,7 +466,7 @@ class WebFormats(Group):
             report.writeTitle("Build WOFF2 (%s)" % reportFormat, "'")
             report.indent()
             report.write("path: %s" % woff2Path)
-            buildTree(fontDir)
+            buildTree(woff2Dir)
             temp = func(path, report=report, preserveTTFhints=preserveTTFhints)
             convertToWoff2(temp, woff2Path)
             report.dedent()
@@ -466,7 +477,7 @@ class WebFormats(Group):
             report.writeTitle("Build EOT", "'")
             report.indent()
             report.write("path: %s" % eotPath)
-            buildTree(fontDir)
+            buildTree(eotDir)
             temp = self._getTempTTF(path, report=report, preserveTTFhints=preserveTTFhints)
             convertToEot(temp, eotPath)
             report.dedent()
@@ -477,7 +488,7 @@ class WebFormats(Group):
             report.writeTitle("Build SVG", "'")
             report.indent()
             report.write("path: %s" % svgPath)
-            buildTree(fontDir)
+            buildTree(svgDir)
             message = convertToSVG(path, svgPath)
             if message:
                 report.indent()
