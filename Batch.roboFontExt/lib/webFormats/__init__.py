@@ -179,7 +179,7 @@ class TTHAutoHintSettings(BaseWindowController):
 
     def __init__(self, parentWindow):
 
-        data = getExtensionDefault(self.identifier, dict())
+        data = getExtensionDefault(settingsIdentifier, dict())
         self.w = Sheet((470, 580), parentWindow=parentWindow)
 
         self.w.tabs = Tabs((10, 10, -10, -40), ["TTF AutoHint", "HTML Preview"])
@@ -218,7 +218,7 @@ class TTHAutoHintSettings(BaseWindowController):
 
     def saveCallback(self, sender):
         data = self.settings.get()
-        setExtensionDefault(self.identifier, data)
+        setExtensionDefault(settingsIdentifier, data)
         setExtensionDefault("%s.htmlPreview" % settingsIdentifier, self.html.get())
         setExtensionDefault("%s.globalCSSPreview" % settingsIdentifier, self.globalCss.get())
         self.closeCallback(sender)
