@@ -251,7 +251,7 @@ class WebFormats(Group):
         y = 10
         for setting in self.webSettings:
             key = setting.replace(" ", "_").lower()
-            checkBox = CheckBox((10, y, -10, 22), setting,
+            checkBox = CheckBox((10, y, -10, 22), setting.replace("Save ", "").upper(),
                                 value=getExtensionDefault("%s.%s" % (settingsIdentifier, key), True),
                                 callback=self.saveDefaults)
             setattr(self, key, checkBox)
