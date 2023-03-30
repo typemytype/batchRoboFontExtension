@@ -180,8 +180,8 @@ class ToolBox(BaseWindowController):
 
         descriptions = [
             dict(label="Fonts", view=self.paths, minSize=50, size=200, canResize=True, collapsed=False),
+            dict(label="Desktop Fonts", view=self.batchGenerate, size=self.batchGenerate.height, canResize=False, collapsed=False),
             dict(label="Web Fonts", view=self.webFormats, size=self.webFormats.height, canResize=False, collapsed=False),
-            dict(label="Batch Generate", view=self.batchGenerate, size=self.batchGenerate.height, canResize=False, collapsed=False),
             dict(label="Variable Fonts", view=self.batchVariableFontGenerate, size=self.batchVariableFontGenerate.height, canResize=False, collapsed=False),
             dict(label="Binary Merge", view=self.binaryMerger, size=240, canResize=self.binaryMerger.height, collapsed=False),
         ]
