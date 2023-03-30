@@ -6,7 +6,7 @@ from mojo.compile import executeCommand
 
 import vanilla
 
-from lib.UI.stepper import SliderEditIntStepper
+from lib.UI.stepper import SliderEditStepper
 
 from batchTools import updateWithDefaultValues
 
@@ -152,16 +152,16 @@ class TTFAutoHintGroup(vanilla.Group):
         y = 10
 
         self.hintRangeMininmumText = vanilla.TextBox((10, y+2, column, 22), "Hint Set Range Minimum:", alignment="right")
-        self.hintRangeMinimum = SliderEditIntStepper((column + gutter, y, -10, 22), self.options["hintRangeMinimum"], callback=self.hintRangeMinimumMaximumCallback)
+        self.hintRangeMinimum = SliderEditStepper((column + gutter, y, -10, 22), self.options["hintRangeMinimum"], callback=self.hintRangeMinimumMaximumCallback)
 
         y += 30
         self.hintRangeMaximumText = vanilla.TextBox((10, y+2, column, 22), "Hint Set Range Maximum:", alignment="right")
-        self.hintRangeMaximum = SliderEditIntStepper((column + gutter, y, -10, 22), self.options["hintRangeMaximum"], callback=self.hintRangeMinimumMaximumCallback)
+        self.hintRangeMaximum = SliderEditStepper((column + gutter, y, -10, 22), self.options["hintRangeMaximum"], callback=self.hintRangeMinimumMaximumCallback)
 
         y += 50
 
         self.hintingLimitText = vanilla.TextBox((10, y+2, column, 22), "Hinting Limit:", alignment="right")
-        self.hintingLimit = SliderEditIntStepper((column + gutter, y, -10, 22), self.options["hintingLimit"])
+        self.hintingLimit = SliderEditStepper((column + gutter, y, -10, 22), self.options["hintingLimit"])
 
         y += 28
         self.noHintingLimit = vanilla.CheckBox((column + gutter, y, -10, 22), "No Hinting Limit", callback=self.noHintingLimitCallback, sizeStyle="small")
@@ -169,7 +169,7 @@ class TTFAutoHintGroup(vanilla.Group):
         y += 30
 
         self.xHeightIncreaseLimitText = vanilla.TextBox((10, y+2, column, 22), "X Height Increase Limit:", alignment="right")
-        self.xHeightIncreaseLimit = SliderEditIntStepper((column + gutter, y, -10, 22), self.options["xHeightIncreaseLimit"])
+        self.xHeightIncreaseLimit = SliderEditStepper((column + gutter, y, -10, 22), self.options["xHeightIncreaseLimit"])
 
         y += 28
         self.noXHeightIncreaseLimit = vanilla.CheckBox((column + gutter, y, -10, 22), "No X Height Increase Limit", callback=self.noXHeightIncreaseLimitCallback, sizeStyle="small")
