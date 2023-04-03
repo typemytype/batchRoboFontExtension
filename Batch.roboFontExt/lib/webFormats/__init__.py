@@ -38,6 +38,7 @@ try:
 except:
     hasUfo2svg = False
 
+autohint_identifier = "%s.%s" % (settingsIdentifier, "autohintSettings")
 
 def getFontBounds(font):
     gs = font.getGlyphSet()
@@ -88,7 +89,7 @@ def convertToTTF(otfPath, dest, report):
     sourceFontWithTables.close()
     del sourceFontWithTables
 
-    autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
+    autohintOptions = getExtensionDefault(autohint_identifier, defaultOptions)
     result = TTFAutohint(tempDest, dest, autohintOptions)
     report.writeItems(result)
 
@@ -135,7 +136,7 @@ def generateTTF(ufoPath, dest, report):
         font.close()
     report.write(result)
 
-    autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
+    autohintOptions = getExtensionDefault(autohint_identifier, defaultOptions)
     result = TTFAutohint(tempDest, dest, autohintOptions)
     report.writeItems(result)
 
@@ -175,11 +176,9 @@ htmlPreviewDefault = string.ascii_letters + string.digits
 
 class TTHAutoHintSettings(BaseWindowController):
 
-    identifier = "%s.%s" % (settingsIdentifier, "autohintSettings")
 
     def __init__(self, parentWindow):
-
-        data = getExtensionDefault(settingsIdentifier, dict())
+        data = getExtensionDefault(autohint_identifier, dict())
         self.w = Sheet((470, 580), parentWindow=parentWindow)
 
         self.w.tabs = Tabs((10, 10, -10, -40), ["TTF AutoHint", "HTML Preview"])
@@ -218,7 +217,7 @@ class TTHAutoHintSettings(BaseWindowController):
 
     def saveCallback(self, sender):
         data = self.settings.get()
-        setExtensionDefault(settingsIdentifier, data)
+        setExtensionDefault(autohint_identifier, data)
         setExtensionDefault("%s.htmlPreview" % settingsIdentifier, self.html.get())
         setExtensionDefault("%s.globalCSSPreview" % settingsIdentifier, self.globalCss.get())
         self.closeCallback(sender)
@@ -320,7 +319,7 @@ class WebFormats(Group):
                     report.write("Auto hint the existing TTF file.")
                     report.indent()
                     tempDest = tempfile.mkstemp(suffix=".ttf")[1]
-                    autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
+                    autohintOptions = getExtensionDefault(autohint_identifier, defaultOptions)
                     result = TTFAutohint(self._tempTTFPath, tempDest, autohintOptions)
                     report.writeItems(result)
                     os.remove(self._tempTTFPath)
@@ -585,7 +584,7 @@ class WebFormats(Group):
 
         report.newLine()
         report.writeTitle("TTFAutohint options:")
-        autohintOptions = getExtensionDefault(settingsIdentifier, defaultOptions)
+        autohintOptions = getExtensionDefault(autohint_identifier, defaultOptions)
         report.writeDict(autohintOptions)
 
         reportPath = os.path.join(destDir, "WebFonts Report.txt")
