@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>designspace.location</key>
+    <array>
+      <array>
+        <string>weight</string>
+        <real>700.0</real>
+      </array>
+    </array>
+    <key>designspace.mathmodel</key>
+    <string>fonttools.varlib</string>
+    <key>public.glyphOrder</key>
+    <array>
+      <string>E</string>
+    </array>
+  </dict>
+</plist>
