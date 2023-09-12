@@ -140,12 +140,20 @@ def buildTree(path):
         os.makedirs(path)
 
 
-def postProcessCollector(*callbacks):
-    callbacks = [callback for callback in callbacks if callback is not None]
-    def wrapper(sourcePath, destinationPath):
-        for callback in callbacks:
+class postProcessCollector:
+
+    def __init__(self, *callbacks):
+        self.callbacks = [callback for callback in callbacks if callback is not None]
+
+    def __call__(self, sourcePath, destinationPath):
+        for callback in self.callbacks:
             callback(sourcePath, destinationPath)
-    return wrapper
+
+    def __del__(self):
+        self.callbacks = None
+
+    def __bool__(self):
+        return bool(self.callbacks)
 
 
 def generatePaths(

@@ -49,33 +49,12 @@ class GenerateVariableFont:
 
         self.makeMasterGlyphsCompatible()
         self.decomposedMixedGlyphs()
-        self.makeMasterGlyphsQuadractic()
+        # self.makeMasterGlyphsQuadractic()
         self.makeMasterKerningCompatible()
         self.makeMasterOnDefaultLocation()
         self.makeLayerMaster()
 
         self.generate()
-
-        # options = FontCompilerOptions()
-        # options.saveFDKPartsNextToUFO = getDefault("saveFDKPartsNextToUFO")
-        # options.shouldDecomposeWithCheckOutlines = False
-        # options.generateCheckComponentMatrix = True
-        # options.format = "ttf"
-        # options.decompose = False
-        # options.checkOutlines = False
-        # options.autohint = self.autohint
-        # options.releaseMode = self.releaseMode
-        # options.glyphOrder = self.glyphOrder
-        # options.useMacRoman = False
-
-        # makeMasterGlyphsCompatible(
-        #     operator=interpolableOperator,
-        #     options=options,
-        #     report=self.report
-        # )
-        # decomposedMixedGlyphs(
-
-        # )
 
     def makeMasterGlyphsCompatible(self):
         """
@@ -246,7 +225,7 @@ class GenerateVariableFont:
         # loop over all pairs
         for pair in allPairs:
             # loop over all masters
-            for sourceDescriptor in self.sources:
+            for sourceDescriptor in self.operator.sources:
                 sourceFont = self.operator.fonts[sourceDescriptor.name]
                 missingPairs = []
                 missingGroups = []
