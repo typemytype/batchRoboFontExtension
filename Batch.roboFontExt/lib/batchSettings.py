@@ -3,6 +3,47 @@ import ezui
 from mojo.extensions import getExtensionDefault, setExtensionDefault
 
 
+defaultSettings = dict(
+    batchSettingExportDebug=0,
+    batchSettingExportInSubFolders=0,
+    batchSettingExportKeepFileNames=0,
+
+    desktopFontsAutohint=0,
+    desktopFontsDecompose=1,
+    desktopFontsReleaseMode=0,
+    desktopFontsRemoveOverlap=1,
+    desktopFontsSuffix="",
+
+    ttfautohintAddTTFAutohintInfo=0,
+    ttfautohintCDIClearType=0,
+    ttfautohintDWClearType=0,
+    ttfautohintFallbackScript=0,
+    ttfautohintGrayScale=0,
+    ttfautohintHintLimit=50,
+    ttfautohintHintSetRangeMaximum=50,
+    ttfautohintHintSetRangeMinimum=50,
+    ttfautohintNoHintLimit=0,
+    ttfautohintNoXHeightIncreaseLimit=0,
+    ttfautohintOverrideFontLicenseRestrictions=0,
+    ttfautohintPreHinted=0,
+    ttfautohintSymbolFont=0,
+    ttfautohintXHeightIncreaseLimit=50,
+
+    variableFontsAutohint=0,
+    variableFontsInterpolateToFitAxesExtremes=0,
+    variableFontsSuffix="",
+
+    webFontsAutohint=0,
+    webFontsDecompose=0,
+    webFontsGenerateHTML=0,
+    webFontsHtmlPreview="",
+    webFontsHtmlPreviewCSS="",
+    webFontsReleaseMode=0,
+    webFontsRemoveOverlap=0,
+    webFontsSuffix="",
+)
+
+
 class BatchSettingsController(ezui.WindowController):
 
     def build(self, parent):
@@ -70,7 +111,7 @@ class BatchSettingsController(ezui.WindowController):
         > [ ] Export in sub-folders           @batchSettingExportInSubFolders
         > ---
         > :
-        > (X) Keep file names                 @batchSettingExportKeepFileNames
+        > ( ) Keep file names                 @batchSettingExportKeepFileNames
         > ( ) Use familyName-styleName
         > ---
         > [ ] Debug                           @batchSettingExportDebug
@@ -108,7 +149,7 @@ class BatchSettingsController(ezui.WindowController):
             minSize=(700, 250),
             controller=self
         )
-        data = getExtensionDefault("com.typemytype.batch.setting", dict())
+        data = getExtensionDefault("com.typemytype.batch.settings", defaultSettings)
         self.w.setItemValues(data)
 
     def started(self):
@@ -118,5 +159,5 @@ class BatchSettingsController(ezui.WindowController):
         self.w.close()
 
     def applyCallback(self, sender):
-        setExtensionDefault("com.typemytype.batch.setting", self.w.getItemValues())
+        setExtensionDefault("com.typemytype.batch.settings", self.w.getItemValues())
         self.w.close()

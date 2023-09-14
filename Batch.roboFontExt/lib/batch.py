@@ -22,7 +22,7 @@ from mojo.roboFont import OpenFont
 from mojo.extensions import getExtensionDefault, setExtensionDefault, ExtensionBundle
 from lib.tools.misc import walkDirectoryForFile
 
-from batchSettings import BatchSettingsController
+from batchSettings import BatchSettingsController, defaultSettings
 
 from batchGenerators import desktopFontsGenerator, webFontsGenerator, variableFontsGenerator
 from batchGenerators.batchTools import Report, BatchEditorOperator
@@ -216,7 +216,7 @@ class BatchController(ezui.WindowController):
                     self.report.writeTitle("Batch Generate:")
                     self.report.indent()
 
-                    settings = getExtensionDefault("com.typemytype.batch.setting", dict())
+                    settings = getExtensionDefault("com.typemytype.batch.settings", defaultSettings)
 
                     generateOptions = self.w.getItemValues()
                     generateOptions["sourceUFOPaths"] = self.getAllUFOPaths()
