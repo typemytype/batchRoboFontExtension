@@ -108,7 +108,7 @@ class BatchSettingsController(ezui.WindowController):
             minSize=(700, 250),
             controller=self
         )
-        data = getExtensionDefault("com.typemytype.batch.settting", dict())
+        data = getExtensionDefault("com.typemytype.batch.setting", dict())
         self.w.setItemValues(data)
 
     def started(self):
@@ -118,5 +118,5 @@ class BatchSettingsController(ezui.WindowController):
         self.w.close()
 
     def applyCallback(self, sender):
-        setExtensionDefault("com.typemytype.batch.settting", self.w.getItemValues())
+        setExtensionDefault("com.typemytype.batch.setting", self.w.getItemValues())
         self.w.close()

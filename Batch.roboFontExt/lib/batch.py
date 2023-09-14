@@ -216,7 +216,7 @@ class BatchController(ezui.WindowController):
                     self.report.writeTitle("Batch Generate:")
                     self.report.indent()
 
-                    settings = self.w.getItemValues()
+                    settings = getExtensionDefault("com.typemytype.batch.setting", dict())
 
                     generateOptions = self.w.getItemValues()
                     generateOptions["sourceUFOPaths"] = self.getAllUFOPaths()
