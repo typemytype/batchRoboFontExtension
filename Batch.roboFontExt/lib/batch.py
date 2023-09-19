@@ -136,9 +136,9 @@ class BatchController(ezui.WindowController):
             content=content,
             descriptionData=descriptionData,
             size="auto",
+            defaultButton="generate",
             controller=self,
         )
-        self.w.setDefaultButton(self.w.getItem("generate"))
 
     def started(self):
         items = getExtensionDefault("com.typemytype.batch", dict())
