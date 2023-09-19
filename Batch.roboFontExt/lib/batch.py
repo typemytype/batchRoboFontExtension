@@ -111,6 +111,7 @@ class BatchController(ezui.WindowController):
                 height=200,
                 columnDescriptions=[dict(identifier="source", title="Sources", cellClassArguments=dict(truncationMode="head"))],
                 showColumnTitles=True,
+                enableDelete=True,
                 items=[dict(source=source) for source in sources],
                 dropSettings=dict(
                     pasteboardTypes=["fileURL"],
