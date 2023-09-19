@@ -166,7 +166,6 @@ class BatchSettingsController(ezui.WindowController):
 
         self.ttfautohintHintLimit = self.w.getItem("ttfautohintHintLimit")
         self.ttfautohintXHeightIncreaseLimit = self.w.getItem("ttfautohintXHeightIncreaseLimit")
-        print(dir(self.ttfautohintXHeightIncreaseLimit))
         self.ttfautohintNoHintLimitCallback(self.w.getItem("ttfautohintNoHintLimit"))
         self.ttfautohintNoXHeightIncreaseLimitCallback(self.w.getItem("ttfautohintNoXHeightIncreaseLimit"))
         
@@ -175,16 +174,10 @@ class BatchSettingsController(ezui.WindowController):
         self.w.open()
 
     def ttfautohintNoHintLimitCallback(self, sender):
-        if sender.get() == 1:
-            self.ttfautohintHintLimit.enable(False)
-        else:
-            self.ttfautohintHintLimit.enable(True)
+        self.ttfautohintHintLimit.enable(not sender.get())
 
     def ttfautohintNoXHeightIncreaseLimitCallback(self, sender):
-        if sender.get() == 1:
-            self.ttfautohintXHeightIncreaseLimit.enable(False)
-        else:
-            self.ttfautohintXHeightIncreaseLimit.enable(True)
+        self.ttfautohintXHeightIncreaseLimit.enable(not sender.get())
 
     def cancelCallback(self, sender):
         self.w.close()
