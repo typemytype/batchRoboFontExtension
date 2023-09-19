@@ -72,14 +72,14 @@ class BatchSettingsController(ezui.WindowController):
         > !§ TTF Autohint
 
         > : Hint Set Range Minimum:
-        > ---X--- [__](±)                            @ttfautohintHintSetRangeMinimum
+        > ---X--- [__]                               @ttfautohintHintSetRangeMinimum
         > : Hint Set Range Maximum:
-        > ---X--- [__](±)                            @ttfautohintHintSetRangeMaximum
+        > ---X--- [__]                               @ttfautohintHintSetRangeMaximum
         > : Hint Limit:
-        > ---X--- [__](±)                            @ttfautohintHintLimit
+        > ---X--- [__]                               @ttfautohintHintLimit
         > [ ] No Hinting Limit                       @ttfautohintNoHintLimit
         > : X Height Increase Limit:
-        > ---X--- [__](±)                            @ttfautohintXHeightIncreaseLimit
+        > ---X--- [__]                               @ttfautohintXHeightIncreaseLimit
         > [ ] No X Height Increase Limit             @ttfautohintNoXHeightIncreaseLimit
         > ---
         > [ ] Fallback Script (Latin)                @ttfautohintFallbackScript
@@ -101,7 +101,7 @@ class BatchSettingsController(ezui.WindowController):
 
         * Tab: Variable Fonts = ScrollingTwoColumnForm @variableFontsForm
         > : Generate:
-        > [ ] Interpolate to Fit Axes Extremes         @variableFontsInterpolateToFitAxesExtremes
+        > [ ] Interpolate to Fit Axis Extremes         @variableFontsInterpolateToFitAxesExtremes
         > [ ] Autohint                                 @variableFontsAutohint
         > : Suffix:
         > [_ _]                                        @variableFontsSuffix
@@ -137,6 +137,18 @@ class BatchSettingsController(ezui.WindowController):
                 titleColumnWidth=180,
                 itemColumnWidth=300,
             ),
+            ttfautohintHintSetRangeMinimum=dict(
+                valueType="integer",
+            ),
+            ttfautohintHintSetRangeMaximum=dict(
+                valueType="integer",
+            ),
+            ttfautohintHintLimit=dict(
+                valueType="integer",
+            ),
+            ttfautohintXHeightIncreaseLimit=dict(
+                valueType="integer",
+            ),
             cancel=dict(
                 keyEquivalent=chr(27)
             ),
@@ -152,8 +164,27 @@ class BatchSettingsController(ezui.WindowController):
         data = getExtensionDefault("com.typemytype.batch.settings", defaultSettings)
         self.w.setItemValues(data)
 
+        self.ttfautohintHintLimit = self.w.getItem("ttfautohintHintLimit")
+        self.ttfautohintXHeightIncreaseLimit = self.w.getItem("ttfautohintXHeightIncreaseLimit")
+        print(dir(self.ttfautohintXHeightIncreaseLimit))
+        self.ttfautohintNoHintLimitCallback(self.w.getItem("ttfautohintNoHintLimit"))
+        self.ttfautohintNoXHeightIncreaseLimitCallback(self.w.getItem("ttfautohintNoXHeightIncreaseLimit"))
+        
+
     def started(self):
         self.w.open()
+
+    def ttfautohintNoHintLimitCallback(self, sender):
+        if sender.get() == 1:
+            self.ttfautohintHintLimit.enable(False)
+        else:
+            self.ttfautohintHintLimit.enable(True)
+
+    def ttfautohintNoXHeightIncreaseLimitCallback(self, sender):
+        if sender.get() == 1:
+            self.ttfautohintXHeightIncreaseLimit.enable(False)
+        else:
+            self.ttfautohintXHeightIncreaseLimit.enable(True)
 
     def cancelCallback(self, sender):
         self.w.close()
