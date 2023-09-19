@@ -87,7 +87,7 @@ def build(root, generateOptions, settings, progress, report):
     if not binaryFormats:
         return
 
-    webFontsRoot = os.path.join(root, "webFonts")
+    webFontsRoot = os.path.join(root, "Web")
 
     report.writeTitle("Batch Generated Web Fonts:")
     progress.update("Collecting Data...")

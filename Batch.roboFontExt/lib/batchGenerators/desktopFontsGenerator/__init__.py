@@ -31,7 +31,7 @@ def build(root, generateOptions, settings, progress, report):
         keepFileNames=settings["batchSettingExportKeepFileNames"],
         suffix=settings["desktopFontsSuffix"],
         exportInFolders=settings["batchSettingExportInSubFolders"],
-        root=os.path.join(root, "desktopFonts"),
+        root=os.path.join(root, "Desktop"),
         report=report,
         progress=progress
     )
