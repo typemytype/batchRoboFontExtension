@@ -211,13 +211,17 @@ class BatchController(ezui.WindowController):
     report = None
 
     def generateCallback(self, sender):
+        generateOptions = self.w.getItemValues()
+        generateOptions["sourceUFOPaths"] = self.getAllUFOPaths()
+        generateOptions["sourceDesignspacePaths"] = self.getAllDesignspacePaths()
+
+        if not generateOptions["sourceUFOPaths"] and not generateOptions["sourceDesignspacePaths"]:
+            # no fonts found in the source table
+            return
 
         def result(path):
             if path:
                 root = path[0]
-                # start with a clean root
-                if os.path.exists(root):
-                    shutil.rmtree(root)
 
                 progress = self.startProgress("Generating...")
                 try:
@@ -226,12 +230,6 @@ class BatchController(ezui.WindowController):
                     self.report.indent()
 
                     settings = getExtensionDefault("com.typemytype.batch.settings", defaultSettings)
-
-                    generateOptions = self.w.getItemValues()
-                    generateOptions["sourceUFOPaths"] = self.getAllUFOPaths()
-                    generateOptions["sourceDesignspacePaths"] = self.getAllDesignspacePaths()
-
-                    # self.report.write(generateOptions)
 
                     for generator in generators:
                         generator.build(root, generateOptions, settings, progress, self.report)
