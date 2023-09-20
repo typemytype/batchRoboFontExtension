@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<designspace format="5.0">
+  <axes>
+    <axis tag="wght" name="weight" minimum="400" maximum="700" default="400"/>
+  </axes>
+  <sources>
+    <source filename="thick.ufo" familyname="E" stylename="Thick">
+      <location>
+        <dimension name="weight" xvalue="700"/>
+      </location>
+    </source>
+    <source filename="thin.ufo" familyname="E" stylename="Thin">
+      <location>
+        <dimension name="weight" xvalue="400"/>
+      </location>
+    </source>
+  </sources>
+  <instances>
+    <instance familyname="E" stylename="Thick" filename="instances/E-Thick.ufo">
+      <location>
+        <dimension name="weight" xvalue="700"/>
+      </location>
+    </instance>
+    <instance familyname="E" stylename="Thin" filename="instances/E-Thin.ufo">
+      <location>
+        <dimension name="weight" xvalue="400"/>
+      </location>
+    </instance>
+    <instance familyname="E" stylename="Style_2" filename="instances/E-Style_2.ufo">
+      <location>
+        <dimension name="weight" xvalue="700" yvalue="400"/>
+      </location>
+    </instance>
+  </instances>
+</designspace>
