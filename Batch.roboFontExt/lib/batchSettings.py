@@ -208,7 +208,6 @@ class BatchSettingsController(ezui.WindowController):
         self.ttfautohintNoHintLimitCallback(self.w.getItem("ttfautohintNoHintLimit"))
         self.ttfautohintNoXHeightIncreaseLimitCallback(self.w.getItem("ttfautohintNoXHeightIncreaseLimit"))
 
-
     def started(self):
         self.w.open()
 
