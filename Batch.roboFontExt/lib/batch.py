@@ -69,7 +69,7 @@ class BatchController(ezui.WindowController):
         "OTF Woff 2",
         "TTF",
         "TTF Woff 2",
-        "SVG",
+        # "SVG",
     ]
     variableFontsFormats = [
         "OTF",
