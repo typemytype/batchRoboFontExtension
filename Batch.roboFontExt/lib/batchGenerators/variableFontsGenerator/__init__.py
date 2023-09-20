@@ -427,10 +427,15 @@ def build(root, generateOptions, settings, progress, report):
                     debug=settings["batchSettingExportDebug"]
                 )
 
+                sourcePath = os.path.join(fontDir, tempFileName)
+                destinationPath = os.path.join(fontDir, fileName)
                 postProcessCallback(
-                    os.path.join(fontDir, tempFileName),
-                    os.path.join(fontDir, fileName)
+                    sourcePath,
+                    destinationPath
                 )
+                if os.path.exists(sourcePath):
+                    shutil.copyfile(sourcePath, destinationPath)
+                    os.remove(sourcePath)
 
 
 # ===========
