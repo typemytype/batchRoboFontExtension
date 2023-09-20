@@ -111,6 +111,7 @@ class BatchController(ezui.WindowController):
                 height=200,
                 columnDescriptions=[dict(identifier="source", title="Sources", cellClassArguments=dict(truncationMode="head"))],
                 showColumnTitles=True,
+                enableDelete=True,
                 items=[dict(source=source) for source in sources],
                 dropSettings=dict(
                     pasteboardTypes=["fileURL"],
@@ -126,12 +127,16 @@ class BatchController(ezui.WindowController):
             help=dict(
                 gravity="leading",
             ),
+            generate=dict(
+                width=85
+            ),
         )
         self.w = ezui.EZWindow(
             title="Batch",
             content=content,
             descriptionData=descriptionData,
             size="auto",
+            defaultButton="generate",
             controller=self,
         )
 

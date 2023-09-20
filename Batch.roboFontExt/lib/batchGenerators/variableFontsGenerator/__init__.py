@@ -396,7 +396,7 @@ def build(root, generateOptions, settings, progress, report):
     if not binaryFormats:
         return
 
-    variableFontsRoot = os.path.join(root, "variableFonts")
+    variableFontsRoot = os.path.join(root, "Variable")
 
     buildTree(variableFontsRoot)
 
