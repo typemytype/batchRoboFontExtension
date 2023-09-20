@@ -14,6 +14,13 @@ from .autohint import TTFAutohint
 percentageRe = re.compile(r"%(?!\((familyName|styleName)\)s)")
 
 
+cssFormatExtMap = {
+    ".otf": "opentype",
+    ".tff": "truetype",
+    ".woff": "woff"
+
+}
+
 def htmlBuilder(htmlPreview, reportHTML, reportCSS):
 
     def wrapper(sourcePath, destinationPath):
@@ -22,12 +29,14 @@ def htmlBuilder(htmlPreview, reportHTML, reportCSS):
         styleName = font["name"].getBestSubFamilyName()
         font.close()
 
+        _, ext = os.path.splitext(sourcePath)
+
         cssFontName = f"{familyName}_{styleName}"
 
         reportCSS.write("@font-face {")
         reportCSS.indent()
         reportCSS.write(f"font-family: '{cssFontName}';")
-        reportCSS.write(f"src:  url('{destinationPath}') format('woff2');")
+        reportCSS.write(f"src:  url('{destinationPath}') format('{cssFormatExtMap[ext]}');")
         reportCSS.write("font-weight: normal;")
         reportCSS.write("font-style: normal;")
         reportCSS.dedent()
