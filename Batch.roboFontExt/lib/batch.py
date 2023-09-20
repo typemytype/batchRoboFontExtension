@@ -142,7 +142,7 @@ class BatchController(ezui.WindowController):
 
     def started(self):
         items = getExtensionDefault("com.typemytype.batch", dict())
-        for identifier in ("sources", "help"):
+        for identifier in ("sources", "help", "webFontGenerate_SVG"):
             if identifier in items:
                 del items[identifier]
 
