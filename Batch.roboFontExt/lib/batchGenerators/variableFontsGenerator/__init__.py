@@ -14,7 +14,7 @@ from fontCompiler.compiler import generateFont, FontCompilerOptions
 
 from ufo2fdk.kernFeatureWriter import side1Prefix, side2Prefix
 
-from batchGenerators.batchTools import postProcessCollector, WOFF2Builder, buildTree, BatchEditorOperator
+from batchGenerators.batchTools import postProcessCollector, WOFF2Builder, buildTree, removeTree, BatchEditorOperator
 
 
 class VarLibMasterFinder(dict):
@@ -398,6 +398,7 @@ def build(root, generateOptions, settings, progress, report):
         return
 
     variableFontsRoot = os.path.join(root, "Variable")
+    removeTree(variableFontsRoot)
 
     for sourceDesignspacePath in generateOptions["sourceDesignspacePaths"]:
         operator = BatchEditorOperator(sourceDesignspacePath)

@@ -6,7 +6,7 @@ from fontTools.ttLib import TTFont
 
 from mojo.compile import autohint as OTFAutohint
 
-from batchGenerators.batchTools import generatePaths, WOFF2Builder, postProcessCollector, CSSWriter, HTMLWriter
+from batchGenerators.batchTools import generatePaths, WOFF2Builder, removeTree, postProcessCollector, CSSWriter, HTMLWriter
 
 from .autohint import TTFAutohint
 
@@ -20,6 +20,7 @@ cssFormatExtMap = {
     ".woff": "woff"
 
 }
+
 
 def htmlBuilder(htmlPreview, reportHTML, reportCSS):
 
@@ -102,6 +103,7 @@ def build(root, generateOptions, settings, progress, report):
         return
 
     webFontsRoot = os.path.join(root, "Web")
+    removeTree(webFontsRoot)
 
     report.writeTitle("Batch Generated Web Fonts:")
     progress.update("Collecting Data...")
