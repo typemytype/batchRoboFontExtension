@@ -14,7 +14,6 @@ import batchGenerators.variableFontsGenerator
 importlib.reload(batchGenerators.variableFontsGenerator)
 
 import os
-import shutil
 import AppKit
 import ezui
 import defcon
