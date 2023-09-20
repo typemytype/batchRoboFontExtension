@@ -1,33 +1,33 @@
 import os
+import shutil
 import re
-import string
 
 from fontTools.ttLib import TTFont
 
-from mojo.extensions import getExtensionDefault, setExtensionDefault
+from mojo.compile import autohint as OTFAutohint
 
-from batchGenerators.batchTools import generatePaths, WOFF2Builder, postProcessCollector, CSSWriter, HTMLWriter, settingsIdentifier
+from batchGenerators.batchTools import generatePaths, WOFF2Builder, postProcessCollector, CSSWriter, HTMLWriter
 
 from .autohint import TTFAutohint
 
 
-_percentageRe = re.compile(r"%(?!\((familyName|styleName)\)s)")
-htmlPreviewDefault = string.ascii_letters + string.digits
+percentageRe = re.compile(r"%(?!\((familyName|styleName)\)s)")
 
 
-def htmlBuilder(previewHTML, previewCSS, reportHTML, reportCSS):
+def htmlBuilder(htmlPreview, reportHTML, reportCSS):
 
     def wrapper(sourcePath, destinationPath):
         font = TTFont(sourcePath)
         familyName = font["name"].getBestFamilyName()
         styleName = font["name"].getBestSubFamilyName()
+        font.close()
 
         cssFontName = f"{familyName}_{styleName}"
 
         reportCSS.write("@font-face {")
         reportCSS.indent()
         reportCSS.write(f"font-family: '{cssFontName}';")
-        reportCSS.write("src:  url('{destinationPath}') format('woff2');")
+        reportCSS.write(f"src:  url('{destinationPath}') format('woff2');")
         reportCSS.write("font-weight: normal;")
         reportCSS.write("font-style: normal;")
         reportCSS.dedent()
@@ -35,9 +35,9 @@ def htmlBuilder(previewHTML, previewCSS, reportHTML, reportCSS):
         reportCSS.newLine()
 
         reportHTML.write(f"<div style='font-family: \"{cssFontName}\", \"AdobeBlank\";'>")
-        html = previewHTML
-        html = _percentageRe.sub("&#37;", html)
-        html = html % dict(familyName=familyName, styleName=styleName)
+        html = htmlPreview
+        html = percentageRe.sub("&#37;", html)
+        html = html % dict(familyName=familyName, styleName=styleName, fileName=os.path.basename(destinationPath))
         reportHTML.write(html.encode("ascii", 'xmlcharrefreplace').decode("utf-8"))
         reportHTML.write("</div>")
 
@@ -47,7 +47,14 @@ def htmlBuilder(previewHTML, previewCSS, reportHTML, reportCSS):
 def autohintBuilder(autohintOptions, report):
 
     def wrapper(sourcePath, destinationPath):
-        result = TTFAutohint(sourcePath, destinationPath, autohintOptions)
+        font = TTFont(sourcePath)
+        isTTF = "glyf" in font
+        font.close()
+        if isTTF:
+            result = TTFAutohint(sourcePath, destinationPath, autohintOptions)
+        else:
+            result = OTFAutohint(sourcePath)
+            shutil.copyfile(sourcePath, destinationPath)
         report.writeItems(result)
     return wrapper
 
@@ -74,13 +81,13 @@ def build(root, generateOptions, settings, progress, report):
     if generateOptions["webFontGenerate_OTF"]:
         binaryFormats.append(("otf", postProcessCollector(autohintFunc, htmlBuilderFunc)))
     if generateOptions["webFontGenerate_OTFWoff2"]:
-        binaryFormats.append(("otf", postProcessCollector(WOFF2Builder, autohintFunc, htmlBuilderFunc)))
+        binaryFormats.append(("otf-woff", postProcessCollector(autohintFunc, WOFF2Builder, htmlBuilderFunc)))
     if generateOptions["webFontGenerate_TTF"]:
         binaryFormats.append(("ttf", postProcessCollector(autohintFunc, htmlBuilderFunc)))
     if generateOptions["webFontGenerate_TTFWoff2"]:
-        binaryFormats.append(("ttf", postProcessCollector(WOFF2Builder, autohintFunc, htmlBuilderFunc)))
-    if generateOptions["webFontGenerate_SVG"]:
-        binaryFormats.append(("svg", None))
+        binaryFormats.append(("ttf-woff", postProcessCollector(autohintFunc, WOFF2Builder, htmlBuilderFunc)))
+    # if generateOptions["webFontGenerate_SVG"]:
+    #    binaryFormats.append(("svg", None))
 
     if not binaryFormats:
         return

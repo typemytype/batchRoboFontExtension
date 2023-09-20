@@ -340,9 +340,10 @@ class GenerateVariableFont:
                         tempFont = defcon.Font(tempSavePath)
                         tempFont.layers.defaultLayer = tempFont.layers[sourceDescriptor.layerName]
                         tempFont.save()
-            except Exception:
+            except Exception as e:
                 import traceback
                 tracebackResult = traceback.format_exc()
+                result = f"Faild to generate: {e}:\n{tracebackResult}"
                 print(tracebackResult)
                 self.report.newLine()
                 self.report.write(f"Generate failed {source.info.familyName}-{source.info.styleName}")
@@ -387,43 +388,48 @@ def build(root, generateOptions, settings, progress, report):
     if generateOptions["variableFontGenerate_OTF"]:
         binaryFormats.append(("otf", postProcessCollector()))
     if generateOptions["variableFontGenerate_OTFWoff2"]:
-        binaryFormats.append(("otf", postProcessCollector(WOFF2Builder)))
+        binaryFormats.append(("otf-woff", postProcessCollector(WOFF2Builder)))
     if generateOptions["variableFontGenerate_TTF"]:
         binaryFormats.append(("ttf", postProcessCollector()))
     if generateOptions["variableFontGenerate_TTFWoff2"]:
-        binaryFormats.append(("ttf", postProcessCollector(WOFF2Builder)))
+        binaryFormats.append(("ttf-woff", postProcessCollector(WOFF2Builder)))
 
     if not binaryFormats:
         return
 
     variableFontsRoot = os.path.join(root, "Variable")
 
-    buildTree(variableFontsRoot)
-
     for sourceDesignspacePath in generateOptions["sourceDesignspacePaths"]:
         operator = BatchEditorOperator(sourceDesignspacePath)
         # loop over all interpolable operators based on the given variable fonts
         for name, interpolableOperator in operator.getInterpolableUFOOperators(useVariableFonts=True):
             for binaryFormat, postProcessCallback in binaryFormats:
-                tempFileName = fileName = f"{name}.{binaryFormat}"
-                if postProcessCallback:
-                    tempFileName = f"temp_{fileName}"
+                binaryExtention = binaryFormat.split("-")[0]
+                fileName = f"{name}.{binaryExtention}"
+                tempFileName = f"temp_{fileName}"
+
+                if settings["batchSettingExportInSubFolders"]:
+                    fontDir = os.path.join(variableFontsRoot, binaryFormat)
+                else:
+                    fontDir = variableFontsRoot
+
+                buildTree(fontDir)
+
                 GenerateVariableFont(
                     operator=interpolableOperator,
-                    destinationPath=os.path.join(variableFontsRoot, tempFileName),
+                    destinationPath=os.path.join(fontDir, tempFileName),
                     autohint=settings["variableFontsAutohint"],
                     fitToExtremes=settings["variableFontsInterpolateToFitAxesExtremes"],
                     releaseMode=False,
                     glyphOrder=None,
                     report=report,
-                    debug=settings["batchSettingExportKeepFileNames"]
+                    debug=settings["batchSettingExportDebug"]
                 )
 
-                if postProcessCallback:
-                    postProcessCallback(
-                        os.path.join(variableFontsRoot, tempFileName),
-                        os.path.join(variableFontsRoot, fileName)
-                    )
+                postProcessCallback(
+                    os.path.join(fontDir, tempFileName),
+                    os.path.join(fontDir, fileName)
+                )
 
 
 # ===========

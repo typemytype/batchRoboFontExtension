@@ -132,4 +132,3 @@ def TTFAutohint(sourcePath, destinationPath, options=dict()):
     cmd.extend([sourcePath, destinationPath])
     result = executeCommand(cmd)
     return result
-

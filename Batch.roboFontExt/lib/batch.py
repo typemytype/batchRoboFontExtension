@@ -14,6 +14,7 @@ import batchGenerators.variableFontsGenerator
 importlib.reload(batchGenerators.variableFontsGenerator)
 
 import os
+import shutil
 import AppKit
 import ezui
 import defcon
@@ -213,7 +214,10 @@ class BatchController(ezui.WindowController):
 
         def result(path):
             if path:
-                path = path[0]
+                root = path[0]
+                # start with a clean root
+                if os.path.exists(root):
+                    shutil.rmtree(root)
 
                 progress = self.startProgress("Generating...")
                 try:
@@ -230,11 +234,11 @@ class BatchController(ezui.WindowController):
                     # self.report.write(generateOptions)
 
                     for generator in generators:
-                        generator.build(path, generateOptions, settings, progress, self.report)
+                        generator.build(root, generateOptions, settings, progress, self.report)
 
                 finally:
                     self.report.dedent()
-                    self.report.save(os.path.join(path, "Batch Generate Report.txt"))
+                    self.report.save(os.path.join(root, "Batch Generate Report.txt"))
                     self.report = None
                     progress.close()
 

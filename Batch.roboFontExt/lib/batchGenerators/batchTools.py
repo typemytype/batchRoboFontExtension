@@ -1,4 +1,5 @@
 import os
+import shutil
 from fontTools.ttLib import TTFont
 from ufoProcessor import ufoOperator
 
@@ -147,7 +148,9 @@ class postProcessCollector:
 
     def __call__(self, sourcePath, destinationPath):
         for callback in self.callbacks:
-            callback(sourcePath, destinationPath)
+            newSourceDestinationPath = callback(sourcePath, destinationPath)
+            if newSourceDestinationPath:
+                sourcePath, destinationPath = newSourceDestinationPath
 
     def __del__(self):
         self.callbacks = None
@@ -188,6 +191,7 @@ def generatePaths(
 
     if removeOverlap:
         report.writeTitle("Remove Overlap:")
+        report.indent()
         progress.setText("Remove Overlap...")
         progress.setMaxValue(len(fonts))
         for font in fonts:
@@ -200,13 +204,16 @@ def generatePaths(
         removeOverlap = False
 
     report.writeTitle("Generate:")
+    report.indent()
 
     for index, font in enumerate(fonts):
         report.writeTitle((os.path.basename(ufoPaths[index])))
+        report.indent()
         report.newLine()
         report.write(f"source: {ufoPaths[index]}")
         report.newLine()
         for binaryFormat, postProcessCallback in binaryFormats:
+            binaryExtention = binaryFormat.split("-")[0]
             report.writeTitle(f"Generate {binaryFormat}")
             report.indent()
             familyName = font.info.familyName or f"familyName-{index}"
@@ -216,13 +223,11 @@ def generatePaths(
             if keepFileNames:
                 fileName = os.path.basename(ufoPaths[index])
                 fileName, _ = os.path.splitext(fileName)
-                fileName = f"{fileName}{suffix}.{binaryFormat}"
+                fileName = f"{fileName}{suffix}.{binaryExtention}"
             else:
-                fileName = f"{familyName}-{styleName}{suffix}.{binaryFormat}"
+                fileName = f"{familyName}-{styleName}{suffix}.{binaryExtention}"
 
-            tempFileName = fileName
-            if postProcessCallback:
-                tempFileName = f"temp_{fileName}"
+            tempFileName = f"temp_{index}_{fileName}"
 
             progress.setText("Generating ... {fileName}")
             if exportInFolders:
@@ -234,7 +239,7 @@ def generatePaths(
             report.write(f"path: {path})")
             result = font.generate(
                 path=path,
-                format=binaryFormat,
+                format=binaryExtention,
                 decompose=decompose,
                 checkOutlines=removeOverlap,
                 autohint=autohint,
@@ -242,11 +247,15 @@ def generatePaths(
                 progressBar=progress,
                 glyphOrder=font.glyphOrder
             )
-            if postProcessCallback:
-                postProcessCallback(
-                    os.path.join(fontDir, tempFileName),
-                    os.path.join(fontDir, fileName)
-                )
+            sourcePath = os.path.join(fontDir, tempFileName)
+            destinationPath = os.path.join(fontDir, fileName)
+            postProcessCallback(
+                sourcePath,
+                destinationPath
+            )
+            if os.path.exists(sourcePath):
+                shutil.copyfile(sourcePath, destinationPath)
+                os.remove(sourcePath)
 
             report.indent()
             report.write(result)
@@ -255,12 +264,16 @@ def generatePaths(
             report.newLine()
         if not font.hasInterface():
             font.close()
+        report.dedent()
+
+    report.dedent()
 
 
 def WOFF2Builder(sourcePath, destinationPath):
     fileName, ext = os.path.splitext(destinationPath)
-
+    destinationPath = fileName + f"_{ext[1:]}" + ".woff"
     font = TTFont(sourcePath)
     font.flavor = "woff2"
-    font.save(fileName + f"_{ext[1:]}" + ".woff")
+    font.save(destinationPath)
     os.remove(sourcePath)
+    return destinationPath, destinationPath

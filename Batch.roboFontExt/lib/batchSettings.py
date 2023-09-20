@@ -27,14 +27,14 @@ webFontsHtmlPreviewCSS = """.test {
 }
 """
 
-webFontsHtmlPreview = """<div class="title">%(familyName)s %(styleName)s</div>
-<div class="test small">
+webFontsHtmlPreview = """<div class="title">%(familyName)s %(styleName)s (%(fileName)s)</div>
+<div class="test small" contenteditable>
     <div>abcdefghijklmnopqrstuvwxyz</div>
     <div>ABCDEFGHIJKLMNOPQRSTUVWXYZ</div>
     <div>0123456789</div>
 </div>
 
-<div class="test big">
+<div class="test big" contenteditable>
     <div>abcdefghijklmnopqrstuvwxyz</div>
     <div>ABCDEFGHIJKLMNOPQRSTUVWXYZ</div>
     <div>0123456789</div>
