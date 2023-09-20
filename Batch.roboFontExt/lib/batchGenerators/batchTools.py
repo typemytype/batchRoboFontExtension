@@ -141,6 +141,11 @@ def buildTree(path):
         os.makedirs(path)
 
 
+def removeTree(path):
+    if not os.path.exists(path):
+        shutil.rmtree(path)
+
+
 class postProcessCollector:
 
     def __init__(self, *callbacks):
@@ -204,9 +209,12 @@ def generatePaths(
         removeOverlap = False
 
     report.writeTitle("Generate:")
+    progress.setText("Generate...")
+    progress.setMaxValue(len(fonts))
     report.indent()
 
     for index, font in enumerate(fonts):
+        progress.increment()
         report.writeTitle((os.path.basename(ufoPaths[index])))
         report.indent()
         report.newLine()
@@ -265,7 +273,7 @@ def generatePaths(
         if not font.hasInterface():
             font.close()
         report.dedent()
-
+    progress.setMaxValue(None)
     report.dedent()
 
 
