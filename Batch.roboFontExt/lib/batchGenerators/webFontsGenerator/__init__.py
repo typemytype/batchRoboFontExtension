@@ -35,8 +35,7 @@ def htmlBuilder(previewHTML, previewCSS, reportHTML, reportCSS):
         reportCSS.newLine()
 
         reportHTML.write(f"<div style='font-family: \"{cssFontName}\", \"AdobeBlank\";'>")
-        html = getExtensionDefault("%s.htmlPreview" % settingsIdentifier, htmlPreviewDefault)
-        html = getExtensionDefault("%s.htmlPreview" % settingsIdentifier, htmlPreviewDefault)
+        html = previewHTML
         html = _percentageRe.sub("&#37;", html)
         html = html % dict(familyName=familyName, styleName=styleName)
         reportHTML.write(html.encode("ascii", 'xmlcharrefreplace').decode("utf-8"))
@@ -60,12 +59,11 @@ def build(root, generateOptions, settings, progress, report):
         autohintFunc = None
 
     if settings["webFontsGenerateHTML"]:
-        reportHTML = HTMLWriter(cssFileName="font.css", style=getExtensionDefault("{settingsIdentifier}.globalCSSPreview", ""))
+        reportHTML = HTMLWriter(cssFileName="font.css", style=settings["webFontsHtmlPreviewCSS"])
         reportCSS = CSSWriter()
 
         htmlBuilderFunc = htmlBuilder(
             htmlPreview=settings["webFontsHtmlPreview"],
-            htmlPreviewCSS=settings["webFontsHtmlPreviewCSS"],
             reportHTML=reportHTML,
             reportCSS=reportCSS
         )
