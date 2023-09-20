@@ -3,6 +3,45 @@ import ezui
 from mojo.extensions import getExtensionDefault, setExtensionDefault
 
 
+webFontsHtmlPreviewCSS = """.test {
+    word-wrap: break-word;
+}
+
+.title {
+    font-size: 30px;
+    background-color: black;
+    color: white;
+    display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-bottom: 3px;
+    margin-top: 10px;
+}
+
+.small {
+    font-size: 10px;
+}
+
+.big {
+    font-size: 50px;
+}
+"""
+
+webFontsHtmlPreview = """<div class="title">%(familyName)s %(styleName)s</div>
+<div class="test small">
+    <div>abcdefghijklmnopqrstuvwxyz</div>
+    <div>ABCDEFGHIJKLMNOPQRSTUVWXYZ</div>
+    <div>0123456789</div>
+</div>
+
+<div class="test big">
+    <div>abcdefghijklmnopqrstuvwxyz</div>
+    <div>ABCDEFGHIJKLMNOPQRSTUVWXYZ</div>
+    <div>0123456789</div>
+</div>
+"""
+
+
 defaultSettings = dict(
     batchSettingExportDebug=0,
     batchSettingExportInSubFolders=0,
@@ -36,8 +75,8 @@ defaultSettings = dict(
     webFontsAutohint=0,
     webFontsDecompose=0,
     webFontsGenerateHTML=0,
-    webFontsHtmlPreview="",
-    webFontsHtmlPreviewCSS="",
+    webFontsHtmlPreview=webFontsHtmlPreview,
+    webFontsHtmlPreviewCSS=webFontsHtmlPreviewCSS,
     webFontsReleaseMode=0,
     webFontsRemoveOverlap=0,
     webFontsSuffix="",
@@ -168,7 +207,7 @@ class BatchSettingsController(ezui.WindowController):
         self.ttfautohintXHeightIncreaseLimit = self.w.getItem("ttfautohintXHeightIncreaseLimit")
         self.ttfautohintNoHintLimitCallback(self.w.getItem("ttfautohintNoHintLimit"))
         self.ttfautohintNoXHeightIncreaseLimitCallback(self.w.getItem("ttfautohintNoXHeightIncreaseLimit"))
-        
+
 
     def started(self):
         self.w.open()
