@@ -1,0 +1,6 @@
+OutputFontPath	compile.otf
+InputFontPath	dummyCompile.otf
+FeaturePath	features
+GlyphAliasDBPath	glyphOrder
+FontMenuDBPath	menuname
+ReleaseMode	true

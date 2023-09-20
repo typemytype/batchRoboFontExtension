@@ -1,0 +1,28 @@
+
+
+table OS/2 {
+    FSType 4;
+    Panose 0 0 0 0 0 0 0 0 0 0;
+    TypoAscender 750;
+    TypoDescender -250;
+    TypoLineGap 200;
+    winAscent 750;
+    winDescent 1;
+    XHeight 500;
+    CapHeight 750;
+    WeightClass 400;
+    WidthClass 5;
+    Vendor "NONE";
+} OS/2;
+
+table head {
+    FontRevision 0.000;
+} head;
+
+table hhea {
+    Ascender 750;
+    Descender -250;
+    LineGap 200;
+    CaretOffset 0;
+} hhea;
+
