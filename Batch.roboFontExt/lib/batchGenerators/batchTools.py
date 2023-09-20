@@ -142,7 +142,7 @@ def buildTree(path):
 
 
 def removeTree(path):
-    if not os.path.exists(path):
+    if os.path.exists(path):
         shutil.rmtree(path)
 
 
