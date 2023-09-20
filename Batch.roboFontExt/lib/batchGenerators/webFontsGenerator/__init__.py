@@ -16,7 +16,7 @@ percentageRe = re.compile(r"%(?!\((familyName|styleName)\)s)")
 
 cssFormatExtMap = {
     ".otf": "opentype",
-    ".tff": "truetype",
+    ".ttf": "truetype",
     ".woff": "woff"
 
 }
