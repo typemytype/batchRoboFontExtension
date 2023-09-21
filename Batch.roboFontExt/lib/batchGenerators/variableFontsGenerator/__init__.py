@@ -388,11 +388,11 @@ def build(root, generateOptions, settings, progress, report):
     if generateOptions["variableFontGenerate_OTF"]:
         binaryFormats.append(("otf", postProcessCollector()))
     if generateOptions["variableFontGenerate_OTFWOFF2"]:
-        binaryFormats.append(("otf-woff", postProcessCollector(WOFF2Builder)))
+        binaryFormats.append(("otf-woff2", postProcessCollector(WOFF2Builder)))
     if generateOptions["variableFontGenerate_TTF"]:
         binaryFormats.append(("ttf", postProcessCollector()))
     if generateOptions["variableFontGenerate_TTFWOFF2"]:
-        binaryFormats.append(("ttf-woff", postProcessCollector(WOFF2Builder)))
+        binaryFormats.append(("ttf-woff2", postProcessCollector(WOFF2Builder)))
 
     if not binaryFormats:
         return
