@@ -429,11 +429,11 @@ def build(root, generateOptions, settings, progress, report):
 
                 sourcePath = os.path.join(fontDir, tempFileName)
                 destinationPath = os.path.join(fontDir, fileName)
-                postProcessCallback(
+                sourcePath, destinationPath = postProcessCallback(
                     sourcePath,
                     destinationPath
                 )
-                if os.path.exists(sourcePath):
+                if os.path.exists(sourcePath) and sourcePath != destinationPath:
                     shutil.copyfile(sourcePath, destinationPath)
                     os.remove(sourcePath)
 

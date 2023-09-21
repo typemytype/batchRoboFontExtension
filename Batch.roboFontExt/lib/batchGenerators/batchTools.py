@@ -156,6 +156,7 @@ class postProcessCollector:
             newSourceDestinationPath = callback(sourcePath, destinationPath)
             if newSourceDestinationPath:
                 sourcePath, destinationPath = newSourceDestinationPath
+        return sourcePath, destinationPath
 
     def __del__(self):
         self.callbacks = None
@@ -257,11 +258,11 @@ def generatePaths(
             )
             sourcePath = os.path.join(fontDir, tempFileName)
             destinationPath = os.path.join(fontDir, fileName)
-            postProcessCallback(
+            sourcePath, destinationPath = postProcessCallback(
                 sourcePath,
                 destinationPath
             )
-            if os.path.exists(sourcePath):
+            if os.path.exists(sourcePath) and sourcePath != destinationPath:
                 shutil.copyfile(sourcePath, destinationPath)
                 os.remove(sourcePath)
 
