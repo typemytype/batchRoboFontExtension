@@ -42,20 +42,19 @@ If a designspace file is provided, it will be expanded into all it's sources and
 
 ## Desktop Fonts
 
-- .otf 
-- .ttf 
+- .otf
+- .ttf
 
 ## Web Fonts
 
-- .otf 
+- .otf
 - .otf (woff2)
 - .ttf
 - .ttf (woff2)
-- .svg
 
 ## Variable Fonts
 
-- .otf 
+- .otf
 - .otf (woff2)
 - .ttf
 - .ttf (woff2)
