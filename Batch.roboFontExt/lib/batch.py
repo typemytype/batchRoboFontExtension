@@ -66,16 +66,16 @@ class BatchController(ezui.WindowController):
     ]
     webFontsFormats = [
         "OTF",
-        "OTF Woff 2",
+        "OTF WOFF2",
         "TTF",
-        "TTF Woff 2",
+        "TTF WOFF2",
         # "SVG",
     ]
     variableFontsFormats = [
         "OTF",
-        "OTF Woff 2",
+        "OTF WOFF2",
         "TTF",
-        "TTF Woff 2",
+        "TTF WOFF2",
     ]
 
     supportedFileTypes = ["ufo", "designspace", "otf", "ttf", "woff", "ttx"]
@@ -142,10 +142,14 @@ class BatchController(ezui.WindowController):
 
     def started(self):
         items = getExtensionDefault("com.typemytype.batch", dict())
-        for identifier in ("sources", "help", "webFontGenerate_SVG"):
+        for identifier in ("sources", "help"):
             if identifier in items:
                 del items[identifier]
 
+        possibleIdentifiers = self.w.getItemValues().keys()
+        for identifier in list(items.keys()):
+            if identifier not in possibleIdentifiers:
+                del items[identifier]
         self.w.setItemValues(items)
         self.w.open()
 
