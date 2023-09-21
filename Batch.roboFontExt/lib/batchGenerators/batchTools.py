@@ -279,7 +279,7 @@ def generatePaths(
 
 def WOFF2Builder(sourcePath, destinationPath):
     fileName, ext = os.path.splitext(destinationPath)
-    destinationPath = fileName + f"_{ext[1:]}" + ".woff"
+    destinationPath = fileName + f"_{ext[1:]}" + ".woff2"
     font = TTFont(sourcePath)
     font.flavor = "woff2"
     font.save(destinationPath)
