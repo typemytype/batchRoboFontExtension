@@ -10,10 +10,10 @@ def build(root, generateOptions, settings, progress, report):
         binaryFormats.append(("otf", postProcessCollector()))
     if generateOptions.get("desktopFontGenerate_TTF"):
         binaryFormats.append(("ttf", postProcessCollector()))
-    if generateOptions.get("desktopFontGenerate_PFA"):
-        binaryFormats.append(("pfa", postProcessCollector()))
-    if generateOptions.get("desktopFontGenerate_VFB"):
-        binaryFormats.append(("vfb", postProcessCollector()))
+    # if generateOptions.get("desktopFontGenerate_PFA"):
+    #     binaryFormats.append(("pfa", postProcessCollector()))
+    # if generateOptions.get("desktopFontGenerate_VFB"):
+    #     binaryFormats.append(("vfb", postProcessCollector()))
 
     if not binaryFormats:
         return

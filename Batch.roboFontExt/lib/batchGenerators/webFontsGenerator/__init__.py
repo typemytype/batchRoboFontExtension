@@ -90,11 +90,11 @@ def build(root, generateOptions, settings, progress, report):
     binaryFormats = []
     if generateOptions["webFontGenerate_OTF"]:
         binaryFormats.append(("otf", postProcessCollector(autohintFunc, htmlBuilderFunc)))
-    if generateOptions["webFontGenerate_OTFWoff2"]:
+    if generateOptions["webFontGenerate_OTFWOFF2"]:
         binaryFormats.append(("otf-woff", postProcessCollector(autohintFunc, WOFF2Builder, htmlBuilderFunc)))
     if generateOptions["webFontGenerate_TTF"]:
         binaryFormats.append(("ttf", postProcessCollector(autohintFunc, htmlBuilderFunc)))
-    if generateOptions["webFontGenerate_TTFWoff2"]:
+    if generateOptions["webFontGenerate_TTFWOFF2"]:
         binaryFormats.append(("ttf-woff", postProcessCollector(autohintFunc, WOFF2Builder, htmlBuilderFunc)))
     # if generateOptions["webFontGenerate_SVG"]:
     #    binaryFormats.append(("svg", None))
