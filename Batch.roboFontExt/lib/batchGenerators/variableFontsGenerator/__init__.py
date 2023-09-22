@@ -406,6 +406,7 @@ def build(root, generateOptions, settings, progress, report):
         for name, interpolableOperator in operator.getInterpolableUFOOperators(useVariableFonts=True):
             for binaryFormat, postProcessCallback in binaryFormats:
                 binaryExtention = binaryFormat.split("-")[0]
+
                 fileName = f"{name}.{binaryExtention}"
                 tempFileName = f"temp_{fileName}"
 
