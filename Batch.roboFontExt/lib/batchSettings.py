@@ -150,8 +150,8 @@ class BatchSettingsController(ezui.WindowController):
         > [ ] Export in sub-folders           @batchSettingExportInSubFolders
         > ---
         > :
-        > ( ) Keep file names                 @batchSettingExportKeepFileNames
-        > ( ) Use familyName-styleName
+        > ( ) Use familyName-styleName        @batchSettingExportKeepFileNames
+        > ( ) Keep file names
         > ---
         > [ ] Debug                           @batchSettingExportDebug
 
