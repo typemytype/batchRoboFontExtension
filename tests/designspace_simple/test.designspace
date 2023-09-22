@@ -16,17 +16,17 @@
     </source>
   </sources>
   <instances>
-    <instance familyname="E" stylename="Thick" filename="instances/E-Thick.ufo">
+    <instance familyname="E" stylename="Thick" filename="instances/FileName-E-Thick.ufo">
       <location>
         <dimension name="weight" xvalue="700"/>
       </location>
     </instance>
-    <instance familyname="E" stylename="Thin" filename="instances/E-Thin.ufo">
+    <instance familyname="E" stylename="Thin" filename="instances/FileName-E-Thin.ufo">
       <location>
         <dimension name="weight" xvalue="400"/>
       </location>
     </instance>
-    <instance familyname="E" stylename="Style_2" filename="instances/E-Style_2.ufo">
+    <instance familyname="E" stylename="Style_2" filename="instances/FileName-E-Style_2.ufo">
       <location>
         <dimension name="weight" xvalue="700" yvalue="400"/>
       </location>
