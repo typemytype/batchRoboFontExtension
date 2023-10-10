@@ -78,7 +78,7 @@ class BatchController(ezui.WindowController):
         "TTF WOFF2",
     ]
 
-    supportedFileTypes = ["ufo", "designspace", "otf", "ttf", "woff", "ttx"]
+    supportedFileTypes = ["ufo", "designspace", "otf", "ttf", "woff", "woff2", "ttx"]
 
     def build(self, sources=[]):
         content = f"""
