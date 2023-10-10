@@ -154,12 +154,6 @@ class BatchController(ezui.WindowController):
         for identifier in list(items.keys()):
             if identifier not in possibleIdentifiers:
                 del items[identifier]
-                
-        # position the window where it was last
-        wx, wy, ww, wh = self.w.getPosSize()
-        posSize = getExtensionDefault("com.typemytype.batch.windowPosSize", fallback=(wx, wy, ww, wh))
-        self.w.setPosSize(posSize)
-        
         self.w.setItemValues(items)
         self.w.open()
 
@@ -169,7 +163,6 @@ class BatchController(ezui.WindowController):
             if identifier in items:
                 del items[identifier]
         setExtensionDefault("com.typemytype.batch", items)
-        setExtensionDefault("com.typemytype.batch.windowPosSize", self.w.getPosSize())
 
     def sourcesAddRemoveButtonAddCallback(self, sender):
         # add item
