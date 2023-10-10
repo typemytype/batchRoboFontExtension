@@ -235,7 +235,7 @@ class BatchController(ezui.WindowController):
             if path:
                 root = path[0]
 
-                progress = self.startProgress("Generating...")
+                progress = self.startProgress("Generating...", parent=self.w)
                 try:
                     self.report = Report()
                     self.report.writeTitle("Batch Generate:")
