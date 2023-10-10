@@ -156,7 +156,7 @@ class BatchController(ezui.WindowController):
                 del items[identifier]
                 
         # position the window where it was last
-        wx, wy, ww, wh =  self.w.getPosSize()
+        wx, wy, ww, wh = self.w.getPosSize()
         posSize = getExtensionDefault("com.typemytype.batch.windowPosSize", fallback=(wx, wy, ww, wh))
         self.w.setPosSize(posSize)
         
