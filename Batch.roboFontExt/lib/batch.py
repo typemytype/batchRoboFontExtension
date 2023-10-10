@@ -83,30 +83,32 @@ class BatchController(ezui.WindowController):
     def build(self, sources=[]):
         content = f"""
 
-#= ScrollingVerticalStack
-|---|                                              @sources
-> (+-)                                             @sourcesAddRemoveButton
-> ( Add Open UFO's )                               @sourcesAddOpenUFOsButton
+        #= ScrollingVerticalStack
+        |---|                                              @sources
+        > (+-)                                             @sourcesAddRemoveButton
+        > ( Add Open UFOs )                                @sourcesAddOpenUFOsButton
 
-* HorizontalStack
-> * Box @desktopFontsBox
->> !§ Desktop Fonts:
-{ buildFormatCheckBoxes(self.desktopFontsFormats, "desktopFont", ">>") }
+        ---
 
-> * Box @webFontsBox
->> !§ Web Fonts:
-{ buildFormatCheckBoxes(self.webFontsFormats, "webFont", ">>") }
+        * HorizontalStack
+        > * Box @desktopFontsBox
+        >> !§ Desktop Fonts:
+        { buildFormatCheckBoxes(self.desktopFontsFormats, "desktopFont", ">>") }
 
-> * Box @variableFontsBox
->> !§ Variable Fonts:
-{ buildFormatCheckBoxes(self.variableFontsFormats, "variableFont", ">>") }
+        > * Box @webFontsBox
+        >> !§ Web Fonts:
+        { buildFormatCheckBoxes(self.webFontsFormats, "webFont", ">>") }
 
-=---=
+        > * Box @variableFontsBox
+        >> !§ Variable Fonts:
+        { buildFormatCheckBoxes(self.variableFontsFormats, "variableFont", ">>") }
 
-(?)                                               @help
-(*)                                               @settings
-( Generate )                                      @generate
-"""
+        =---=
+
+        (?)                                                @help
+        (*)                                                @settings
+        ( Generate )                                       @generate
+        """
         descriptionData = dict(
             sources=dict(
                 columnDescriptions=[dict(identifier="source", title="Sources", cellClassArguments=dict(truncationMode="head"))],
@@ -231,7 +233,7 @@ class BatchController(ezui.WindowController):
             if path:
                 root = path[0]
 
-                progress = self.startProgress("Generating...")
+                progress = self.startProgress("Generating...", parent=self.w)
                 try:
                     self.report = Report()
                     self.report.writeTitle("Batch Generate:")
