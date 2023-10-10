@@ -109,7 +109,6 @@ class BatchController(ezui.WindowController):
 """
         descriptionData = dict(
             sources=dict(
-                height=200,
                 columnDescriptions=[dict(identifier="source", title="Sources", cellClassArguments=dict(truncationMode="head"))],
                 showColumnTitles=True,
                 enableDelete=True,
@@ -134,7 +133,9 @@ class BatchController(ezui.WindowController):
             title="Batch",
             content=content,
             descriptionData=descriptionData,
-            size="auto",
+            size=(435, 450),
+            minSize=(435, 450),
+            maxSize=(435, 1000),
             defaultButton="generate",
             controller=self,
         )
