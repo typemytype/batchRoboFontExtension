@@ -48,7 +48,9 @@ def buildFormatCheckBoxes(items, identifier, prefix=""):
 
 def tableAddPathItems(table, paths):
     if paths:
-        existingSources = [item["source"] for item in table.getItems()]
+        print(table)
+        print(table.getArrangedItems())
+        existingSources = [item["source"] for item in table.getArrangedItems()]
         items = []
         for path in paths:
             if path not in existingSources:
@@ -185,7 +187,7 @@ class BatchController(ezui.WindowController):
         table = self.w.getItem("sources")
         sender = info["sender"]
         droppedItems = sender.getDropItemValues(info["items"], "fileURL")
-        existing = [item["source"] for item in table.getItems()]
+        existing = [item["source"] for item in table.getArrangedItems()]
 
         items = []
         for item in droppedItems:
