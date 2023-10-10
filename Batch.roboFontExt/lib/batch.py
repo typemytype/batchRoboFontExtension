@@ -90,6 +90,8 @@ class BatchController(ezui.WindowController):
         > (+-)                                             @sourcesAddRemoveButton
         > ( Add Open UFOs )                                @sourcesAddOpenUFOsButton
 
+        ---
+
         * HorizontalStack
         > * Box @desktopFontsBox
         >> !§ Desktop Fonts:
