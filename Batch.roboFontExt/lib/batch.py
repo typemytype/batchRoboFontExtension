@@ -18,7 +18,7 @@ import AppKit
 import ezui
 import defcon
 
-from mojo.roboFont import OpenFont
+from mojo.roboFont import OpenFont, AllFonts
 from mojo.extensions import getExtensionDefault, setExtensionDefault, ExtensionBundle
 from lib.tools.misc import walkDirectoryForFile
 
@@ -85,7 +85,8 @@ class BatchController(ezui.WindowController):
 
 #= ScrollingVerticalStack
 |---|                                              @sources
-(+-)                                               @sourcesAddRemoveButton
+> (+-)                                             @sourcesAddRemoveButton
+> ( Add Open UFO's )                               @sourcesAddOpenUFOsButton
 
 * HorizontalStack
 > * Box @desktopFontsBox
@@ -119,9 +120,7 @@ class BatchController(ezui.WindowController):
                     performDropCallback=self.sourcesPerformDropCallback
                 )
             ),
-            sourcesAddOpenUFO=dict(
-                width="fill",
-                alignment="left",
+            sourcesAddOpenUFOsButton=dict(
                 gravity="leading",
             ),
             help=dict(
@@ -175,6 +174,11 @@ class BatchController(ezui.WindowController):
         # remove selected items
         table = self.w.getItem("sources")
         table.removeSelectedItems()
+
+    def sourcesAddOpenUFOsButtonCallback(self, sender):
+        # add open ufo's only when they are saved on disk
+        paths = [font.path for font in AllFonts() if font.path is not None]
+        tableAddPathItems(self.w.getItem("sources"), paths)
 
     def sourcesDropCandidateCallback(self, info):
         table = self.w.getItem("sources")
