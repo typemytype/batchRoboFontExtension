@@ -48,8 +48,6 @@ def buildFormatCheckBoxes(items, identifier, prefix=""):
 
 def tableAddPathItems(table, paths):
     if paths:
-        print(table)
-        print(table.getArrangedItems())
         existingSources = [item["source"] for item in table.getArrangedItems()]
         items = []
         for path in paths:
