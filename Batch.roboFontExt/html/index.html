@@ -13,136 +13,59 @@
 <p><strong>Batch is a RoboFont extension to generate binary fonts in batch.</strong></p>
 <ul>
 <li>supports UFO, OpenType (TTF/CFF) and designSpace files as input</li>
-<li>generates .otf .ttf .pfa .vfb .woff .woff2 .eot .svg &amp; variable fonts</li>
+<li>generates .otf .ttf .pfa .woff2 &amp; variable fonts</li>
 </ul>
 <h2 id="documentation">Documentation</h2>
 <ul>
-<li><a href="#fonts">Fonts</a></li>
+<li><a href="#sources">Sources</a></li>
+<li><a href="#desktop-fonts">Desktop Fonts</a></li>
 <li><a href="#web-fonts">Web fonts</a></li>
-<li><a href="#batch-generate">Batch generate</a></li>
-<li><a href="#variable-fonts">Variable Fonts</a></li>
-<li><a href="#binary-merge">Binary Merge</a></li>
+<li><a href="#variable-fonts">Variable fonts</a></li>
 <li><a href="#settings">Settings</a></li>
 </ul>
 <p>Once installed, Batch will add itself to the <em>File</em> menu:</p>
 <p><img alt="" src="imgs/batch-menu.png" /></p>
-<h2 id="fonts">Fonts</h2>
-<p>Use the <em>Fonts</em> section to choose which fonts to use as input.</p>
-<p><img alt="" src="imgs/fonts.png" /></p>
-<p><strong>Add fonts by dragging files into the list.</strong></p>
+<h1 id="sources">Sources</h1>
+<p>Use the <em>Sources</em> section to choose which fonts to use as input.</p>
+<p><strong>Add fonts by dragging files into the list or use the + - buttons.</strong></p>
 <p>The following types of input files are supported:</p>
 <ul>
 <li>UFO fonts</li>
 <li>OpenType fonts (CFF/TTF)</li>
-<li>UFOs folder</li>
-<li>designSpace file</li>
+<li>UFO's folder</li>
+<li>designspace file</li>
 </ul>
-<h3 id="options">Options</h3>
-<dl>
-  <dt>add open fonts</dt>
-  <dd>Use the toolbar button *Add Open Fonts* to add all open fonts to the list.</dd>
-  <dt>UFOs folder</dt>
-  <dd>If a folder is provided, Batch will search for all UFOs inside it.</dd>
-  <dt>designSpace files</dt>
-  <dd>If a designSpace file is provided, it will be expanded into all its masters and instances, and the instances can be generated.</dd>
-</dl>
-
-<h2 id="web-fonts">Web fonts</h2>
-<p>Use the <em>Web fonts</em> section to generate webfont formats and related test files.</p>
-<p><img alt="" src="imgs/web-fonts.png" /></p>
-<p>The following webfont formats are supported:</p>
+<p>If a designspace file is provided, it will be expanded into all it's sources and instances, the instances can be generated as seperate static desktop and web fonts.</p>
+<p><img alt="" src="imgs/batch.png" /></p>
+<h1 id="export-formats">Export formats</h1>
+<h2 id="desktop-fonts">Desktop Fonts</h2>
 <ul>
 <li>.otf</li>
 <li>.ttf</li>
-<li>.woff</li>
-<li>.woff2</li>
-<li>.eot</li>
-<li>.svg</li>
 </ul>
-<h3 id="options_1">Options</h3>
-<dl>
-  <dt>woff</dt>
-  <dd>Creates WOFF metadata based on the info in the font, if available.</dd>
-  <dt>woff2</dt>
-  <dd>Does not create any metadata – the fonts are simply compressed.</dd>
-  <dt>preserve hints</dt>
-  <dd>Check this option to prevent autohinting of binary TTF fonts.</dd>
-  <dt>suffix</dt>
-  <dd>Add a suffix to the output file names. The suffix can contain <a href='http://docs.python.org/2/library/time.html#time.strftime'>date time formatting</a>.</dd>
-  <dt>ttfautohint</dt>
-  <dd>Opens a sheet to choose ttfautohint settings.</dd>
-  <dt>generate html</dt>
-  <dd>Generates a HTML preview with some simple presets.</dd>
-</dl>
-
-<h3 id="ttfautohint">ttfautohint</h3>
-<p>TrueType autohinting with <a href="http://www.freetype.org/ttfautohint/">ttfautohint</a> is available when generating OpenType-TrueType webfonts.</p>
-<p>Click on the gears icon to open the ttfautohint settings.</p>
-<p><img alt="" src="imgs/ttfautohint.png" /></p>
-<p>See the <a href="https://www.freetype.org/ttfautohint/doc/ttfautohint.html">ttfautohint documentation</a> for details about each setting.</p>
-<h3 id="generate-html">Generate HTML</h3>
-<p>If <em>Generate HTML</em>  is selected, Batch will generate a simple HTML+CSS test page to preview the webfonts.</p>
-<p><img alt="" src="imgs/html-preview.png" /></p>
-<p>Use the top text area to edit the HTML code, and the bottom one to edit the CSS.</p>
-<p>The HTML preview can replace <code>%(familyName)s</code> and <code>%(styleName)s</code> by the corresponding font info values retrieved from the font.</p>
-<h2 id="batch-generate">Batch generate</h2>
-<p>Use the <em>Batch Generate</em> section to generate desktop fonts, and to convert fonts to VFB format.</p>
-<p><img alt="" src="imgs/batch-generate.png" /></p>
-<p>The following binary output formats are supported:</p>
+<h2 id="web-fonts">Web Fonts</h2>
 <ul>
 <li>.otf</li>
+<li>.otf (woff2)</li>
 <li>.ttf</li>
-<li>.pfa</li>
-<li>.vfb</li>
-<li>variable fonts</li>
+<li>.ttf (woff2)</li>
 </ul>
-<p><em>Note: Generating .vfb fonts requires <a href="http://blog.fontlab.com/font-utility/vfb2ufo/">ufo2vfb</a>.</em></p>
-<h3 id="options_2">Options</h3>
-<ul>
-<li>decompose</li>
-<li>remove overlap</li>
-<li>autohint</li>
-<li>release mode</li>
-</ul>
-<dl>
-  <dt>suffix</dt>
-  <dd>Add a suffix to the output file names. The suffix can contain <a href='http://docs.python.org/2/library/time.html#time.strftime'>date time formatting</a>.</dd>
-</dl>
-
 <h2 id="variable-fonts">Variable Fonts</h2>
-<p>Use the <em>Batch Generate</em> section to generate variable fonts.</p>
+<ul>
+<li>.otf</li>
+<li>.otf (woff2)</li>
+<li>.ttf</li>
+<li>.ttf (woff2)</li>
+</ul>
 <p><em>Note: It is required to provide a designSpace file.</em></p>
-<p><img alt="" src="imgs/variable-fonts.png" /></p>
-<p>Batch will try to optimize the designSpace data by performing the following actions:</p>
+<p>Batch will try to optimize the designspace data by performing the following actions:</p>
 <ul>
 <li>Add off-curve points where needed to make contours compatible.</li>
 <li>Add axes to the design space if they are missing.</li>
 <li>Add missing glyphs by generating them from the design space.</li>
 <li>Add kerning pairs to make kerning compatible.</li>
 </ul>
-<h3 id="options_3">Options</h3>
-<dl>
-  <dt>autohint</dt>
-  <dd>...</dd>
-  <dt>interpolate to fit axes extremes</dt>
-  <dd>...</dd>
-</dl>
-
-<h2 id="binary-merge">Binary Merge</h2>
-<p>Use the <em>Binary Merge</em> section to merge specific tables from a source.</p>
-<p><strong>This option is available only when a UFO is provided, and when the UFO has the source path in the <code>font.lib</code>.</strong></p>
-<p><img alt="" src="imgs/binary-merge.png" /></p>
-<p>Binary Merge will use the output settings selected in the <em>Batch Generate</em> section.</p>
 <h2 id="settings">Settings</h2>
 <p>Click on the gears icon in the toolbar to open the <em>Settings</em> sheet.</p>
-<p><img alt="" src="imgs/settings.png" /></p>
-<dl>
-  <dt>threaded</dt>
-  <dd>...</dd>
-  <dt>export in subfolders</dt>
-  <dd>Create subfolders for different types of file.</dd>
-  <dt>keep file names</dt>
-  <dd>Use the same file names as the input fonts.</dd>
-</dl>
 </body>
 </html>

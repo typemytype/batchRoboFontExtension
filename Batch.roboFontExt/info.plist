@@ -17,19 +17,12 @@
 	<key>name</key>
 	<string>Batch</string>
 	<key>requiresVersionMajor</key>
-	<string>3</string>
+	<string>4</string>
 	<key>requiresVersionMinor</key>
-	<string>2</string>
+	<string>4b</string>
 	<key>timeStamp</key>
-	<real>1680146593</real>
+	<real>1373965736.141633</real>
 	<key>version</key>
-	<string>1.9.13</string>
-	<key>com.robofontmechanic.Mechanic</key>
-	<dict>
-		<key>repository</key>
-		<string>typemytype/batchRoboFontExtension</string>
-		<key>summary</key>
-		<string>Batch generate fonts to various formats.</string>
-	</dict>
+	<string>2.0</string>
 </dict>
 </plist>

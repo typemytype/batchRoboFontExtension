@@ -1,15 +1,8 @@
-from __future__ import absolute_import
-
 import AppKit
 
-try:
-    # RF 2.0
-    from mojo.tools import CallbackWrapper
-except:
-    # RF 1.8
-    from lib.baseObjects import CallbackWrapper
+from mojo.tools import CallbackWrapper
 
-import toolBox
+import batch
 
 
 class BatchMenu(object):
@@ -36,7 +29,7 @@ class BatchMenu(object):
         fileMenu.insertItem_atIndex_(newItem, index + 1)
 
     def callback(self, sender):
-        OpenWindow(toolBox.ToolBox)
+        OpenWindow(batch.BatchController)
 
 
 BatchMenu()
