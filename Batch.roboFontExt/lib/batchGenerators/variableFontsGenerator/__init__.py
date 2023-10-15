@@ -36,6 +36,7 @@ class GenerateVariableFont:
         # split the designspace first first
         self.operator = operator
         self.destinationPath = destinationPath
+        self.binaryFormat = os.path.splitext(self.destinationPath)[-1][1:].lower()
         self.autohint = autohint
         self.fitToExtremes = fitToExtremes
         self.releaseMode = releaseMode
@@ -45,11 +46,12 @@ class GenerateVariableFont:
         self.build()
 
     def build(self):
-        self.operator.loadFonts()
+        self.operator.loadFonts(reload=True)
 
         self.makeMasterGlyphsCompatible()
         self.decomposedMixedGlyphs()
-        # self.makeMasterGlyphsQuadractic()
+        if self.binaryFormat == "ttf":
+            self.makeMasterGlyphsQuadractic()
         self.makeMasterKerningCompatible()
         self.makeMasterOnDefaultLocation()
         self.makeLayerMaster()
@@ -295,14 +297,14 @@ class GenerateVariableFont:
 
     def generate(self):
         dirname = os.path.dirname(self.destinationPath)
-        binaryFormat = os.path.splitext(self.destinationPath)[-1][1:]
+
         # fontCompiler settings
         options = FontCompilerOptions()
         options.fdk = CurrentFDK()
         options.saveFDKPartsNextToUFO = self.debug
         options.shouldDecomposeWithCheckOutlines = False
         options.generateCheckComponentMatrix = True
-        options.format = binaryFormat
+        options.format = self.binaryFormat
         options.decompose = False
         options.checkOutlines = False
         options.autohint = self.autohint
@@ -313,7 +315,7 @@ class GenerateVariableFont:
         # options.generateFeaturesWithFontTools = True
 
         self.report.newLine()
-        self.report.writeTitle(f"Generate {binaryFormat.upper()}", "'")
+        self.report.writeTitle(f"Generate {self.binaryFormat.upper()}", "'")
         self.report.indent()
 
         # map all master ufo paths to generated binaries
@@ -323,7 +325,7 @@ class GenerateVariableFont:
         for sourceCount, sourceDescriptor in enumerate(self.operator.sources):
             source = self.operator.fonts[sourceDescriptor.name]
             # get the output path
-            outputPath = os.path.join(dirname, f"temp_{sourceCount}_{source.info.familyName}-{source.info.styleName}.{binaryFormat}")
+            outputPath = os.path.join(dirname, f"temp_{sourceCount}_{source.info.familyName}-{source.info.styleName}.{self.binaryFormat}")
             masterBinaryPaths[sourceDescriptor.path] = outputPath
             generatedFiles.add(outputPath)
             # set the output path
