@@ -264,8 +264,8 @@ class BatchController(ezui.WindowController):
         if not items:
             items = table.getArrangedItems()
         ufoPaths = []
-        for item in items:
-            path = item["source"]
+
+        def extractPath(path):
             ext = os.path.splitext(path)[1].lower()
             if ext == ".ufo":
                 dummyFont = defcon.Font(path)
@@ -274,8 +274,9 @@ class BatchController(ezui.WindowController):
                 elif self.report is not None:
                     self.report.write(f"'{path}' has no family name or style name")
             elif os.path.isdir(path):
-                for ext in self.supportedFontFileFormats:
-                    ufoPaths.extend(walkDirectoryForFile(path, ext=ext))
+                for ext in self.supportedFileTypes:
+                    for subpath in walkDirectoryForFile(path, ext=ext):
+                        extractPath(subpath)
             elif flattenDesignSpace and ext == ".designspace":
                 if "designspaceDocument" not in item:
                     item["designspaceDocument"] = BatchEditorOperator(path)
@@ -286,6 +287,12 @@ class BatchController(ezui.WindowController):
                 for instanceDescriptor in designspaceDocument.instances:
                     if instanceDescriptor.path is not None:
                         ufoPaths.append(instanceDescriptor.path)
+            elif ext in self.supportedFileTypes:
+                ufoPaths.append(path)
+
+        for item in items:
+            extractPath(item["source"])
+
         return ufoPaths
 
     def getAllDesignspacePaths(self):
