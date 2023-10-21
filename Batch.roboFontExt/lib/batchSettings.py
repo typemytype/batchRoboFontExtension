@@ -189,7 +189,11 @@ class BatchSettingsController(ezui.WindowController):
                 valueType="integer",
             ),
             cancel=dict(
-                keyEquivalent=chr(27)
+                width=85,
+                keyEquivalent=chr(27),
+            ),
+            apply=dict(
+                width=85,
             ),
         )
         self.w = ezui.EZSheet(
@@ -198,6 +202,7 @@ class BatchSettingsController(ezui.WindowController):
             descriptionData=descriptionData,
             size=(700, 500),
             minSize=(700, 250),
+            defaultButton="apply",
             controller=self
         )
         data = getExtensionDefault("com.typemytype.batch.settings", defaultSettings)

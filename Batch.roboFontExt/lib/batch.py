@@ -287,7 +287,7 @@ class BatchController(ezui.WindowController):
                 for instanceDescriptor in designspaceDocument.instances:
                     if instanceDescriptor.path is not None:
                         ufoPaths.append(instanceDescriptor.path)
-            elif ext in self.supportedFileTypes:
+            elif ext.strip(".") in self.supportedFileTypes:
                 ufoPaths.append(path)
 
         for item in items:
