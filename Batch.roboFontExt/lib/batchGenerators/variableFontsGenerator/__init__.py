@@ -409,7 +409,8 @@ def build(root, generateOptions, settings, progress, report):
             for binaryFormat, postProcessCallback in binaryFormats:
                 binaryExtention = binaryFormat.split("-")[0]
 
-                fileName = f"{name}.{binaryExtention}"
+                suffix = settings["variableFontsSuffix"]
+                fileName = f"{name}{suffix}.{binaryExtention}"
                 tempFileName = f"temp_{fileName}"
 
                 if settings["batchSettingExportInSubFolders"]:
