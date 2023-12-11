@@ -8,7 +8,7 @@ from fontTools import varLib
 
 from fontPens.transformPointPen import TransformPointPen
 
-from lib.tools.compileTools import CurrentFDK
+from lib.tools.compileTools import CurrentFDK, CurrentFontCompilerTool
 from mojo.UI import getDefault
 from fontCompiler.compiler import generateFont, FontCompilerOptions
 
@@ -291,9 +291,9 @@ class GenerateVariableFont:
                 sourceDescriptor.filename = None
                 sourceDescriptor.layerName = None
                 if self.debug:
-                    masterFont = self.fonts[sourceDescriptor.name]
-                    layerPath = os.path.join(os.path.dirname(self.path), sourceDescriptor.path)
-                    masterFont.save(layerPath)
+                    sourceFont = self.operator.fonts[sourceDescriptor.name]
+                    layerPath = os.path.join(os.path.dirname(self.destinationPath), sourceDescriptor.path)
+                    sourceFont.save(layerPath)
 
     def generate(self):
         dirname = os.path.dirname(self.destinationPath)
@@ -301,6 +301,7 @@ class GenerateVariableFont:
         # fontCompiler settings
         options = FontCompilerOptions()
         options.fdk = CurrentFDK()
+        options.fontCompilerTool = CurrentFontCompilerTool()
         options.saveFDKPartsNextToUFO = self.debug
         options.shouldDecomposeWithCheckOutlines = False
         options.generateCheckComponentMatrix = True
