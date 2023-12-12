@@ -87,7 +87,7 @@ class BatchController(ezui.WindowController):
         |---|                                              @sources
         > (+-)                                             @sourcesAddRemoveButton
         > ( Add Open UFOs )                                @sourcesAddOpenUFOsButton
-
+        > ( Add Open Designspaces)                         @sourcesAddOpenDesignspacesButton
         ---
 
         * HorizontalStack
@@ -122,6 +122,9 @@ class BatchController(ezui.WindowController):
                 )
             ),
             sourcesAddOpenUFOsButton=dict(
+                gravity="leading",
+            ),
+            sourcesAddOpenDesignspacesButton=dict(
                 gravity="leading",
             ),
             help=dict(
@@ -181,6 +184,11 @@ class BatchController(ezui.WindowController):
     def sourcesAddOpenUFOsButtonCallback(self, sender):
         # add open ufo's only when they are saved on disk
         paths = [font.path for font in AllFonts() if font.path is not None]
+        tableAddPathItems(self.w.getItem("sources"), paths)
+
+    def sourcesAddOpenDesignspacesButtonCallback(self, sender):
+        # add open designspace's only when they are saved on disk
+        paths = [designspace.path for designspace in AllDesignspaces() if designspace.path is not None]
         tableAddPathItems(self.w.getItem("sources"), paths)
 
     def sourcesDropCandidateCallback(self, info):
