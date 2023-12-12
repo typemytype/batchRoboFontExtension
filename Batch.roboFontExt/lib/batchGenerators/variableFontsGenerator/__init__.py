@@ -310,6 +310,7 @@ class GenerateVariableFont:
         options.checkOutlines = False
         options.autohint = self.autohint
         options.releaseMode = self.releaseMode
+        options.turnOnSubroutinization = False
         options.glyphOrder = self.glyphOrder
         options.useMacRoman = False
         # the generate features with fontTools flag is a users decision and should be extracted from the lib
