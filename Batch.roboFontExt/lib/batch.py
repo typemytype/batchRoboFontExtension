@@ -222,7 +222,7 @@ class BatchController(ezui.WindowController):
 
     def generateCallback(self, sender):
         generateOptions = self.w.getItemValues()
-        generateOptions["sourceUFOPaths"] = self.getAllUFOPaths()
+        generateOptions["sourceUFOPaths"], designspaceDocuments = self.getAllUFOPaths()
         generateOptions["sourceDesignspacePaths"] = self.getAllDesignspacePaths()
 
         if not generateOptions["sourceUFOPaths"] and not generateOptions["sourceDesignspacePaths"]:
@@ -234,6 +234,8 @@ class BatchController(ezui.WindowController):
                 root = path[0]
 
                 progress = self.startProgress("Generating...", parent=self.w)
+                for designspaceDocument in designspaceDocuments:
+                    designspaceDocument.generateUFOs()
                 try:
                     self.report = Report()
                     self.report.writeTitle("Batch Generate:")
@@ -264,6 +266,7 @@ class BatchController(ezui.WindowController):
         if not items:
             items = table.getArrangedItems()
         ufoPaths = []
+        designspaceDocuments = []
 
         def extractPath(path):
             ext = os.path.splitext(path)[1].lower()
@@ -281,7 +284,7 @@ class BatchController(ezui.WindowController):
                 if "designspaceDocument" not in item:
                     item["designspaceDocument"] = BatchEditorOperator(path)
                 designspaceDocument = item["designspaceDocument"]
-                designspaceDocument.generateUFOs()
+                designspaceDocuments.append(designspaceDocument)
                 for sourceDescriptor in designspaceDocument.sources:
                     ufoPaths.append(sourceDescriptor.path)
                 for instanceDescriptor in designspaceDocument.instances:
@@ -293,7 +296,7 @@ class BatchController(ezui.WindowController):
         for item in items:
             extractPath(item["source"])
 
-        return ufoPaths
+        return ufoPaths, designspaceDocuments
 
     def getAllDesignspacePaths(self):
         table = self.w.getItem("sources")
