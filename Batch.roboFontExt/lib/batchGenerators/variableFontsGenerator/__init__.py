@@ -5,6 +5,7 @@ import defcon
 
 from fontTools.cu2qu.ufo import fonts_to_quadratic
 from fontTools import varLib
+from fontTools.ttLib import TTFont
 
 from fontPens.transformPointPen import TransformPointPen
 
@@ -16,17 +17,6 @@ from ufo2fdk.kernFeatureWriter import side1Prefix, side2Prefix
 
 from batchGenerators.batchTools import postProcessCollector, WOFF2Builder, buildTree, removeTree, BatchEditorOperator
 
-
-class VarLibMasterFinder(dict):
-
-    """
-    VarLib needs an argument mapping source UFOs to binary fonts.
-    A simple dict which is callable with an source UFO path returning
-    the binary font path.
-    """
-
-    def __call__(self, arg):
-        return self.get(arg)
 
 
 class GenerateVariableFont:
@@ -46,17 +36,28 @@ class GenerateVariableFont:
         self.build()
 
     def build(self):
+        self.generatedFiles = set()
+
         self.operator.loadFonts(reload=True)
 
         self.makeMasterGlyphsCompatible()
         self.decomposedMixedGlyphs()
-        if self.binaryFormat == "ttf":
-            self.makeMasterGlyphsQuadractic()
         self.makeMasterKerningCompatible()
         self.makeMasterOnDefaultLocation()
         self.makeLayerMaster()
+        if self.binaryFormat == "ttf":
+            self.makeMasterGlyphsQuadractic()
 
         self.generate()
+
+        if not self.debug:
+            # remove generated files
+            for path in self.generatedFiles:
+                if os.path.exists(path):
+                    if os.path.isdir(path):
+                        shutil.rmtree(path)
+                    else:
+                        os.remove(path)
 
     def makeMasterGlyphsCompatible(self):
         """
@@ -285,15 +286,23 @@ class GenerateVariableFont:
         """
         for sourceDescriptor in self.operator.sources:
             if sourceDescriptor.layerName is not None:
+                layerName = sourceDescriptor.layerName
+
                 path, ext = os.path.splitext(sourceDescriptor.path)
-                sourceDescriptor.path = "%s-%s%s" % (path, sourceDescriptor.layerName, ext)
-                sourceDescriptor.styleName = "%s %s" % (sourceDescriptor.styleName, sourceDescriptor.layerName)
+
+                sourceDescriptor.path = os.path.join(os.path.dirname(self.destinationPath), f"{path}-{layerName}{ext}")
+                sourceDescriptor.styleName = f"{sourceDescriptor.styleName} {layerName}"
                 sourceDescriptor.filename = None
                 sourceDescriptor.layerName = None
-                if self.debug:
-                    sourceFont = self.operator.fonts[sourceDescriptor.name]
-                    layerPath = os.path.join(os.path.dirname(self.destinationPath), sourceDescriptor.path)
-                    sourceFont.save(layerPath)
+
+                layeredSource = self.operator._instantiateFont(sourceDescriptor.path)
+                layeredSource.layers.defaultLayer = layeredSource.layers[layerName]
+                layeredSource.save(sourceDescriptor.path)
+
+                self.operator.fonts[sourceDescriptor.name] = layeredSource
+
+                self.generatedFiles.add(sourceDescriptor.path)
+
 
     def generate(self):
         dirname = os.path.dirname(self.destinationPath)
@@ -320,25 +329,34 @@ class GenerateVariableFont:
         self.report.writeTitle(f"Generate {self.binaryFormat.upper()}", "'")
         self.report.indent()
 
-        # map all master ufo paths to generated binaries
-        masterBinaryPaths = VarLibMasterFinder()
-        generatedFiles = set()
-
         for sourceCount, sourceDescriptor in enumerate(self.operator.sources):
             source = self.operator.fonts[sourceDescriptor.name]
             # get the output path
-            outputPath = os.path.join(dirname, f"temp_{sourceCount}_{source.info.familyName}-{source.info.styleName}.{self.binaryFormat}")
-            masterBinaryPaths[sourceDescriptor.path] = outputPath
-            generatedFiles.add(outputPath)
+            familyName = sourceDescriptor.familyName
+            if not familyName:
+                familyName = source.info.familyName
+            styleName = sourceDescriptor.styleName
+            if not styleName:
+                styleName = source.info.styleName
+            outputPath = os.path.join(dirname, f"temp_{sourceCount}_{familyName}-{styleName}.{self.binaryFormat}")
+            self.generatedFiles.add(outputPath)
             # set the output path
             options.outputPath = outputPath
+            options.layerName = None
             if sourceDescriptor.layerName:
                 options.layerName = sourceDescriptor.layerName
             # generate the font
             try:
                 result = generateFont(source, options=options)
+                sourceDescriptor.font = TTFont(outputPath)
+                if sourceDescriptor.layerName:
+                    # https://github.com/googlefonts/ufo2ft/blob/150c2d6a00da9d5854173c8457a553ce03b89cf7/Lib/ufo2ft/_compilers/interpolatableTTFCompiler.py#L58-L66
+                    if "post" in sourceDescriptor.font:
+                        sourceDescriptor.font["post"].underlinePosition = -0x8000
+                        sourceDescriptor.font["post"].underlineThickness = -0x8000
+
                 if self.debug:
-                    tempSavePath = os.path.join(dirname, f"temp_{sourceCount}_{source.info.familyName}-{source.info.styleName}.ufo")
+                    tempSavePath = os.path.join(dirname, f"temp_{sourceCount}_{familyName}-{styleName}.ufo")
                     source.save(tempSavePath)
                     if source.layers.defaultLayer.name != sourceDescriptor.layerName:
                         tempFont = defcon.Font(tempSavePath)
@@ -350,40 +368,30 @@ class GenerateVariableFont:
                 result = f"Faild to generate: {e}:\n{tracebackResult}"
                 print(tracebackResult)
                 self.report.newLine()
-                self.report.write(f"Generate failed {source.info.familyName}-{source.info.styleName}")
+                self.report.write(f"Generate failed {familyName}-{styleName}")
                 self.report.indent()
                 self.report.write(tracebackResult)
                 self.report.dedent()
 
             self.report.newLine()
-            self.report.write(f"Generate {source.info.familyName}-{source.info.styleName}")
+            self.report.write(f"Generate {familyName}-{styleName}")
             self.report.write(result)
         self.report.dedent()
 
         # optimize the design space for varlib
         designSpacePath = os.path.join(dirname, f"{self.destinationPath}.designspace")
         self.operator.write(designSpacePath)
-        generatedFiles.add(designSpacePath)
+        self.generatedFiles.add(designSpacePath)
+
         try:
             # let varLib build the variation font
-            varFont, _, _ = varLib.build(designSpacePath, master_finder=masterBinaryPaths)
+            varFont, _, _ = varLib.build(self.operator.doc)
             # save the variation font
             varFont.save(self.destinationPath)
         except Exception:
-            if self.debug:
-                print("masterBinaryPaths:", masterBinaryPaths)
             import traceback
             result = traceback.format_exc()
             print(result)
-
-        if not self.debug:
-            # remove generated files
-            for path in generatedFiles:
-                if os.path.exists(path):
-                    if os.path.isdir(path):
-                        shutil.rmtree(path)
-                    else:
-                        os.remove(path)
 
 
 def build(root, generateOptions, settings, progress, report):
