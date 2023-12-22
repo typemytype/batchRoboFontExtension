@@ -47,6 +47,8 @@ class GenerateVariableFont:
         self.makeLayerMaster()
         if self.binaryFormat == "ttf":
             self.makeMasterGlyphsQuadractic()
+        elif self.binaryFormat == "otf":
+            self.makeMasterExportOptimizeCharstring()
 
         self.generate()
 
@@ -205,6 +207,10 @@ class GenerateVariableFont:
         # use cu2qu to optimize all masters
         fonts_to_quadratic(self.operator.fonts.values())
 
+    def makeMasterExportOptimizeCharstring(self):
+        for name, font in self.operator.fonts.items():
+            font.lib["com.typemytype.robofont.optimizeCharstring"] = False
+
     def makeMasterKerningCompatible(self):
         """
         Optimize kerning data.
@@ -302,7 +308,6 @@ class GenerateVariableFont:
                 self.operator.fonts[sourceDescriptor.name] = layeredSource
 
                 self.generatedFiles.add(sourceDescriptor.path)
-
 
     def generate(self):
         dirname = os.path.dirname(self.destinationPath)
