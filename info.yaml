@@ -1,0 +1,10 @@
+name: Batch
+developer: TypeMyType
+developerURL: http://typemytype.com
+launchAtStartUp: true
+mainScript: main.py
+version: '2.2'
+addToMenu: []
+html: true
+requiresVersionMajor: '4'
+requiresVersionMinor: 4b
