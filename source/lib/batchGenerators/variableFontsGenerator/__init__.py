@@ -18,7 +18,6 @@ from ufo2fdk.kernFeatureWriter import side1Prefix, side2Prefix
 from batchGenerators.batchTools import postProcessCollector, WOFF2Builder, buildTree, removeTree, BatchEditorOperator
 
 
-
 class GenerateVariableFont:
 
     def __init__(self, operator, destinationPath, autohint=False, fitToExtremes=False, releaseMode=True, glyphOrder=None, report=None, debug=False):
