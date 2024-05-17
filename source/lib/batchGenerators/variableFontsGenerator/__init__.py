@@ -15,7 +15,7 @@ from fontCompiler.compiler import generateFont, FontCompilerOptions
 
 from ufo2fdk.kernFeatureWriter import side1Prefix, side2Prefix
 
-from batchGenerators.batchTools import postProcessCollector, WOFF2Builder, buildTree, removeTree, BatchEditorOperator
+from batchGenerators.batchTools import postProcessCollector, WOFF2Builder, buildTree, removeTree, BatchEditorOperator, Report
 
 
 class GenerateVariableFont:
@@ -23,6 +23,8 @@ class GenerateVariableFont:
     def __init__(self, operator, destinationPath, autohint=False, fitToExtremes=False, releaseMode=True, glyphOrder=None, report=None, debug=False):
         # this must be an operator with no discrete axes.
         # split the designspace first first
+        if report is None:
+            report = Report()
         self.operator = operator
         self.destinationPath = destinationPath
         self.binaryFormat = os.path.splitext(self.destinationPath)[-1][1:].lower()
@@ -293,19 +295,20 @@ class GenerateVariableFont:
             if sourceDescriptor.layerName is not None:
                 layerName = sourceDescriptor.layerName
 
-                path, ext = os.path.splitext(sourceDescriptor.path)
+                layeredUFOPath = sourceDescriptor.path
+
+                path, ext = os.path.splitext(layeredUFOPath)
 
                 sourceDescriptor.path = os.path.join(os.path.dirname(self.destinationPath), f"{path}-{layerName}{ext}")
                 sourceDescriptor.styleName = f"{sourceDescriptor.styleName} {layerName}"
                 sourceDescriptor.filename = None
                 sourceDescriptor.layerName = None
 
-                layeredSource = self.operator._instantiateFont(sourceDescriptor.path)
+                layeredSource = self.operator._instantiateFont(layeredUFOPath)
                 layeredSource.layers.defaultLayer = layeredSource.layers[layerName]
                 layeredSource.save(sourceDescriptor.path)
 
                 self.operator.fonts[sourceDescriptor.name] = layeredSource
-
                 self.generatedFiles.add(sourceDescriptor.path)
 
     def generate(self):
