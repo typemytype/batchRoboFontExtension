@@ -1,10 +1,9 @@
 import os
-from mojo.roboFont import RFont
 
 from batchGenerators.batchTools import removeTree, generatePaths, postProcessCollector
 
 
-def build(root, generateOptions, settings, progress, report):
+def build(root, generateOptions, settings, progress, report, subFolder="Desktop"):
     binaryFormats = []
     if generateOptions.get("desktopFontGenerate_OTF"):
         binaryFormats.append(("otf", postProcessCollector()))
@@ -21,8 +20,11 @@ def build(root, generateOptions, settings, progress, report):
     report.writeTitle("Batch Generated Desktop Fonts:")
     progress.setText("Collecting Data...")
 
-    desktopFontsRoot = os.path.join(root, "Desktop")
-    removeTree(desktopFontsRoot)
+    if subFolder:
+        desktopFontsRoot = os.path.join(root, subFolder)
+        removeTree(desktopFontsRoot)
+    else:
+        desktopFontsRoot = root
 
     generatePaths(
         ufoPaths=generateOptions["sourceUFOPaths"],

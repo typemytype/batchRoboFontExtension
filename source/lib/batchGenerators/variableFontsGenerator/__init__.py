@@ -401,7 +401,7 @@ class GenerateVariableFont:
             print(result)
 
 
-def build(root, generateOptions, settings, progress, report):
+def build(root, generateOptions, settings, progress, report, subFolder="Variable"):
 
     binaryFormats = []
     if generateOptions["variableFontGenerate_OTF"]:
@@ -416,8 +416,11 @@ def build(root, generateOptions, settings, progress, report):
     if not binaryFormats:
         return
 
-    variableFontsRoot = os.path.join(root, "Variable")
-    removeTree(variableFontsRoot)
+    if subFolder:
+        variableFontsRoot = os.path.join(root, subFolder)
+        removeTree(variableFontsRoot)
+    else:
+        variableFontsRoot = root
 
     for sourceDesignspacePath in generateOptions["sourceDesignspacePaths"]:
         operator = BatchEditorOperator(sourceDesignspacePath)

@@ -70,7 +70,7 @@ def autohintBuilder(autohintOptions, report):
     return wrapper
 
 
-def build(root, generateOptions, settings, progress, report):
+def build(root, generateOptions, settings, progress, report, subFolder="Web"):
     if settings["webFontsAutohint"]:
         autohintFunc = autohintBuilder(settings, report)
     else:
@@ -103,8 +103,11 @@ def build(root, generateOptions, settings, progress, report):
     if not binaryFormats:
         return
 
-    webFontsRoot = os.path.join(root, "Web")
-    removeTree(webFontsRoot)
+    if subFolder:
+        webFontsRoot = os.path.join(root, subFolder)
+        removeTree(webFontsRoot)
+    else:
+        webFontsRoot = root
 
     report.writeTitle("Batch Generated Web Fonts:")
     progress.update("Collecting Data...")
