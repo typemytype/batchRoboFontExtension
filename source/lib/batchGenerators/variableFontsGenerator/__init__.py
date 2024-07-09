@@ -268,7 +268,7 @@ class GenerateVariableFont:
         create default location
         which is on the crossing of all axis
         """
-        defaultLocation = self.operator.newDefaultLocation()
+        defaultLocation = self.operator.newDefaultLocation(bend=True)
         # compare default location with locations all of sources
         for sourceDescriptor in self.operator.sources:
             if defaultLocation == sourceDescriptor.location:
