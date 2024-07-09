@@ -282,7 +282,7 @@ class GenerateVariableFont:
         defaulSource = self.operator.findDefault()
         neutralLocation = defaulSource.location
         for axis in self.operator.axes:
-            axis.default = axis.axis.map_backward(neutralLocation[axis.name])
+            axis.default = axis.map_backward(neutralLocation[axis.name])
         self.report.writeDict(neutralLocation)
         self.report.dedent()
         self.report.newLine()
