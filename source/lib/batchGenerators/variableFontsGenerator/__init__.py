@@ -279,11 +279,9 @@ class GenerateVariableFont:
         self.report.indent()
         # there is no master at the default location
         # change the defaults of each axis so it fits with a given master
-        defaulSource = self.operator.findDefault()
-        neutralLocation = defaulSource.location
         for axis in self.operator.axes:
-            axis.default = axis.map_backward(neutralLocation[axis.name])
-        self.report.writeDict(neutralLocation)
+            axis.default = axis.map_backward(defaultLocation[axis.name])
+        self.report.writeDict(defaultLocation)
         self.report.dedent()
         self.report.newLine()
 
