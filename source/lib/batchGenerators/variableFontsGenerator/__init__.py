@@ -64,8 +64,8 @@ class GenerateVariableFont:
 
     def makeMasterGlyphsCompatible(self):
         """
-        Update all masters with missing glyphs.
-        All Masters must have the same glyphs.
+        Update all sources with missing glyphs.
+        All sources must have the same glyphs.
         """
         self.report.writeTitle("Making master glyphs compatible", "'")
         self.report.indent()
