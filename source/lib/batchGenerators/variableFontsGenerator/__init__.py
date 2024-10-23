@@ -40,16 +40,17 @@ class GenerateVariableFont:
         self.generatedFiles = set()
 
         self.operator.loadFonts(reload=True)
-
-        self.makeMasterGlyphsCompatible()
+        self.applySkipExportGlyphs()
+        self.makeSourceGlyphsCompatible()
         self.decomposedMixedGlyphs()
-        self.makeMasterKerningCompatible()
-        self.makeMasterOnDefaultLocation()
-        self.makeLayerMaster()
+        self.makeSourceKerningCompatible()
+        self.makeSourceOnDefaultLocation()
+        self.makeLayerSource()
+        self.makeSourcesAtAxesExtremes()
         if self.binaryFormat == "ttf":
-            self.makeMasterGlyphsQuadractic()
+            self.makeSourceGlyphsQuadractic()
         elif self.binaryFormat == "otf":
-            self.makeMasterExportOptimizeCharstring()
+            self.makeSourceExportOptimizeCharstring()
 
         self.generate()
 
@@ -62,12 +63,71 @@ class GenerateVariableFont:
                     else:
                         os.remove(path)
 
-    def makeMasterGlyphsCompatible(self):
+    def applySkipExportGlyphs(self):
+        for font in self.operator.fonts:
+            skipExportGlyphs = set(font.lib.get("public.skipExportGlyphs", []))
+            if skipExportGlyphs:
+                # Decompose the listed glyphs everywhere they are used as components.
+                for glyph in font:
+                    for component in glyph.components:
+                        if component.baseGlyph in skipExportGlyphs:
+                            glyph.decomposeComponent(component)
+                # Remove these glyphs before the compilation run.
+                for glyphName in skipExportGlyphs:
+                    if glyphName in font:
+                        del font[glyphName]
+                # Prune all groups of the listed glyphs.
+                for key, value in list(font.groups.items()):
+                    font.groups[key] = [glyphName for glyphName in value if glyphName not in skipExportGlyphs]
+                # Prune all kerning pairs that contain any of the listed glyphs.
+                for side1, side2 in list(font.kerning.keys()):
+                    if side1 in skipExportGlyphs or side2 in skipExportGlyphs:
+                        del font.kerning[side1, side2]
+
+    def makeSourcesAtAxesExtremes(self):
+        if self.fitToExtremes:
+            self.report.writeTitle("Add sources at axes extremes", "'")
+            extremeLocations = []
+            for axis in self.operator.axes:
+                location = dict()
+                for otherAxis in self.operator.axes:
+                    if otherAxis == axis:
+                        continue
+                    location[otherAxis.name] = otherAxis.default
+
+                if hasattr(axis, "values"):
+                    for value in axis.values:
+                        extremeLocations.append(dict(**location, **{axis.name: value}))
+                else:
+                    extremeLocations.append(dict(**location, **{axis.name: axis.minimum}))
+                    extremeLocations.append(dict(**location, **{axis.name: axis.maximum}))
+
+            sourceLocations = [sourceDescriptor.location for sourceDescriptor in self.operator.sources]
+            for extremeLocation in extremeLocations:
+                if extremeLocation not in sourceLocations:
+
+                    self.report.indent()
+                    self.report.write("Adding source at location:")
+                    self.report.indent()
+                    self.report.writeDict(extremeLocation)
+                    self.report.dedent()
+                    font = self.operator.makeInstance(extremeLocation)
+                    self.operator.addSourceDescriptor(
+                        font=font,
+                        name=f"source.{len(self.operator.sources) + 1}",
+                        familyName=font.info.familyName,
+                        styleName=font.info.styleName,
+                        location=extremeLocation
+                    )
+                    self.report.dedent()
+            self.report.newLine()
+
+    def makeSourceGlyphsCompatible(self):
         """
         Update all sources with missing glyphs.
         All sources must have the same glyphs.
         """
-        self.report.writeTitle("Making master glyphs compatible", "'")
+        self.report.writeTitle("Making source glyphs compatible", "'")
         self.report.indent()
         # collect all possible glyph names
         glyphNames = set()
@@ -77,7 +137,7 @@ class GenerateVariableFont:
         defaultSource = self.operator.findDefaultFont()
         # loop over all glyphName
         for glyphName in glyphNames:
-            # first check if the default master has this glyph
+            # first check if the default source has this glyph
             if glyphName not in defaultSource:
                 # the default does not have the glyph
                 # build a repair glyph
@@ -89,15 +149,15 @@ class GenerateVariableFont:
                     roundGeometry=self.operator.roundGeometry,
                     clip=False
                 )
-                self.report.write(f"Adding missing glyph '{glyphName}' in the default master '{defaultSource.info.familyName} {defaultSource.info.styleName}'")
-                # add the glyph to the default master
+                self.report.write(f"Adding missing glyph '{glyphName}' in the default source '{defaultSource.info.familyName} {defaultSource.info.styleName}'")
+                # add the glyph to the default source
                 glyph = defaultSource.newGlyph(glyphName)
                 result.extractGlyph(glyph, onlyGeometry=True)
                 glyph.unicodes = list(result.unicodes)
 
             sourceGlyphs = []
-            # fill all masters with missing glyphs
-            # and collect all glyphs from all masters
+            # fill all sources with missing glyphs
+            # and collect all glyphs from all sources
             # to send them to optimize contour data
             for sourceDescriptor in self.operator.sources:
                 sourceFont = self.operator.fonts[sourceDescriptor.name]
@@ -114,7 +174,7 @@ class GenerateVariableFont:
                     clip=False
                 )
                 self.report.write(f"Adding missing glyph '{glyphName}' in the source '{sourceFont.info.familyName} {sourceFont.info.styleName}'")
-                # add the glyph to the master
+                # add the glyph to the source
                 glyph = sourceFont.newGlyph(glyphName)
                 result.extractGlyph(glyph, onlyGeometry=True)
                 glyph.unicodes = list(result.unicodes)
@@ -165,7 +225,7 @@ class GenerateVariableFont:
                 if types == pointTypes:
                     continue
                 # add missing off curves
-                self.report.write(f"Adding missing offcurves in contour {contourIndex} for glyph '{glyph.name}' in master '{font.info.familyName} {font.info.styleName}'")
+                self.report.write(f"Adding missing offcurves in contour {contourIndex} for glyph '{glyph.name}' in source '{font.info.familyName} {font.info.styleName}'")
                 contour = glyph[contourIndex]
                 pen = CompatibleContourPointPen(pointTypes)
                 contour.drawPoints(pen)
@@ -185,7 +245,7 @@ class GenerateVariableFont:
                 if len(glyph) and len(glyph.components):
                     # found, loop over all components and decompose
                     for component in glyph.components:
-                        # get the master font
+                        # get the source font
                         base = fontSource[component.baseGlyph]
                         # get the decompose pen
                         decomposePointPen = DecomposePointPen(glyph.layer, glyph.getPointPen(), component.transformation)
@@ -197,29 +257,29 @@ class GenerateVariableFont:
                             component.drawPoints(decomposePointPen)
                     # remove all components
                     glyph.clearComponents()
-                    self.report.write(f"Decomposing glyph '{glyph.name}' in master '{fontSource.info.familyName} {fontSource.info.styleName}'")
+                    self.report.write(f"Decomposing glyph '{glyph.name}' in source '{fontSource.info.familyName} {fontSource.info.styleName}'")
         self.report.dedent()
         self.report.newLine()
 
-    def makeMasterGlyphsQuadractic(self):
+    def makeSourceGlyphsQuadractic(self):
         """
-        Optimize and convert all master ufo to quad curves.
+        Optimize and convert all source ufo to quad curves.
         """
-        # use cu2qu to optimize all masters
+        # use cu2qu to optimize all sources
         fonts_to_quadratic(self.operator.fonts.values())
 
-    def makeMasterExportOptimizeCharstring(self):
+    def makeSourceExportOptimizeCharstring(self):
         for name, font in self.operator.fonts.items():
             font.lib["com.typemytype.robofont.optimizeCharstring"] = False
 
-    def makeMasterKerningCompatible(self):
+    def makeSourceKerningCompatible(self):
         """
         Optimize kerning data.
-        All masters must have the same kering pairs.
+        All sources must have the same kering pairs.
         Build repair mutators for missing kering pairs
         and generate the kerning value within the design space.
         """
-        self.report.writeTitle("Making master kerning compatible", "'")
+        self.report.writeTitle("Making source kerning compatible", "'")
         self.report.indent()
         # collect all kerning pairs
         allPairs = set()
@@ -234,7 +294,7 @@ class GenerateVariableFont:
         kerningCache = dict()
         # loop over all pairs
         for pair in allPairs:
-            # loop over all masters
+            # loop over all sources
             for sourceDescriptor in self.operator.sources:
                 sourceFont = self.operator.fonts[sourceDescriptor.name]
                 missingPairs = []
@@ -263,7 +323,7 @@ class GenerateVariableFont:
         self.report.dedent()
         self.report.newLine()
 
-    def makeMasterOnDefaultLocation(self):
+    def makeSourceOnDefaultLocation(self):
         """
         create default location
         which is on the crossing of all axis
@@ -275,19 +335,19 @@ class GenerateVariableFont:
                 # found the default location
                 # do nothing
                 return
-        self.report.writeTitle("Setting a master on the default", "'")
+        self.report.writeTitle("Setting a source on the default", "'")
         self.report.indent()
-        # there is no master at the default location
-        # change the defaults of each axis so it fits with a given master
+        # there is no source at the default location
+        # change the defaults of each axis so it fits with a given source
         for axis in self.operator.axes:
             axis.default = axis.map_backward(defaultLocation[axis.name])
         self.report.writeDict(defaultLocation)
         self.report.dedent()
         self.report.newLine()
 
-    def makeLayerMaster(self):
+    def makeLayerSource(self):
         """
-        If there is a layer name in a source description add it as seperate master in the source description.
+        If there is a layer name in a source description add it as seperate source in the source description.
         """
         for sourceDescriptor in self.operator.sources:
             if sourceDescriptor.layerName is not None:
