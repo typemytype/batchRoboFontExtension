@@ -64,7 +64,7 @@ class GenerateVariableFont:
                         os.remove(path)
 
     def applySkipExportGlyphs(self):
-        for font in self.operator.fonts:
+        for font in self.operator.fonts.values():
             skipExportGlyphs = set(font.lib.get("public.skipExportGlyphs", []))
             if skipExportGlyphs:
                 # Decompose the listed glyphs everywhere they are used as components.
