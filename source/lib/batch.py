@@ -243,7 +243,8 @@ class BatchController(ezui.WindowController):
 
                 progress = self.startProgress("Generating...", parent=self.w)
                 for designspaceDocument in designspaceDocuments:
-                    designspaceDocument.generateUFOs()
+                    if set([generateOptions.get(item) for item in ['desktopFontGenerate_OTF','desktopFontGenerate_TTF','webFontGenerate_OTF','webFontGenerate_OTFWOFF2','webFontGenerate_TTF','webFontGenerate_TTFWOFF2']]) != {0}:
+                        designspaceDocument.generateUFOs()
                 try:
                     self.report = Report()
                     self.report.writeTitle("Batch Generate:")
