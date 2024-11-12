@@ -237,13 +237,16 @@ class BatchController(ezui.WindowController):
             # no fonts found in the source table
             return
 
+        shouldGenerateUFOsFromDesignspaces = any([value for key, value in generateOptions.items() if "desktopFontGenerate" in key or "webFontGenerate" in key])
+
         def result(path):
             if path:
                 root = path[0]
 
                 progress = self.startProgress("Generating...", parent=self.w)
                 for designspaceDocument in designspaceDocuments:
-                    designspaceDocument.generateUFOs()
+                    if shouldGenerateUFOsFromDesignspaces:
+                        designspaceDocument.generateUFOs()
                 try:
                     self.report = Report()
                     self.report.writeTitle("Batch Generate:")
