@@ -247,19 +247,20 @@ class BatchController(ezui.WindowController):
                 for designspaceDocument in designspaceDocuments:
                     if shouldGenerateUFOsFromDesignspaces:
                         designspaceDocument.generateUFOs()
+
+                settings = getExtensionDefault("com.typemytype.batch.settings", defaultSettings)
+
                 try:
                     self.report = Report()
                     self.report.writeTitle("Batch Generate:")
                     self.report.indent()
-
-                    settings = getExtensionDefault("com.typemytype.batch.settings", defaultSettings)
-
                     for generator in generators:
                         generator.build(root, generateOptions, settings, progress, self.report)
 
                 finally:
                     self.report.dedent()
-                    self.report.save(os.path.join(root, "Batch Generate Report.txt"))
+                    if settings["batchSettingStoreReport"]:
+                        self.report.save(os.path.join(root, "Batch Generate Report.txt"))
                     self.report = None
                     progress.close()
 
