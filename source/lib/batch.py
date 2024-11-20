@@ -230,10 +230,10 @@ class BatchController(ezui.WindowController):
 
     def generateCallback(self, sender):
         generateOptions = self.w.getItemValues()
-        generateOptions["sourceUFOPaths"], designspaceDocuments = self.getAllUFOPaths()
-        generateOptions["sourceDesignspacePaths"] = self.getAllDesignspacePaths()
+        generateOptions["sourceUFOs"], designspaceDocuments = self.getAllUFOPaths()
+        generateOptions["sourceDesignspaces"] = self.getAllDesignspacePaths()
 
-        if not generateOptions["sourceUFOPaths"] and not generateOptions["sourceDesignspacePaths"]:
+        if not generateOptions["sourceUFOs"] and not generateOptions["sourceDesignspaces"]:
             # no fonts found in the source table
             return
 

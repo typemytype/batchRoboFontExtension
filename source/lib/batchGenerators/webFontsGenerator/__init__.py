@@ -107,10 +107,10 @@ def build(root, generateOptions, settings, progress, report):
     removeTree(webFontsRoot)
 
     report.writeTitle("Batch Generated Web Fonts:")
-    progress.update("Collecting Data...")
+    progress.setText("Collecting Data...")
 
     generatePaths(
-        ufoPaths=generateOptions["sourceUFOPaths"],
+        sourceUFOs=generateOptions["sourceUFOs"],
         binaryFormats=binaryFormats,
         decompose=settings["webFontsDecompose"],
         removeOverlap=settings["webFontsRemoveOverlap"],

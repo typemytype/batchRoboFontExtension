@@ -477,8 +477,11 @@ def build(root, generateOptions, settings, progress, report):
     variableFontsRoot = os.path.join(root, "Variable")
     removeTree(variableFontsRoot)
 
-    for sourceDesignspacePath in generateOptions["sourceDesignspacePaths"]:
-        operator = BatchEditorOperator(sourceDesignspacePath)
+    for sourceDesignspace in generateOptions["sourceDesignspaces"]:
+        if isinstance(sourceDesignspace, str):
+            operator = BatchEditorOperator(sourceDesignspace)
+        else:
+            operator = sourceDesignspace
         # loop over all interpolable operators based on the given variable fonts
         for name, interpolableOperator in operator.getInterpolableUFOOperators(useVariableFonts=True):
             for binaryFormat, postProcessCallback in binaryFormats:
