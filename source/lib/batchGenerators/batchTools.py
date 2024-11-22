@@ -23,7 +23,7 @@ def loadFonts(sourceUFOs):
         if isinstance(sourceUFO, str):
             font = RFont(sourceUFO, document=False, showInterface=False)
         else:
-            font = sourceUFO
+            font = sourceUFO.copy()
         # check font info
         requiredFontInfo = dict(descender=-250, xHeight=500, ascender=750, capHeight=750, unitsPerEm=1000)
         for attr, value in requiredFontInfo.items():
