@@ -3,6 +3,8 @@ import AppKit
 from mojo.tools import CallbackWrapper
 
 import batch
+# just import batchCompileTools to make them available everywhere else
+import batchCompileTools
 
 
 class BatchMenu(object):
