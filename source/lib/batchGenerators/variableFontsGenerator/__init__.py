@@ -462,13 +462,13 @@ class GenerateVariableFont:
 def build(root, generateOptions, settings, progress, report):
 
     binaryFormats = []
-    if generateOptions["variableFontGenerate_OTF"]:
+    if generateOptions.get("variableFontGenerate_OTF"):
         binaryFormats.append(("otf", postProcessCollector()))
-    if generateOptions["variableFontGenerate_OTFWOFF2"]:
+    if generateOptions.get("variableFontGenerate_OTFWOFF2"):
         binaryFormats.append(("otf-woff2", postProcessCollector(WOFF2Builder)))
-    if generateOptions["variableFontGenerate_TTF"]:
+    if generateOptions.get("variableFontGenerate_TTF"):
         binaryFormats.append(("ttf", postProcessCollector()))
-    if generateOptions["variableFontGenerate_TTFWOFF2"]:
+    if generateOptions.get("variableFontGenerate_TTFWOFF2"):
         binaryFormats.append(("ttf-woff2", postProcessCollector(WOFF2Builder)))
 
     if not binaryFormats:
