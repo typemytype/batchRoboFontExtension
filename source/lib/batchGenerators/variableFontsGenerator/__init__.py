@@ -482,6 +482,11 @@ def build(root, generateOptions, settings, progress, report):
             operator = BatchEditorOperator(sourceDesignspace)
         else:
             operator = sourceDesignspace
+            operator.doc = operator.doc.deepcopyExceptFonts()
+            # copy all sources
+            for key, font in list(operator.fonts.items()):
+                operator.fonts[key] = font.copy()
+
         # loop over all interpolable operators based on the given variable fonts
         for name, interpolableOperator in operator.getInterpolableUFOOperators(useVariableFonts=True):
             for binaryFormat, postProcessCallback in binaryFormats:

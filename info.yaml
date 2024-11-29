@@ -3,7 +3,7 @@ developer: TypeMyType
 developerURL: http://typemytype.com
 launchAtStartUp: true
 mainScript: main.py
-version: '2.5b4'
+version: '2.5b5'
 addToMenu: []
 html: true
 requiresVersionMajor: '4'
