@@ -46,6 +46,7 @@ defaultSettings = dict(
     batchSettingExportDebug=0,
     batchSettingExportInSubFolders=0,
     batchSettingExportKeepFileNames=0,
+    batchSettingStoreReport=1,
 
     desktopFontsAutohint=0,
     desktopFontsDecompose=1,
@@ -81,6 +82,13 @@ defaultSettings = dict(
     webFontsRemoveOverlap=0,
     webFontsSuffix="",
 )
+
+# update settings when new keys are added
+settings = getExtensionDefault("com.typemytype.batch.settings", dict())
+for key, value in defaultSettings.items():
+    if key not in settings:
+        settings[key] = value
+setExtensionDefault("com.typemytype.batch.settings", settings)
 
 
 class BatchSettingsController(ezui.WindowController):
@@ -152,6 +160,8 @@ class BatchSettingsController(ezui.WindowController):
         > :
         > ( ) Use familyName-styleName        @batchSettingExportKeepFileNames
         > ( ) Keep file names
+        > ---
+        > [ ] Store Export Report             @batchSettingStoreReport
         > ---
         > [ ] Debug                           @batchSettingExportDebug
 

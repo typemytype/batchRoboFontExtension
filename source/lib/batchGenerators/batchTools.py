@@ -17,10 +17,13 @@ class BatchEditorOperator(ufoOperator.UFOOperator):
         return internalFontClasses.createFontObject(path)
 
 
-def loadFonts(ufoPaths):
+def loadFonts(sourceUFOs):
     fonts = []
-    for path in ufoPaths:
-        font = RFont(path, document=False, showInterface=False)
+    for sourceUFO in sourceUFOs:
+        if isinstance(sourceUFO, str):
+            font = RFont(sourceUFO, document=False, showInterface=False)
+        else:
+            font = sourceUFO.copy()
         # check font info
         requiredFontInfo = dict(descender=-250, xHeight=500, ascender=750, capHeight=750, unitsPerEm=1000)
         for attr, value in requiredFontInfo.items():
@@ -104,6 +107,19 @@ class Report:
         return "\n".join(self._data)
 
 
+class DummyProgress:
+
+    def __dummy(self, *args, **kwargs):
+        pass
+
+    setText = __dummy
+    update = __dummy
+    increment = __dummy
+    setMaxValue = __dummy
+    setTickCount = __dummy
+    close = __dummy
+
+
 blankFontCss = """<style>
 @font-face {
     font-family: AdobeBlank;
@@ -166,7 +182,7 @@ class postProcessCollector:
 
 
 def generatePaths(
-        ufoPaths,
+        sourceUFOs,
         binaryFormats,
         decompose,
         removeOverlap,
@@ -179,7 +195,7 @@ def generatePaths(
         report,
         progress
     ):
-    fonts = loadFonts(ufoPaths)
+    fonts = loadFonts(sourceUFOs)
 
     if decompose:
         report.writeTitle("Decompose:")
@@ -215,11 +231,12 @@ def generatePaths(
     report.indent()
 
     for index, font in enumerate(fonts):
+        fontPath = font.path
         progress.increment()
-        report.writeTitle((os.path.basename(ufoPaths[index])))
+        report.writeTitle((os.path.basename(fontPath)))
         report.indent()
         report.newLine()
-        report.write(f"source: {ufoPaths[index]}")
+        report.write(f"source: {fontPath}")
         report.newLine()
         for binaryFormat, postProcessCallback in binaryFormats:
             binaryExtention = binaryFormat.split("-")[0]
@@ -229,8 +246,8 @@ def generatePaths(
             familyName = familyName.replace(" ", "")
             styleName = font.info.styleName or f"styleName-{index}"
             styleName = styleName.replace(" ", "")
-            if keepFileNames:
-                fileName = os.path.basename(ufoPaths[index])
+            if keepFileNames and fontPath is not None:
+                fileName = os.path.basename(fontPath)
                 fileName, _ = os.path.splitext(fileName)
                 fileName = f"{fileName}{suffix}.{binaryExtention}"
             else:

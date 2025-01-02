@@ -87,7 +87,7 @@ class BatchController(ezui.WindowController):
         |---|                                              @sources
         > (+-)                                             @sourcesAddRemoveButton
         > ( Add Open UFOs )                                @sourcesAddOpenUFOsButton
-
+        > ( Add Open Designspaces)                         @sourcesAddOpenDesignspacesButton
         ---
 
         * HorizontalStack
@@ -122,6 +122,9 @@ class BatchController(ezui.WindowController):
                 )
             ),
             sourcesAddOpenUFOsButton=dict(
+                gravity="leading",
+            ),
+            sourcesAddOpenDesignspacesButton=dict(
                 gravity="leading",
             ),
             help=dict(
@@ -183,6 +186,11 @@ class BatchController(ezui.WindowController):
         paths = [font.path for font in AllFonts() if font.path is not None]
         tableAddPathItems(self.w.getItem("sources"), paths)
 
+    def sourcesAddOpenDesignspacesButtonCallback(self, sender):
+        # add open designspace's only when they are saved on disk
+        paths = [designspace.path for designspace in AllDesignspaces() if designspace.path is not None]
+        tableAddPathItems(self.w.getItem("sources"), paths)
+
     def sourcesDropCandidateCallback(self, info):
         table = self.w.getItem("sources")
         sender = info["sender"]
@@ -222,31 +230,37 @@ class BatchController(ezui.WindowController):
 
     def generateCallback(self, sender):
         generateOptions = self.w.getItemValues()
-        generateOptions["sourceUFOPaths"] = self.getAllUFOPaths()
-        generateOptions["sourceDesignspacePaths"] = self.getAllDesignspacePaths()
+        generateOptions["sourceUFOs"], designspaceDocuments = self.getAllUFOPaths()
+        generateOptions["sourceDesignspaces"] = self.getAllDesignspacePaths()
 
-        if not generateOptions["sourceUFOPaths"] and not generateOptions["sourceDesignspacePaths"]:
+        if not generateOptions["sourceUFOs"] and not generateOptions["sourceDesignspaces"]:
             # no fonts found in the source table
             return
+
+        shouldGenerateUFOsFromDesignspaces = any([value for key, value in generateOptions.items() if "desktopFontGenerate" in key or "webFontGenerate" in key])
 
         def result(path):
             if path:
                 root = path[0]
 
                 progress = self.startProgress("Generating...", parent=self.w)
+                for designspaceDocument in designspaceDocuments:
+                    if shouldGenerateUFOsFromDesignspaces:
+                        designspaceDocument.generateUFOs()
+
+                settings = getExtensionDefault("com.typemytype.batch.settings", defaultSettings)
+
                 try:
                     self.report = Report()
                     self.report.writeTitle("Batch Generate:")
                     self.report.indent()
-
-                    settings = getExtensionDefault("com.typemytype.batch.settings", defaultSettings)
-
                     for generator in generators:
                         generator.build(root, generateOptions, settings, progress, self.report)
 
                 finally:
                     self.report.dedent()
-                    self.report.save(os.path.join(root, "Batch Generate Report.txt"))
+                    if settings["batchSettingStoreReport"]:
+                        self.report.save(os.path.join(root, "Batch Generate Report.txt"))
                     self.report = None
                     progress.close()
 
@@ -264,6 +278,7 @@ class BatchController(ezui.WindowController):
         if not items:
             items = table.getArrangedItems()
         ufoPaths = []
+        designspaceDocuments = []
 
         def extractPath(path):
             ext = os.path.splitext(path)[1].lower()
@@ -281,7 +296,7 @@ class BatchController(ezui.WindowController):
                 if "designspaceDocument" not in item:
                     item["designspaceDocument"] = BatchEditorOperator(path)
                 designspaceDocument = item["designspaceDocument"]
-                designspaceDocument.generateUFOs()
+                designspaceDocuments.append(designspaceDocument)
                 for sourceDescriptor in designspaceDocument.sources:
                     ufoPaths.append(sourceDescriptor.path)
                 for instanceDescriptor in designspaceDocument.instances:
@@ -293,7 +308,7 @@ class BatchController(ezui.WindowController):
         for item in items:
             extractPath(item["source"])
 
-        return ufoPaths
+        return ufoPaths, designspaceDocuments
 
     def getAllDesignspacePaths(self):
         table = self.w.getItem("sources")

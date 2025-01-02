@@ -25,7 +25,7 @@ def build(root, generateOptions, settings, progress, report):
     removeTree(desktopFontsRoot)
 
     generatePaths(
-        ufoPaths=generateOptions["sourceUFOPaths"],
+        sourceUFOs=generateOptions["sourceUFOs"],
         binaryFormats=binaryFormats,
         decompose=settings["desktopFontsDecompose"],
         removeOverlap=settings["desktopFontsRemoveOverlap"],

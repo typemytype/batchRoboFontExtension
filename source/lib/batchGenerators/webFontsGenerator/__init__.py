@@ -89,13 +89,13 @@ def build(root, generateOptions, settings, progress, report):
         htmlBuilderFunc = None
 
     binaryFormats = []
-    if generateOptions["webFontGenerate_OTF"]:
+    if generateOptions.get("webFontGenerate_OTF"):
         binaryFormats.append(("otf", postProcessCollector(autohintFunc, htmlBuilderFunc)))
-    if generateOptions["webFontGenerate_OTFWOFF2"]:
+    if generateOptions.get("webFontGenerate_OTFWOFF2"):
         binaryFormats.append(("otf-woff2", postProcessCollector(autohintFunc, WOFF2Builder, htmlBuilderFunc)))
-    if generateOptions["webFontGenerate_TTF"]:
+    if generateOptions.get("webFontGenerate_TTF"):
         binaryFormats.append(("ttf", postProcessCollector(autohintFunc, htmlBuilderFunc)))
-    if generateOptions["webFontGenerate_TTFWOFF2"]:
+    if generateOptions.get("webFontGenerate_TTFWOFF2"):
         binaryFormats.append(("ttf-woff2", postProcessCollector(autohintFunc, WOFF2Builder, htmlBuilderFunc)))
     # if generateOptions["webFontGenerate_SVG"]:
     #    binaryFormats.append(("svg", None))
@@ -107,10 +107,10 @@ def build(root, generateOptions, settings, progress, report):
     removeTree(webFontsRoot)
 
     report.writeTitle("Batch Generated Web Fonts:")
-    progress.update("Collecting Data...")
+    progress.setText("Collecting Data...")
 
     generatePaths(
-        ufoPaths=generateOptions["sourceUFOPaths"],
+        sourceUFOs=generateOptions["sourceUFOs"],
         binaryFormats=binaryFormats,
         decompose=settings["webFontsDecompose"],
         removeOverlap=settings["webFontsRemoveOverlap"],
