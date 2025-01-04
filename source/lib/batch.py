@@ -122,10 +122,10 @@ class BatchController(ezui.WindowController):
                 )
             ),
             sourcesAddOpenUFOsButton=dict(
-                gravity="leading",
+                gravity="trailing",
             ),
             sourcesAddOpenDesignspacesButton=dict(
-                gravity="leading",
+                gravity="trailing",
             ),
             help=dict(
                 gravity="leading",
@@ -177,6 +177,11 @@ class BatchController(ezui.WindowController):
         )
 
     def sourcesAddRemoveButtonRemoveCallback(self, sender):
+        # remove selected items
+        table = self.w.getItem("sources")
+        table.removeSelectedItems()
+        
+    def sourcesDeleteCallback(self, sender):
         # remove selected items
         table = self.w.getItem("sources")
         table.removeSelectedItems()
