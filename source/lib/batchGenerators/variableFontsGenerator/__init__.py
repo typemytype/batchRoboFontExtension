@@ -5,6 +5,7 @@ import defcon
 
 from fontTools.cu2qu.ufo import fonts_to_quadratic
 from fontTools import varLib
+from fontTools.varLib.stat import buildVFStatTable
 from fontTools.ttLib import TTFont
 
 from fontPens.transformPointPen import TransformPointPen
@@ -20,13 +21,15 @@ from batchGenerators.batchTools import postProcessCollector, WOFF2Builder, build
 
 class GenerateVariableFont:
 
-    def __init__(self, operator, destinationPath, autohint=False, fitToExtremes=False, releaseMode=True, glyphOrder=None, report=None, debug=False):
+    def __init__(self, operator, destinationPath, designspace=None, discreteAxisName=None, autohint=False, fitToExtremes=False, releaseMode=True, glyphOrder=None, report=None, debug=False):
         # this must be an operator with no discrete axes.
         # split the designspace first first
         if report is None:
             report = Report()
         self.operator = operator
         self.destinationPath = destinationPath
+        self.designspace = designspace
+        self.discreteAxisName = discreteAxisName
         self.binaryFormat = os.path.splitext(self.destinationPath)[-1][1:].lower()
         self.autohint = autohint
         self.fitToExtremes = fitToExtremes
@@ -369,7 +372,7 @@ class GenerateVariableFont:
                 self.operator.fonts[sourceDescriptor.name] = layeredSource
                 self.generatedFiles.add(sourceDescriptor.path)
 
-    def generate(self):
+    def generate(self, ):
         dirname = os.path.dirname(self.destinationPath)
 
         # fontCompiler settings
@@ -451,6 +454,9 @@ class GenerateVariableFont:
         try:
             # let varLib build the variation font
             varFont, _, _ = varLib.build(self.operator.doc)
+            if self.designspace and self.discreteAxisName:
+                # build the stat table from the full designspace and according discrete axis
+                buildVFStatTable(varFont, self.designspace, self.discreteAxisName)
             # save the variation font
             varFont.save(self.destinationPath)
         except Exception:
@@ -506,6 +512,8 @@ def build(root, generateOptions, settings, progress, report):
                 GenerateVariableFont(
                     operator=interpolableOperator,
                     destinationPath=os.path.join(fontDir, tempFileName),
+                    designspace=operator.doc,
+                    discreteAxisName=name,
                     autohint=settings["variableFontsAutohint"],
                     fitToExtremes=settings["variableFontsInterpolateToFitAxesExtremes"],
                     releaseMode=False,
