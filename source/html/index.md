@@ -75,3 +75,52 @@ Settings
 
 Click on the gears icon in the toolbar to open the *Settings* sheet.
 
+## Desktop Fonts
+
+### Generate
+
+- **Decompose**
+- **Remove Overlap**
+- **Autohint**
+- **Release Mode**
+
+### Suffix
+
+A suffix added to to the export path.
+
+## Web Fonts
+
+### Generate
+
+- **Decompose**
+- **Remove Overlap**
+- **Autohint**
+- **Release Mode**
+- **Generate HTML** build a test html page with the Batch generated fonts.
+
+### Suffix
+
+A suffix added to to the export path.
+
+### TTF Autohint
+
+see the documentation of [ttf autohint](https://freetype.org/ttfautohint/doc/ttfautohint.html)
+
+## Variable Fonts
+
+### Generate
+
+- **Interpolate to Fit Axis Extremes** generate missing extremes for all axis.
+- **Autohint**
+
+### Suffix
+
+A suffix added to to the export path
+
+## Batch Settings
+
+- **Export in sub-folders**
+- **Use familyName-styleName** or **Keep file names**
+- **Store Export Report**
+- **Debug**
+
