@@ -414,8 +414,10 @@ class GenerateVariableFont:
             if sourceDescriptor.layerName:
                 options.layerName = sourceDescriptor.layerName
             # generate the font
+            result = ""
             try:
                 result = generateFont(source, options=options)
+                self.report.write(result)
                 sourceDescriptor.font = TTFont(outputPath)
                 if sourceDescriptor.layerName:
                     # https://github.com/googlefonts/ufo2ft/blob/150c2d6a00da9d5854173c8457a553ce03b89cf7/Lib/ufo2ft/_compilers/interpolatableTTFCompiler.py#L58-L66
@@ -433,7 +435,6 @@ class GenerateVariableFont:
             except Exception as e:
                 import traceback
                 tracebackResult = traceback.format_exc()
-                result = f"Faild to generate: {e}:\n{tracebackResult}"
                 print(tracebackResult)
                 self.report.newLine()
                 self.report.write(f"Generate failed {familyName}-{styleName}")
