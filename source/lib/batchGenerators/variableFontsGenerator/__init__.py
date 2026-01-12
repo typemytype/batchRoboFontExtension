@@ -17,6 +17,7 @@ from fontCompiler.compiler import generateFont, FontCompilerOptions
 from ufo2fdk.kernFeatureWriter import side1Prefix, side2Prefix
 
 from batchGenerators.batchTools import postProcessCollector, WOFF2Builder, buildTree, removeTree, BatchEditorOperator, Report
+from batchCompileTools import BatchException
 
 
 class GenerateVariableFont:
@@ -153,6 +154,9 @@ class GenerateVariableFont:
                     clip=False
                 )
                 self.report.write(f"Adding missing glyph '{glyphName}' in the default source '{defaultSource.info.familyName} {defaultSource.info.styleName}'")
+                if result is None:
+                    # no result
+                    raise BatchException(f"Unable to generate instance for missing glyph '{glyphName}' in the default source. '{defaultSource.info.familyName} {defaultSource.info.styleName}'")
                 # add the glyph to the default source
                 glyph = defaultSource.newGlyph(glyphName)
                 result.extractGlyph(glyph, onlyGeometry=True)
@@ -177,6 +181,9 @@ class GenerateVariableFont:
                     clip=False
                 )
                 self.report.write(f"Adding missing glyph '{glyphName}' in the source '{sourceFont.info.familyName} {sourceFont.info.styleName}'")
+                if result is None:
+                    # no result
+                    raise BatchException(f"Unable to generate instance for missing glyph '{glyphName}' in the source '{sourceFont.info.familyName} {sourceFont.info.styleName}'")
                 # add the glyph to the source
                 glyph = sourceFont.newGlyph(glyphName)
                 result.extractGlyph(glyph, onlyGeometry=True)

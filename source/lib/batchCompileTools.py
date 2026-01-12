@@ -3,6 +3,10 @@ import batchGenerators
 import batchSettings
 
 
+class BatchException(Exception):
+    pass
+
+
 def generateDesktopFonts(ufoPathsOrObjects, destinationRoot, format="ttf", decompose=True, removeOverlap=True, autohint=False, releaseMode=True, suffix=""):
     if not isinstance(ufoPathsOrObjects, list):
         ufoPathsOrObjects = [ufoPathsOrObjects]
