@@ -180,7 +180,7 @@ class BatchController(ezui.WindowController):
         # remove selected items
         table = self.w.getItem("sources")
         table.removeSelectedItems()
-        
+
     def sourcesDeleteCallback(self, sender):
         # remove selected items
         table = self.w.getItem("sources")
@@ -248,16 +248,20 @@ class BatchController(ezui.WindowController):
             if path:
                 root = path[0]
 
+                self.report = Report()
+                self.report.writeTitle("Batch Generate:")
+
                 progress = self.startProgress("Generating...", parent=self.w)
                 for designspaceDocument in designspaceDocuments:
                     if shouldGenerateUFOsFromDesignspaces:
-                        designspaceDocument.generateUFOs()
+                        try:
+                            designspaceDocument.generateUFOs()
+                        except Exception as e:
+                            self.report.writeTitle(f"Generating instance failed: {e} for {designspaceDocument.path}")
 
                 settings = getExtensionDefault("com.typemytype.batch.settings", defaultSettings)
 
                 try:
-                    self.report = Report()
-                    self.report.writeTitle("Batch Generate:")
                     self.report.indent()
                     for generator in generators:
                         generator.build(root, generateOptions, settings, progress, self.report)
